@@ -263,6 +263,256 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Phase 2 Planners",
+      "item": [
+        {
+          "name": "Create Financial Goal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalName\": \"Buy Dream House\",\n  \"targetAmount\": 2500000,\n  \"currentSavings\": 500000,\n  \"targetDate\": \"2030-12-31\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/goals/create",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "goals",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Goals List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/goals",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "goals"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Plan Trip",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"destination\": \"Tokyo\",\n  \"numberOfTravelers\": 2,\n  \"startDate\": \"2026-10-10\",\n  \"endDate\": \"2026-10-20\",\n  \"budget\": 300000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/trip-planner",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "trip-planner"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Analyze Debt Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"totalDebt\": 600000,\n  \"emiAmount\": 25000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/debt-analysis",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "debt-analysis"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Analyze Subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/subscriptions/analyze",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "subscriptions",
+                "analyze"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Retirement Planner",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentAge\": 28,\n  \"retirementAge\": 60,\n  \"currentSavings\": 300000,\n  \"monthlyInvestment\": 15000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/retirement-plan",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "retirement-plan"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Regression Forecast",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/forecast",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "forecast"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get AI Recommendations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/recommendations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recommendations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Smart Alerts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notifications"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "event": [

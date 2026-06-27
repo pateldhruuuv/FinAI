@@ -35,6 +35,7 @@ app.use('/auth', require('./routes/auth'));
 // POST /upload-statement, GET /dashboard, POST /recommend-investment, POST /recommend-insurance, POST /predict-health, POST /chat
 app.use('/', require('./routes/transactions'));
 app.use('/', require('./routes/ai'));
+app.use('/', require('./routes/planners'));
 
 // Basic error handler middleware
 app.use((err, req, res, next) => {

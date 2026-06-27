@@ -12,7 +12,7 @@ This application is built as a major college project MVP combining the **MERN (M
 d:/FinAI/
 ├── ai-engine/             # Python FastAPI + Pandas + Scikit-Learn
 │   ├── data/              # Programmatically generated CSV training data
-│   ├── models/            # Serialized trained Scikit-Learn models
+│   ├── models/            # Sverialized trained Scikit-Learn models
 │   ├── generate_data.py   # Programmatic dataset generator
 │   ├── train.py           # ML training script (Random Forest, Decision Tree)
 │   ├── main.py            # FastAPI endpoints and rule-based chat logic
@@ -132,15 +132,54 @@ Make sure MongoDB is running locally on port `27017` (default). The backend will
 
 ---
 
+## Phase 2 Features Added
+*   **Goal Planner:** Set financial milestones, compute savings rates, and get probability calculations.
+*   **Trip Planner:** Vacations cost estimator with alternative destination safety routing.
+*   **Debt Rescue:** Risk analysis score, high-interest priority payback lists, and avalanche payback models.
+*   **Subscription Leakage:** Scans transaction logs for recurring premium leakage (Netflix, Spotify, Gym, Cloud).
+*   **Retirement Planner:** FastAPI Scikit-learn Linear Regression projected retirement growth curves.
+*   **Emergency Fund:** Safety buffer limits (3M/6M/12M) and readiness quotients.
+*   **Financial Forecast:** M-o-M linear regression prediction maps for savings/expenses.
+*   **Spending Insights:** Pandas EDA summaries and dark-mode Seaborn Heatmap diagrams.
+*   **Smart Alerts:** Diagnostics warnings (Savings drops, high spends, EMI load, off-track goals).
+*   **AI Recommendations:** Algorithmic wealth improvement action items history.
+
+---
+
+## Migration and Setup
+
+### 1. Python Environment updates
+Before starting the FastAPI AI Engine, install the new plotting and modeling dependencies:
+```bash
+cd ai-engine
+venv\Scripts\pip install -r requirements.txt
+```
+
+### 2. Seeding Test Data (2000 Records)
+To populate 500 Goal, 500 Trip, 500 Debt, and 500 Forecast records linked to a dummy test user (`seeduser@finpilot.com`), run the seeder script in the `backend/` directory:
+```bash
+cd backend
+node seedTestData.js
+```
+
+---
+
 ## Testing Guide
 
 1.  **Register a new user:** Navigate to `http://localhost:3000/register` and enter your details (e.g., Income: 80,000, Age: 29).
 2.  **Upload Statement:** Go to the "Upload CSV" page and select `sample_statement.csv` (located at the project root). Submit the file.
-3.  **Explore Dashboard:** Look at the cash flow totals, expense categories pie chart, and income vs expense bar chart.
+3.  **Explore Dashboard:** Switch between tab sections (**Overview, Goal Tracker, Trip Planner, Debt & Subscriptions, Retirement & Forecasts, Alerts**) to interact with all the new Phase 2 features.
 4.  **Run Diagnostics:** Click "Run AI Diagnostic" on the dashboard to trigger the Random Forest classifier and view your predicted health rating and recommendations.
 5.  **Get Asset Recommendations:** Go to the "Investments" tab, pick a risk level (Conservative, Moderate, Aggressive), and evaluate your Decision Tree portfolio results.
 6.  **Get Insurance Coverage:** Go to the "Insurance" tab, fill in dependents/marital status, and view your coverage requirements.
 7.  **Chat with Assistant:** Go to the "AI Assistant" tab, click the quick chips (e.g., "Can I invest?"), or type custom questions to test the chatbot's rule-based financial advice.
 
+### Automated API Integration Tests
+To run the automated integration tests across all 9 endpoints, start both Express and FastAPI servers and run:
+```bash
+cd backend
+node testEndpoints.js
+```
+
 ### Postman Collections
-Import `postman_collection.json` into Postman to test backend endpoints directly. Use the environment variables inside the collection to handle JWT token persistence automatically.
+Import `postman_collection.json` into Postman. A new `Phase 2 Planners` folder has been added containing pre-configured request payloads for all 8 main planner APIs.

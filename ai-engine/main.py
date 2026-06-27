@@ -6,6 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import pandas as pd
 import numpy as np
+from sklearn.linear_model import LinearRegression
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import seaborn as sns
+import io
+import base64
 
 app = FastAPI(title="FinPilot AI Engine", version="1.0.0")
 
@@ -40,6 +47,27 @@ class InsuranceRequest(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str
+
+class RetirementRequest(BaseModel):
+    current_age: int = Field(..., ge=18, le=100)
+    retirement_age: int = Field(..., ge=18, le=100)
+    current_savings: float = Field(..., ge=0)
+    monthly_investment: float = Field(..., ge=0)
+    monthly_expenses: float = Field(..., ge=0)
+
+class TransactionItem(BaseModel):
+    date: str
+    description: str
+    category: str
+    amount: float
+    type: str
+
+class ForecastRequest(BaseModel):
+    transactions: list[TransactionItem]
+    monthly_income: float
+
+class SpendingInsightsRequest(BaseModel):
+    transactions: list[TransactionItem]
 
 # Helper to load pickled models
 models = {}
@@ -236,3 +264,212 @@ def chat(data: ChatRequest):
         "status": "success",
         "reply": reply
     }
+
+@app.post("/retirement-plan")
+def calculate_retirement_plan(data: RetirementRequest):
+    years_left = max(data.retirement_age - data.current_age, 1)
+    
+    # Simulate compounded savings growth year-by-year with 8% compound annual return
+    corpus = data.current_savings
+    corpus_history = []
+    
+    for t in range(years_left + 1):
+        corpus_history.append(corpus)
+        corpus = corpus * 1.08 + data.monthly_investment * 12
+
+    # Fit linear regression model
+    X = np.array(range(years_left + 1)).reshape(-1, 1)
+    y = np.array(corpus_history)
+    
+    reg = LinearRegression()
+    reg.fit(X, y)
+    
+    # Predict projected corpus at retirement age
+    projected_corpus = float(reg.predict([[years_left]])[0])
+    
+    # Required corpus: inflation-adjusted (6%) monthly expenses * 12 * 25 years
+    future_monthly_expenses = data.monthly_expenses * (1.06 ** years_left)
+    required_corpus = future_monthly_expenses * 12 * 25
+    
+    gap = required_corpus - projected_corpus
+    gap_status = "Shortfall" if gap > 0 else "On Track"
+    
+    return {
+        "status": "success",
+        "projected_corpus": round(projected_corpus, 2),
+        "required_corpus": round(required_corpus, 2),
+        "gap": round(gap, 2),
+        "gap_status": gap_status,
+        "years_left": years_left,
+        "compounded_projection": [round(c, 2) for c in corpus_history]
+    }
+
+@app.post("/forecast")
+def get_financial_forecast(data: ForecastRequest):
+    txs = data.transactions
+    
+    # If no transactions or not enough history, generate synthetic monthly history (past 6 months)
+    if len(txs) < 5:
+        avg_exp = data.monthly_income * 0.65
+        avg_inc = data.monthly_income
+        
+        # Introduce reproducibility seed
+        np.random.seed(42)
+        monthly_exp = [avg_exp * (1 + np.random.uniform(-0.1, 0.1)) for _ in range(6)]
+        monthly_inc = [avg_inc * (1 + np.random.uniform(-0.05, 0.05)) for _ in range(6)]
+        monthly_sav = [max(i - e, 0) for i, e in zip(monthly_inc, monthly_exp)]
+    else:
+        df = pd.DataFrame([t.dict() for t in txs])
+        df['date'] = pd.to_datetime(df['date'])
+        df['month'] = df['date'].dt.to_period('M')
+        
+        monthly_grp = df.groupby(['month', 'type'])['amount'].sum().unstack(fill_value=0)
+        
+        if 'Credit' not in monthly_grp.columns:
+            monthly_grp['Credit'] = data.monthly_income
+        if 'Debit' not in monthly_grp.columns:
+            monthly_grp['Debit'] = 0.0
+            
+        monthly_exp = monthly_grp['Debit'].tolist()
+        monthly_inc = monthly_grp['Credit'].tolist()
+        monthly_sav = (monthly_grp['Credit'] - monthly_grp['Debit']).clip(lower=0).tolist()
+        
+        if len(monthly_exp) < 6:
+            pad_len = 6 - len(monthly_exp)
+            avg_exp = np.mean(monthly_exp) if len(monthly_exp) > 0 else data.monthly_income * 0.65
+            avg_inc = np.mean(monthly_inc) if len(monthly_inc) > 0 else data.monthly_income
+            
+            for _ in range(pad_len):
+                monthly_exp.insert(0, avg_exp * (1 + np.random.uniform(-0.08, 0.08)))
+                monthly_inc.insert(0, avg_inc * (1 + np.random.uniform(-0.05, 0.05)))
+                monthly_sav.insert(0, max(monthly_inc[0] - monthly_exp[0], 0))
+
+    # Fit regression models
+    n_months = len(monthly_exp)
+    X = np.array(range(n_months)).reshape(-1, 1)
+    
+    reg_exp = LinearRegression()
+    reg_exp.fit(X, np.array(monthly_exp))
+    
+    reg_sav = LinearRegression()
+    reg_sav.fit(X, np.array(monthly_sav))
+    
+    # Predict 3M, 6M, 12M
+    exp_3m = max(float(reg_exp.predict([[n_months + 3]])[0]), 0)
+    exp_6m = max(float(reg_exp.predict([[n_months + 6]])[0]), 0)
+    exp_12m = max(float(reg_exp.predict([[n_months + 12]])[0]), 0)
+    
+    sav_3m = max(float(reg_sav.predict([[n_months + 3]])[0]), 0)
+    sav_6m = max(float(reg_sav.predict([[n_months + 6]])[0]), 0)
+    sav_12m = max(float(reg_sav.predict([[n_months + 12]])[0]), 0)
+    
+    historical_months = [f"Month -{n_months - i - 1}" for i in range(n_months)]
+    
+    return {
+        "status": "success",
+        "expenses_forecast": {
+            "3M": round(exp_3m, 2),
+            "6M": round(exp_6m, 2),
+            "12M": round(exp_12m, 2)
+        },
+        "savings_forecast": {
+            "3M": round(sav_3m, 2),
+            "6M": round(sav_6m, 2),
+            "12M": round(sav_12m, 2)
+        },
+        "historical_expenses": [round(e, 2) for e in monthly_exp],
+        "historical_savings": [round(s, 2) for s in monthly_sav],
+        "months": historical_months
+    }
+
+@app.post("/spending-insights")
+def get_spending_insights(data: SpendingInsightsRequest):
+    txs = data.transactions
+    if not txs:
+        return {
+            "status": "success",
+            "top_categories": [],
+            "highest_month": "N/A",
+            "average_monthly_savings": 0.0,
+            "trends": [],
+            "heatmap": ""
+        }
+        
+    df = pd.DataFrame([t.dict() for t in txs])
+    df['date'] = pd.to_datetime(df['date'])
+    
+    df_exp = df[df['type'] == 'Debit']
+    
+    top_cats = []
+    if not df_exp.empty:
+        cat_sums = df_exp.groupby('category')['amount'].sum().sort_values(ascending=False).head(5)
+        for cat, amt in cat_sums.items():
+            top_cats.append({"category": cat, "amount": float(amt)})
+            
+    highest_month = "N/A"
+    if not df_exp.empty:
+        df_exp['month'] = df_exp['date'].dt.strftime('%B %Y')
+        month_sums = df_exp.groupby('month')['amount'].sum()
+        if not month_sums.empty:
+            highest_month = month_sums.idxmax()
+            
+    df['month'] = df['date'].dt.to_period('M')
+    monthly_inc = df[df['type'] == 'Credit'].groupby('month')['amount'].sum()
+    monthly_exp = df[df['type'] == 'Debit'].groupby('month')['amount'].sum()
+    
+    all_months = df['month'].unique()
+    monthly_savs = []
+    for m in all_months:
+        inc = monthly_inc.get(m, 0.0)
+        exp = monthly_exp.get(m, 0.0)
+        monthly_savs.append(max(inc - exp, 0.0))
+        
+    avg_savings = float(np.mean(monthly_savs)) if monthly_savs else 0.0
+    
+    trends = []
+    sorted_months = sorted(all_months)
+    for m in sorted_months:
+        trends.append({
+            "month": str(m),
+            "expenses": float(monthly_exp.get(m, 0.0)),
+            "income": float(monthly_inc.get(m, 0.0))
+        })
+        
+    heatmap_base64 = ""
+    if not df_exp.empty:
+        try:
+            df_exp['Day'] = df_exp['date'].dt.day_name()
+            pivot = df_exp.pivot_table(index='category', columns='Day', values='amount', aggfunc='sum').fillna(0)
+            
+            days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            existing_days = [d for d in days_order if d in pivot.columns]
+            pivot = pivot[existing_days]
+            
+            plt.figure(figsize=(7, 4.5))
+            plt.style.use('dark_background')
+            sns.heatmap(pivot, annot=True, fmt=".0f", cmap="magma", cbar=True, linewidths=0.5)
+            plt.title("Expense Density: Category vs Day of Week", fontsize=11, color='white', pad=12)
+            plt.xlabel("Day of Week", color='#94a3b8', labelpad=8)
+            plt.ylabel("Category", color='#94a3b8', labelpad=8)
+            plt.xticks(rotation=45, color='#cbd5e1')
+            plt.yticks(color='#cbd5e1')
+            plt.tight_layout()
+            
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png', dpi=100, facecolor='#111827')
+            buf.seek(0)
+            heatmap_base64 = base64.b64encode(buf.read()).decode('utf-8')
+            plt.close()
+        except Exception as e:
+            print("Heatmap generation error:", e)
+            plt.close()
+            
+    return {
+        "status": "success",
+        "top_categories": top_cats,
+        "highest_month": highest_month,
+        "average_monthly_savings": round(avg_savings, 2),
+        "trends": trends,
+        "heatmap": heatmap_base64
+    }
+
