@@ -49,6 +49,7 @@ exports.register = async (req, res) => {
         email: user.email,
         age: user.age,
         monthlyIncome: user.monthlyIncome,
+        isPremium: user.isPremium,
       },
     });
   } catch (err) {
@@ -95,10 +96,38 @@ exports.login = async (req, res) => {
         email: user.email,
         age: user.age,
         monthlyIncome: user.monthlyIncome,
+        isPremium: user.isPremium,
       },
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({ status: 'error', message: 'Server error during login' });
+  }
+};
+
+// Toggle Premium Status
+exports.togglePremium = async (req, res) => {
+  try {
+    const user = await User.findById(req.user);
+    if (!user) {
+      return res.status(404).json({ status: 'error', message: 'User not found' });
+    }
+    user.isPremium = !user.isPremium;
+    await user.save();
+
+    res.json({
+      status: 'success',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        age: user.age,
+        monthlyIncome: user.monthlyIncome,
+        isPremium: user.isPremium,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: 'error', message: 'Server error toggling premium status' });
   }
 };

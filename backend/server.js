@@ -36,6 +36,7 @@ app.use('/auth', require('./routes/auth'));
 app.use('/', require('./routes/transactions'));
 app.use('/', require('./routes/ai'));
 app.use('/', require('./routes/planners'));
+app.use('/', require('./routes/premium'));
 
 // Basic error handler middleware
 app.use((err, req, res, next) => {

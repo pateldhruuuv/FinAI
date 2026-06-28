@@ -1,0 +1,16 @@
+Date,Description,Category,Amount,Type
+2026-06-01,Monthly Salary Credit,Salary,100000.00,Credit
+2026-06-02,House Rent Payment,Rent,25000.00,Debit
+2026-06-03,Grocery Store Purchase,Groceries,4500.00,Debit
+2026-06-04,Netflix Subscription,Subscription,649.00,Debit
+2026-06-05,Electricity Bill Payment,Utilities,2200.00,Debit
+2026-06-08,HDFC Bank Car Loan EMI,EMI,12000.00,Debit
+2026-06-10,Restaurant Dining,Food,3500.00,Debit
+2026-06-12,Spotify Premium,Subscription,179.00,Debit
+2026-06-15,Cashback Reward,Cashback,250.00,Credit
+2026-06-18,Gym Membership Fee,Subscription,1500.00,Debit
+2026-06-20,Gas Station Fuel,Fuel,3000.00,Debit
+2026-06-22,AWS Cloud Subscription,Subscription,1200.00,Debit
+2026-06-25,Credit Card Minimum Payment,Credit Card,5000.00,Debit
+2026-06-27,Online Shopping,Shopping,4200.00,Debit
+2026-06-28,Interest Credit,Interest,120.00,Credit

@@ -1,16 +1,24 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Landmark, Compass, ShieldAlert, MessageSquare, LogOut, LayoutDashboard, UploadCloud } from 'lucide-react';
+import { Landmark, Compass, ShieldAlert, MessageSquare, LogOut, LayoutDashboard, UploadCloud, Lock, Zap } from 'lucide-react';
 
 const Navbar = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, togglePremium } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handleTogglePremium = async () => {
+    try {
+      await togglePremium();
+    } catch (err) {
+      console.error('Failed to toggle premium:', err);
+    }
   };
 
   const isActive = (path) => location.pathname === path;
@@ -47,8 +55,38 @@ const Navbar = () => {
                 AI Assistant
               </Link>
               
+              {/* Premium Hub Link */}
+              <Link 
+                to="/premium-dashboard" 
+                style={{ 
+                  ...styles.link, 
+                  ...(isActive('/premium-dashboard') ? styles.activeLink : {}),
+                  ...(user.isPremium ? styles.premiumLink : styles.lockedLink)
+                }}
+              >
+                {user.isPremium ? <Zap size={18} color="#eab308" /> : <Lock size={18} color="#94a3b8" />}
+                Premium Hub
+              </Link>
+              
               <div style={styles.userSection}>
-                <span style={styles.userName}>Hello, {user.name}</span>
+                <div style={styles.userInfo}>
+                  <span style={styles.userName}>Hello, {user.name}</span>
+                  <span style={user.isPremium ? styles.premiumBadge : styles.freeBadge}>
+                    {user.isPremium ? 'PREMIUM' : 'FREE'}
+                  </span>
+                </div>
+                
+                <button 
+                  onClick={handleTogglePremium} 
+                  style={{
+                    ...styles.toggleBtn,
+                    ...(user.isPremium ? styles.downgradeBtn : styles.upgradeBtn)
+                  }}
+                  title={user.isPremium ? "Switch to Free tier" : "Upgrade to Premium tier"}
+                >
+                  {user.isPremium ? 'Go Free' : 'Go Premium'}
+                </button>
+
                 <button onClick={handleLogout} style={styles.logoutBtn} title="Logout">
                   <LogOut size={16} />
                   Logout
@@ -143,6 +181,14 @@ const styles = {
     borderBottom: '2px solid #6366f1',
     borderRadius: '8px 8px 0 0',
   },
+  premiumLink: {
+    color: '#fef08a',
+    background: 'rgba(234, 179, 8, 0.05)',
+    border: '1px solid rgba(234, 179, 8, 0.2)',
+  },
+  lockedLink: {
+    opacity: 0.8,
+  },
   btnLink: {
     background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
     color: '#ffffff',
@@ -163,11 +209,58 @@ const styles = {
     paddingLeft: '16px',
     borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
   },
+  userInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '2px',
+  },
   userName: {
     fontSize: '14px',
     color: '#f8fafc',
     fontWeight: 500,
     fontFamily: 'Outfit, sans-serif',
+  },
+  freeBadge: {
+    fontSize: '10px',
+    fontWeight: 700,
+    color: '#94a3b8',
+    background: 'rgba(148, 163, 184, 0.15)',
+    padding: '2px 6px',
+    borderRadius: '4px',
+    fontFamily: 'Outfit, sans-serif',
+    marginTop: '2px',
+  },
+  premiumBadge: {
+    fontSize: '10px',
+    fontWeight: 700,
+    color: '#10b981',
+    background: 'rgba(16, 185, 129, 0.15)',
+    padding: '2px 6px',
+    borderRadius: '4px',
+    fontFamily: 'Outfit, sans-serif',
+    marginTop: '2px',
+    border: '1px solid rgba(16, 185, 129, 0.3)',
+  },
+  toggleBtn: {
+    fontSize: '12px',
+    fontWeight: 600,
+    padding: '6px 10px',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    border: 'none',
+    fontFamily: 'Outfit, sans-serif',
+  },
+  upgradeBtn: {
+    background: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
+    color: '#000000',
+    boxShadow: '0 0 10px rgba(234, 179, 8, 0.2)',
+  },
+  downgradeBtn: {
+    background: 'rgba(255, 255, 255, 0.08)',
+    color: '#cbd5e1',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
   },
   logoutBtn: {
     display: 'flex',

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
+import PremiumProtectedRoute from './components/PremiumProtectedRoute';
 
 // Import Pages
 import LandingPage from './pages/LandingPage';
@@ -13,6 +14,18 @@ import UploadStatement from './pages/UploadStatement';
 import InvestmentAdvisor from './pages/InvestmentAdvisor';
 import InsuranceAdvisor from './pages/InsuranceAdvisor';
 import Chatbot from './pages/Chatbot';
+
+// Import Premium Pages
+import PremiumDashboard from './pages/PremiumDashboard';
+import TaxOptimizer from './pages/TaxOptimizer';
+import LoanAdvisor from './pages/LoanAdvisor';
+import InsuranceGap from './pages/InsuranceGap';
+import PurchaseAdvisor from './pages/PurchaseAdvisor';
+import WhatIfSimulator from './pages/WhatIfSimulator';
+import PortfolioRisk from './pages/PortfolioRisk';
+import FinancialCoach from './pages/FinancialCoach';
+import FinancialTwin from './pages/FinancialTwin';
+import FinancialReports from './pages/FinancialReports';
 
 function App() {
   return (
@@ -65,6 +78,88 @@ function App() {
                 <ProtectedRoute>
                   <Chatbot />
                 </ProtectedRoute>
+              }
+            />
+
+            {/* Premium Protected Routes */}
+            <Route
+              path="/premium-dashboard"
+              element={
+                <PremiumProtectedRoute>
+                  <PremiumDashboard />
+                </PremiumProtectedRoute>
+              }
+            />
+            <Route
+              path="/tax-optimizer"
+              element={
+                <PremiumProtectedRoute>
+                  <TaxOptimizer />
+                </PremiumProtectedRoute>
+              }
+            />
+            <Route
+              path="/loan-advisor"
+              element={
+                <PremiumProtectedRoute>
+                  <LoanAdvisor />
+                </PremiumProtectedRoute>
+              }
+            />
+            <Route
+              path="/insurance-gap"
+              element={
+                <PremiumProtectedRoute>
+                  <InsuranceGap />
+                </PremiumProtectedRoute>
+              }
+            />
+            <Route
+              path="/purchase-advisor"
+              element={
+                <PremiumProtectedRoute>
+                  <PurchaseAdvisor />
+                </PremiumProtectedRoute>
+              }
+            />
+            <Route
+              path="/what-if"
+              element={
+                <PremiumProtectedRoute>
+                  <WhatIfSimulator />
+                </PremiumProtectedRoute>
+              }
+            />
+            <Route
+              path="/portfolio-risk"
+              element={
+                <PremiumProtectedRoute>
+                  <PortfolioRisk />
+                </PremiumProtectedRoute>
+              }
+            />
+            <Route
+              path="/financial-coach"
+              element={
+                <PremiumProtectedRoute>
+                  <FinancialCoach />
+                </PremiumProtectedRoute>
+              }
+            />
+            <Route
+              path="/digital-twin"
+              element={
+                <PremiumProtectedRoute>
+                  <FinancialTwin />
+                </PremiumProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <PremiumProtectedRoute>
+                  <FinancialReports />
+                </PremiumProtectedRoute>
               }
             />
           </Routes>

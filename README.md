@@ -146,6 +146,20 @@ Make sure MongoDB is running locally on port `27017` (default). The backend will
 
 ---
 
+## Phase 3 Features Added (Premium)
+*   **Premium Hub / Dashboard:** Unified overview widgets displaying Net Worth, Portfolio Pie Charts, Net Worth Trends, Goal horizontal progress bars, and Digital Twin metrics.
+*   **Tax Optimization Advisor:** Dynamic Old vs New tax calculators (FY 2024-25), HRA Section 10(13A) exemptions, and actionable ELSS/NPS tax-saving strategies.
+*   **Loan Eligibility Advisor:** PV annuity-based borrowing limit calculator for Home, Car, Personal, and Education loans, plus safety EMI ratios.
+*   **Insurance Gap Analysis:** Calculates the protection deficit index based on annual income and dependents, recommending Term Life vs Family Health policies.
+*   **Purchase Advisor:** Scoring index (0-100) analyzing if a planned purchase (iPhone, Bike, Laptop) compromises active savings/goals, suggesting refurbished or second-hand options.
+*   **What-If Simulator:** Projects the impact of milestones (Job loss, salary hike, marriage, home purchase) on future savings, debt levels, and goal delays.
+*   **Portfolio Risk Analyzer:** Evaluates asset holding weights (Stocks, Funds, Gold, FD, Crypto, Property), calculating risk index, rebalancing suggestions, and rendering pie charts.
+*   **AI Financial Coach:** Profile-aware contextual chat advisor that answers complex budgeting and affordability questions.
+*   **Financial Digital Twin:** Dynamic profile engine simulating Financial Age, Risk Level, Savings/Investment Personalities, and Stability Scores.
+*   **Financial Reports Engine:** Generates and exports beautiful, structured Monthly/Quarterly/Yearly statements in PDF (using pdfkit) and CSV formats.
+
+---
+
 ## Migration and Setup
 
 ### 1. Python Environment updates
@@ -155,31 +169,46 @@ cd ai-engine
 venv\Scripts\pip install -r requirements.txt
 ```
 
-### 2. Seeding Test Data (2000 Records)
-To populate 500 Goal, 500 Trip, 500 Debt, and 500 Forecast records linked to a dummy test user (`seeduser@finpilot.com`), run the seeder script in the `backend/` directory:
-```bash
-cd backend
-node seedTestData.js
-```
+### 2. Seeding Test Data
+We have two seeder scripts inside the `backend/` directory:
+
+- **Phase 2 Seeder** (seeds Goals, Trips, Debts, and Forecasts for dummy user `seeduser@finpilot.com`):
+  ```bash
+  cd backend
+  node seedTestData.js
+  ```
+- **Phase 3 Premium Seeder** (seeds 500 Premium Users, 1000 Purchase History records, 500 Portfolios, 500 Loans, and sample Tax/Insurance data):
+  ```bash
+  cd backend
+  node seedPremiumData.js
+  ```
 
 ---
 
 ## Testing Guide
 
-1.  **Register a new user:** Navigate to `http://localhost:3000/register` and enter your details (e.g., Income: 80,000, Age: 29).
-2.  **Upload Statement:** Go to the "Upload CSV" page and select `sample_statement.csv` (located at the project root). Submit the file.
-3.  **Explore Dashboard:** Switch between tab sections (**Overview, Goal Tracker, Trip Planner, Debt & Subscriptions, Retirement & Forecasts, Alerts**) to interact with all the new Phase 2 features.
-4.  **Run Diagnostics:** Click "Run AI Diagnostic" on the dashboard to trigger the Random Forest classifier and view your predicted health rating and recommendations.
-5.  **Get Asset Recommendations:** Go to the "Investments" tab, pick a risk level (Conservative, Moderate, Aggressive), and evaluate your Decision Tree portfolio results.
-6.  **Get Insurance Coverage:** Go to the "Insurance" tab, fill in dependents/marital status, and view your coverage requirements.
-7.  **Chat with Assistant:** Go to the "AI Assistant" tab, click the quick chips (e.g., "Can I invest?"), or type custom questions to test the chatbot's rule-based financial advice.
+1.  **Register a new user:** Navigate to `http://localhost:3000/register` and enter your details (starts as a Free tier user).
+2.  **Toggle Trial Premium Mode:** In the navigation bar, toggle the switch to **Go Premium** or **Go Free** to test tier-based access control.
+3.  **Explore Premium Hub:** When Premium status is active, click **Premium Hub** to explore widgets and dynamic Seaborn charts.
+4.  **Test Premium Advisors:** Open the Tax, Loan, Insurance, Purchase, or What-If advisors via the sidebar navigation and fill out values to get real-time evaluations.
+5.  **Chat with AI Coach:** Open the **AI Financial Coach** and select suggestion chips (e.g., "Can I afford Goa trip?") to test profile-aware chat.
+6.  **Download PDF Reports:** Go to **Financial Reports**, select PDF, and download your consolidated statements.
 
 ### Automated API Integration Tests
-To run the automated integration tests across all 9 endpoints, start both Express and FastAPI servers and run:
-```bash
-cd backend
-node testEndpoints.js
-```
+We have two automated test suites in the `backend/` directory:
+
+- **Phase 2 Tests**:
+  ```bash
+  cd backend
+  node testEndpoints.js
+  ```
+- **Phase 3 Premium Tests** (verifies Premium Access Control, toggling, and all 9 premium routes):
+  ```bash
+  cd backend
+  node testPremiumEndpoints.js
+  ```
 
 ### Postman Collections
-Import `postman_collection.json` into Postman. A new `Phase 2 Planners` folder has been added containing pre-configured request payloads for all 8 main planner APIs.
+- **Phase 2**: Use `postman_collection.json` at the root.
+- **Phase 3 Premium**: Use `backend/postman_collection_v2.json` containing endpoints for all 9 premium advisory APIs.
+

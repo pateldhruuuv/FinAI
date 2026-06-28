@@ -75,6 +75,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Toggle Premium Status
+  const togglePremium = async () => {
+    setError(null);
+    try {
+      const res = await axios.post('/auth/toggle-premium');
+      const updatedUser = res.data.user;
+
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      return updatedUser.isPremium;
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to toggle premium';
+      setError(errMsg);
+      throw new Error(errMsg);
+    }
+  };
+
   // Logout User
   const logout = () => {
     localStorage.removeItem('token');
@@ -95,6 +112,7 @@ export const AuthProvider = ({ children }) => {
         register,
         login,
         logout,
+        togglePremium,
         setError,
       }}
     >

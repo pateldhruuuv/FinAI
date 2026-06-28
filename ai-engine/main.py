@@ -1,6 +1,7 @@
 import os
 import pickle
 import re
+import math
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -472,4 +473,834 @@ def get_spending_insights(data: SpendingInsightsRequest):
         "trends": trends,
         "heatmap": heatmap_base64
     }
+
+# --- PHASE 3 PREMIUM API SCHEMAS & ENDPOINTS ---
+
+class TaxOptimizerRequest(BaseModel):
+    annual_income: float
+    salary_basic: float
+    salary_hra: float
+    salary_special: float
+    salary_other: float
+    deductions_80c: float
+    deductions_80d: float
+    home_loan: float
+    education_loan: float
+    rent_paid: float
+
+class LoanAdvisorRequest(BaseModel):
+    income: float
+    age: int
+    credit_score: int = 750
+    current_emi: float
+    existing_loans: float
+
+class InsuranceGapRequest(BaseModel):
+    current_coverage: float
+    dependents: int
+    income: float
+
+class PurchaseAdvisorRequest(BaseModel):
+    item: str
+    cost: float
+    income: float
+    savings: float
+    goals_target: float
+    debt: float
+    emergency_fund: float
+    investments: float
+
+class WhatIfGoal(BaseModel):
+    goalName: str
+    targetAmount: float
+    currentSavings: float
+
+class WhatIfRequest(BaseModel):
+    scenario: str
+    value: float
+    current_savings: float
+    current_income: float
+    current_expenses: float
+    current_debt: float
+    goals: list[WhatIfGoal] = []
+
+class PortfolioRiskRequest(BaseModel):
+    stocks: float
+    mutual_funds: float
+    gold: float
+    fd: float
+    crypto: float
+    property: float
+
+class FinancialCoachGoal(BaseModel):
+    goalName: str
+    targetAmount: float
+    currentSavings: float
+
+class FinancialCoachRequest(BaseModel):
+    question: str
+    age: int
+    income: float
+    expenses: float
+    savings: float
+    debt: float
+    goals: list[FinancialCoachGoal] = []
+    investments: dict = {}
+    insurance: dict = {}
+
+class DashboardPlotsRequest(BaseModel):
+    portfolio: dict
+    net_worth_history: list[dict]
+    tax: dict
+    goals: list[dict]
+    investments: dict
+    debt: dict
+    forecast: dict
+
+
+def calculate_old_regime_tax(taxable_income: float) -> float:
+    if taxable_income <= 250000:
+        return 0.0
+    tax = 0.0
+    if taxable_income <= 500000:
+        tax = (taxable_income - 250000) * 0.05
+        # Rebate under 87A makes tax zero up to 5L under old regime
+        if taxable_income <= 500000:
+            tax = 0.0
+    elif taxable_income <= 1000000:
+        tax = 12500 + (taxable_income - 500000) * 0.20
+    else:
+        tax = 12500 + 100000 + (taxable_income - 1000000) * 0.30
+    return tax * 1.04
+
+
+def calculate_new_regime_tax(taxable_income: float) -> float:
+    # FY 2024-25 new regime slabs
+    if taxable_income <= 700000:
+        return 0.0
+    tax = 0.0
+    if taxable_income <= 300000:
+        return 0.0
+    elif taxable_income <= 600000:
+        tax = (taxable_income - 300000) * 0.05
+    elif taxable_income <= 900000:
+        tax = 15000 + (taxable_income - 600000) * 0.10
+    elif taxable_income <= 1200000:
+        tax = 15000 + 30000 + (taxable_income - 900000) * 0.15
+    elif taxable_income <= 1500000:
+        tax = 15000 + 30000 + 45000 + (taxable_income - 1200000) * 0.20
+    else:
+        tax = 15000 + 30000 + 45000 + 60000 + (taxable_income - 1500000) * 0.30
+    return tax * 1.04
+
+
+@app.post("/tax-optimizer")
+def get_tax_optimization(data: TaxOptimizerRequest):
+    # Calculate HRA Exemption: section 10(13A)
+    # Min of: 1) HRA received, 2) Rent Paid - 10% of Basic, 3) 50% of Basic (metro standard)
+    hra_exemption = 0.0
+    if data.salary_hra > 0 and data.rent_paid > 0:
+        opt1 = data.salary_hra
+        opt2 = max(data.rent_paid - (0.10 * data.salary_basic), 0)
+        opt3 = 0.50 * data.salary_basic
+        hra_exemption = min(opt1, opt2, opt3)
+
+    # 80C Cap is 150,000 INR
+    ded_80c = min(data.deductions_80c, 150000.0)
+    # 80D Cap is 25,000 INR (non-senior)
+    ded_80d = min(data.deductions_80d, 25000.0)
+    # Home loan interest deduction under Section 24(b) cap 200,000
+    home_ded = min(data.home_loan, 200000.0)
+    # Education loan interest deduction under Section 80E (no cap)
+    edu_ded = data.education_loan
+
+    # Standard Deduction is 50,000 INR under Old Regime
+    total_deductions = 50000.0 + hra_exemption + ded_80c + ded_80d + home_ded + edu_ded
+    taxable_old = max(data.annual_income - total_deductions, 0)
+    old_tax = calculate_old_regime_tax(taxable_old)
+
+    # New Regime Standard Deduction is 75,000 INR
+    taxable_new = max(data.annual_income - 75000.0, 0)
+    new_tax = calculate_new_regime_tax(taxable_new)
+
+    # Suggest Tax-Saving Strategies (Optimized Plan)
+    # Target maximum 80C, 80D, NPS (up to 50k under 80CCD(1B))
+    suggestions = []
+    recommended_investments = []
+    
+    if data.deductions_80c < 150000:
+        diff = 150000 - data.deductions_80c
+        suggestions.append(f"Invest ₹{diff:,.0f} more in ELSS or PPF to maximize Section 80C deduction.")
+        recommended_investments.append(f"ELSS / PPF: ₹{diff:.0f}")
+    if data.deductions_80d < 25000:
+        diff = 25000 - data.deductions_80d
+        suggestions.append(f"Purchase Health Insurance up to ₹{diff:,.0f} to fully utilize Section 80D.")
+        recommended_investments.append(f"Health Insurance: ₹{diff:.0f}")
+        
+    # NPS suggestion
+    suggestions.append("Invest ₹50,000 in NPS (National Pension System) to claim additional deduction under Section 80CCD(1B).")
+    recommended_investments.append("NPS: ₹50000")
+    
+    # FD tax saver suggestion
+    suggestions.append("Lock in surplus funds in 5-Year Tax Saver Fixed Deposits (FDs) to claim secure 80C benefits.")
+
+    # Calculate potential tax savings (compared to current old/new tax)
+    best_current_tax = min(old_tax, new_tax)
+    
+    # Optimized Old Tax if they maximize deductions
+    opt_deductions = 50000.0 + hra_exemption + 150000.0 + 25000.0 + home_ded + edu_ded + 50000.0
+    opt_taxable_old = max(data.annual_income - opt_deductions, 0)
+    opt_old_tax = calculate_old_regime_tax(opt_old_taxable := opt_taxable_old)
+    
+    savings = max(best_current_tax - opt_old_tax, 0.0)
+
+    # Plot tax comparison chart
+    chart_base64 = ""
+    try:
+        regimes = ['Old Regime', 'New Regime', 'Optimized Old']
+        taxes = [old_tax, new_tax, opt_old_tax]
+        
+        plt.figure(figsize=(6, 4))
+        plt.style.use('dark_background')
+        bars = plt.bar(regimes, taxes, color=['#ef4444', '#3b82f6', '#10b981'], width=0.5, edgecolor='white', linewidth=0.7)
+        plt.title("Tax Comparison & Potential Savings", fontsize=11, color='white', pad=12)
+        plt.ylabel("Tax Amount (₹)", color='#94a3b8', labelpad=8)
+        
+        for bar in bars:
+            height = bar.get_height()
+            plt.text(bar.get_x() + bar.get_width()/2.0, height + (max(taxes)*0.02), f"₹{height:,.0f}", ha='center', va='bottom', color='white', fontsize=9)
+            
+        plt.ylim(0, max(taxes) * 1.15 if max(taxes) > 0 else 1000)
+        plt.tight_layout()
+        
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', dpi=100, facecolor='#111827')
+        buf.seek(0)
+        chart_base64 = base64.b64encode(buf.read()).decode('utf-8')
+        plt.close()
+    except Exception as e:
+        print("Tax chart error:", e)
+        plt.close()
+
+    return {
+        "status": "success",
+        "taxable_income": taxable_old,
+        "old_tax": round(old_tax, 2),
+        "new_tax": round(new_tax, 2),
+        "potential_savings": round(savings, 2),
+        "suggestions": suggestions,
+        "recommended_investments": recommended_investments,
+        "tax_breakdown_chart": chart_base64
+    }
+
+
+@app.post("/loan-advisor")
+def get_loan_advice(data: LoanAdvisorRequest):
+    # Max EMI (50% of monthly income)
+    max_emi = data.income * 0.50
+    # Safe EMI (35% of monthly income)
+    safe_emi = data.income * 0.35
+
+    # Subtract current EMIs
+    available_max_emi = max(max_emi - data.current_emi, 0)
+    available_safe_emi = max(safe_emi - data.current_emi, 0)
+
+    # Loan Eligibility Formulas (Present Value of Annuity)
+    # P = EMI * [1 - (1+r)^-n] / r
+    def pv(emi, rate, years):
+        r = rate / 12.0
+        n = years * 12
+        if r == 0:
+            return emi * n
+        return emi * (1.0 - (1.0 + r)**(-n)) / r
+
+    # Tenures & Rates
+    # Personal: 3 yrs @ 12%, Car: 5 yrs @ 9%, Home: 20 yrs @ 8.5%, Edu: 7 yrs @ 10.5%
+    personal_eligible = pv(available_safe_emi, 0.12, 3)
+    car_eligible = pv(available_safe_emi, 0.09, 5)
+    home_eligible = pv(available_safe_emi, 0.085, 20)
+    education_eligible = pv(available_safe_emi, 0.105, 7)
+
+    # Risk Assessment
+    debt_burden = (data.current_emi / data.income) if data.income > 0 else 1.0
+    
+    if debt_burden > 0.45 or data.credit_score < 650:
+        risk = "High"
+    elif debt_burden > 0.20 or data.credit_score < 720:
+        risk = "Medium"
+    else:
+        risk = "Low"
+
+    return {
+        "status": "success",
+        "eligible_amount": round(home_eligible, 2),
+        "maximum_emi": round(max_emi, 2),
+        "safe_emi": round(safe_emi, 2),
+        "loan_risk": risk,
+        "breakdown": {
+            "personalLoan": round(personal_eligible, 2),
+            "educationLoan": round(education_eligible, 2),
+            "carLoan": round(car_eligible, 2),
+            "homeLoan": round(home_eligible, 2)
+        }
+    }
+
+
+@app.post("/insurance-gap")
+def get_insurance_gap(data: InsuranceGapRequest):
+    # Required coverage rule of thumb: 10x Annual Income + 1.5x Annual Income per dependent
+    annual_income = data.income * 12 if data.income < 1000000 else data.income # Check if monthly or annual input
+    required_coverage = annual_income * (10 + 1.5 * data.dependents)
+    gap = max(required_coverage - data.current_coverage, 0.0)
+
+    # Priority Level
+    if gap > (0.60 * required_coverage) and data.dependents > 0:
+        priority = "Critical"
+    elif gap > 0.25 * required_coverage:
+        priority = "High"
+    elif gap > 0.0:
+        priority = "Medium"
+    else:
+        priority = "Low"
+
+    best_type = "Term Life Insurance" if data.dependents > 0 else "Comprehensive Family Health Plan"
+
+    return {
+        "status": "success",
+        "required_coverage": round(required_coverage, 2),
+        "coverage_gap": round(gap, 2),
+        "recommended_additional_coverage": round(gap, 2),
+        "best_insurance_type": best_type,
+        "priority_level": priority
+    }
+
+
+@app.post("/purchase-advisor")
+def get_purchase_advice(data: PurchaseAdvisorRequest):
+    # Purchase Score calculation: starts at 100, subtracts risk factors
+    score = 100
+    
+    # 1. Cost relative to monthly income
+    if data.income > 0:
+        cost_income_ratio = data.cost / data.income
+        if cost_income_ratio > 3.0:
+            score -= 30
+        elif cost_income_ratio > 1.0:
+            score -= 15
+        elif cost_income_ratio > 0.5:
+            score -= 5
+            
+    # 2. Cost relative to savings minus emergency fund
+    usable_savings = data.savings - data.emergency_fund
+    if usable_savings <= 0:
+        score -= 40
+    elif data.cost > usable_savings:
+        excess = data.cost - usable_savings
+        # scale deduction
+        score -= min(int((excess / data.cost) * 35), 35)
+
+    # 3. Debt to income ratio
+    if data.income > 0:
+        debt_ratio = data.debt / data.income
+        if debt_ratio > 0.40:
+            score -= 25
+        elif debt_ratio > 0.20:
+            score -= 10
+
+    score = max(score, 0)
+
+    # Recommendation
+    if score >= 75:
+        status = "Buy"
+    elif score >= 45:
+        status = "Wait"
+    else:
+        status = "Avoid"
+
+    # Suggest alternative options
+    refurbished = f"Refurbished model estimated at ₹{data.cost * 0.65:,.0f} (saves 35%)"
+    second_hand = f"Good-condition pre-owned estimated at ₹{data.cost * 0.50:,.0f} (saves 50%)"
+    
+    # EMI calculation: 6-month EMI at 12% p.a.
+    r = 0.12 / 12
+    emi_val = data.cost * r * (1+r)**6 / ((1+r)**6 - 1) if data.cost > 0 else 0
+    emi = f"₹{emi_val:,.0f}/month for 6 months at 12% p.a. interest"
+    
+    # Better alternative suggestion
+    item_lower = data.item.lower()
+    if "iphone" in item_lower:
+        alt = "Look for last year's base model or a premium Android flag-ship, saving up to ₹25,000."
+    elif "bike" in item_lower:
+        alt = "Consider a high-mileage commuter bike or public transit pass to keep transportation expenses low."
+    elif "laptop" in item_lower:
+        alt = "Opt for a mid-range model with upgradeable RAM rather than a top-tier premium workstation."
+    else:
+        alt = "Rent it first if it is for one-time use, or wait for seasonal clearance/discount events."
+
+    return {
+        "status": "success",
+        "purchase_score": score,
+        "status_recommendation": status,
+        "suggestions": {
+            "refurbishedOption": refurbished,
+            "emiOption": emi,
+            "secondHandOption": second_hand,
+            "betterAlternative": alt
+        }
+    }
+
+
+@app.post("/what-if")
+def run_what_if_simulation(data: WhatIfRequest):
+    # Simulate impacts on: Future savings, Debt, Goal delay, Investment impact
+    future_savings = data.current_savings
+    debt = data.current_debt
+    goal_delay_months = 0
+    investment_impact = 0.0
+
+    # Base values
+    monthly_savings = max(data.current_income - data.current_expenses, 0.0)
+
+    if data.scenario == "salary_increase":
+        hike = data.value # e.g. 15 for 15%
+        new_income = data.current_income * (1 + hike/100.0)
+        added_savings = (new_income - data.current_income) * 12 # Annual added
+        future_savings += (added_savings * 3) # Projected over 3 years
+        investment_impact = added_savings * 0.60 # assume 60% of raise goes to investments
+        goal_delay_months = -6 # Goals accelerate by 6 months
+
+    elif data.scenario == "job_loss":
+        months_unemployed = int(data.value) if data.value > 0 else 4
+        # lose income, drain savings for expenses + debt
+        drain = (data.current_expenses + data.current_debt) * months_unemployed
+        future_savings = max(future_savings - drain, 0.0)
+        goal_delay_months = months_unemployed + 3 # delays goals significantly due to compounding loss
+
+    elif data.scenario == "medical_emergency":
+        cost = data.value
+        future_savings = max(future_savings - cost, 0.0)
+        if cost > data.current_savings:
+            debt += (cost - data.current_savings)
+        goal_delay_months = int(cost / (monthly_savings + 1)) # months needed to rebuild savings
+
+    elif data.scenario == "marriage":
+        cost = data.value
+        future_savings = max(future_savings - cost, 0.0)
+        if cost > data.current_savings:
+            debt += (cost - data.current_savings)
+        goal_delay_months = int(cost / (monthly_savings + 1)) + 2
+
+    elif data.scenario == "child_education" or data.scenario == "buying_house" or data.scenario == "buying_car":
+        cost = data.value
+        future_savings = max(future_savings - (cost * 0.20), 0.0) # Assume 20% down payment
+        remaining = cost * 0.80
+        # Add to debt (loan)
+        debt += remaining
+        # Monthly EMI increase (at 9% p.a. for 10 years)
+        # delays future goals
+        goal_delay_months = int(remaining / 50000)
+
+    return {
+        "status": "success",
+        "future_savings": round(future_savings, 2),
+        "debt": round(debt, 2),
+        "goal_delay_months": goal_delay_months,
+        "investment_impact": round(investment_impact, 2)
+    }
+
+
+@app.post("/portfolio-risk")
+def get_portfolio_risk(data: PortfolioRiskRequest):
+    total = data.stocks + data.mutual_funds + data.gold + data.fd + data.crypto + data.property
+    
+    if total <= 0:
+        return {
+            "status": "success",
+            "diversification": "Low",
+            "risk_score": 0.0,
+            "safe_allocation": {"cashFd": 20, "bondsDebt": 30, "equity": 40, "gold": 10},
+            "high_risk_assets": [],
+            "recommendations": ["Fund your portfolio to analyze assets."]
+        }
+
+    # Weights
+    weights = {
+        "stocks": data.stocks / total,
+        "mutual_funds": data.mutual_funds / total,
+        "gold": data.gold / total,
+        "fd": data.fd / total,
+        "crypto": data.crypto / total,
+        "property": data.property / total
+    }
+
+    # Risk Score: Crypto: 95, Stocks: 75, Funds: 45, Property: 30, Gold: 15, FD: 5
+    risk_score = (
+        weights["crypto"] * 95 +
+        weights["stocks"] * 75 +
+        weights["mutual_funds"] * 45 +
+        weights["property"] * 30 +
+        weights["gold"] * 15 +
+        weights["fd"] * 5
+    )
+
+    # Diversification Check
+    max_weight = max(weights.values())
+    asset_types_funded = sum(1 for w in weights.values() if w > 0.02)
+
+    if max_weight > 0.70 or asset_types_funded <= 1:
+        diversification = "Low"
+    elif max_weight > 0.40 or asset_types_funded <= 3:
+        diversification = "Medium"
+    else:
+        diversification = "High"
+
+    # Safe Allocation recommendation values
+    safe_cash_fd = total * 0.20
+    safe_bonds = total * 0.30
+    safe_equity = total * 0.40
+    safe_gold = total * 0.10
+
+    high_risk = []
+    if weights["crypto"] > 0.05:
+        high_risk.append("Cryptocurrency (exposure above recommended 5% limit)")
+    if weights["stocks"] > 0.50:
+        high_risk.append("Direct Stocks (high single-asset equity exposure)")
+
+    recommendations = []
+    if diversification == "Low":
+        recommendations.append("Rebalance portfolio to reduce concentration risk in a single asset class.")
+    if risk_score > 65:
+        recommendations.append("Reduce risk by moving funds from high-volatility Crypto/Stocks into secure FDs or Debt Mutual Funds.")
+    if weights["gold"] < 0.05:
+        recommendations.append("Consider allocating 5-10% in Gold as a hedge against equity market shocks.")
+    if not recommendations:
+        recommendations.append("Your portfolio is well-balanced. Maintain periodic automated SIP rebalancing.")
+
+    # Render pie chart
+    chart_base64 = ""
+    try:
+        labels = []
+        sizes = []
+        colors = []
+        
+        mapping = [
+            ('Stocks', data.stocks, '#ef4444'),
+            ('Mutual Funds', data.mutual_funds, '#3b82f6'),
+            ('Gold', data.gold, '#eab308'),
+            ('Fixed Deposits', data.fd, '#10b981'),
+            ('Crypto', data.crypto, '#a855f7'),
+            ('Property', data.property, '#f97316')
+        ]
+        
+        for lbl, val, col in mapping:
+            if val > 0:
+                labels.append(lbl)
+                sizes.append(val)
+                colors.append(col)
+                
+        plt.figure(figsize=(5, 5))
+        plt.style.use('dark_background')
+        plt.pie(sizes, labels=labels, autopct='%1.1f%%', colors=colors, startangle=140, textprops={'fontsize': 9, 'color': 'white'})
+        plt.title("Portfolio Asset Allocation", fontsize=11, color='white', pad=12)
+        plt.tight_layout()
+        
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', dpi=100, facecolor='#111827')
+        buf.seek(0)
+        chart_base64 = base64.b64encode(buf.read()).decode('utf-8')
+        plt.close()
+    except Exception as e:
+        print("Portfolio pie error:", e)
+        plt.close()
+
+    return {
+        "status": "success",
+        "diversification": diversification,
+        "risk_score": round(risk_score, 2),
+        "safe_allocation": {
+            "cashFd": round(safe_cash_fd, 2),
+            "bondsDebt": round(safe_bonds, 2),
+            "equity": round(safe_equity, 2),
+            "gold": round(safe_gold, 2)
+        },
+        "high_risk_assets": high_risk,
+        "recommendations": recommendations,
+        "portfolio_chart": chart_base64
+    }
+
+
+@app.post("/financial-coach")
+def get_financial_coach_advice(data: FinancialCoachRequest):
+    q = data.question.lower().strip()
+    
+    # Context summary
+    savings_ratio = (data.savings / data.income) if data.income > 0 else 0
+    debt_ratio = (data.debt / data.income) if data.income > 0 else 0
+    
+    # 1. Goa Trip Affordability
+    if "goa" in q or "afford" in q or "trip" in q:
+        trip_cost = 25000.0
+        if data.savings >= trip_cost and debt_ratio < 0.35:
+            reply = (
+                f"Based on your profile, **Yes, you can afford a Goa trip!** You have accumulated savings of ₹{data.savings:,.0f} "
+                f"which covers the estimated ₹25,000 cost. Your debt-to-income ratio is at a manageable {debt_ratio*100:.1f}%. "
+                "Enjoy the trip, but make sure to log the expense and keep at least a basic emergency fund untouched!"
+            )
+        else:
+            suggested_wait = math.ceil((trip_cost - data.savings) / (data.income * 0.15 + 1)) if data.savings < trip_cost else 2
+            reply = (
+                f"I advise **postponing the trip for now**. Your current savings are ₹{data.savings:,.0f} "
+                f"and your debt-to-income ratio is {debt_ratio*100:.1f}%. I recommend saving at least ₹5,000 per month for the next "
+                f"{suggested_wait} months to pay for the trip in cash without incurring new debt."
+            )
+            
+    # 2. How to save more
+    elif "save" in q or "budget" in q:
+        savings_pct = savings_ratio * 100
+        if savings_pct >= 30:
+            reply = (
+                f"Excellent job! You are saving {savings_pct:.1f}% of your monthly income (₹{data.income:,.0f}). To optimize further, "
+                "automate your savings through Mutual Fund SIPs on your pay day. Review your statement category details to identify "
+                "recurring subscriptions or non-essential lifestyle expenses you can trim by 5-10%."
+            )
+        else:
+            reply = (
+                f"Your savings ratio is currently {savings_pct:.1f}% of income. Aim to increase this to at least 20-30% by applying the **50/30/20 budget rule**:\n"
+                "- 50% for fixed Needs (Rent, Utilities, EMI)\n"
+                "- 30% for flex Wants (Dining, Shopping)\n"
+                "- 20% dedicated immediately to Savings.\n"
+                "Try cutting down on high-spending categories like dining/ordering in and auto-debiting savings."
+            )
+
+    # 3. Should I invest now?
+    elif "invest" in q or "investment" in q:
+        if data.savings < data.expenses * 3:
+            reply = (
+                "Before investing, you should **build a strong emergency fund**. Currently, your savings are ₹"
+                f"{data.savings:,.0f}, which covers less than 3 months of expenses. I recommend building a liquid reserve "
+                "equal to 6 months of expenses before allocating surplus funds to volatile equity markets."
+            )
+        else:
+            reply = (
+                "**Yes, you should begin investing immediately.** You have a healthy liquid buffer. If you are new to the market, "
+                "start a monthly SIP (Systematic Investment Plan) in a diversified **Nifty 50 Index Mutual Fund** or a Conservative Hybrid Fund. "
+                "This dollar-cost averages your purchases and mitigates short-term market timing risks."
+            )
+
+    # 4. Should I buy insurance?
+    elif "insurance" in q or "insure" in q:
+        if data.goals:
+            reply = (
+                "**Absolutely.** Insurance is the foundation of risk management. Because you have active goals and financial dependencies, "
+                "you should secure a **Term Life Insurance policy** (aim for 10-15x your annual income) to protect your family's future, "
+                "along with a standalone **Family Health Insurance plan** to safeguard your investments from medical bill shocks."
+            )
+        else:
+            reply = (
+                "Yes. Even without extensive dependents, a basic **Health Insurance Policy** is critical. A single medical emergency "
+                "can wipe out years of accumulated savings. Ensure you have health cover (at least ₹5-10 Lakhs) independent of your employer-provided policy."
+            )
+
+    # 5. Should I close my loan?
+    elif "close" in q or "loan" in q or "debt" in q or "emi" in q:
+        if debt_ratio > 0.35:
+            reply = (
+                f"**Yes, prioritizing loan pre-payments is highly advised.** Your monthly debt/EMI burden is {debt_ratio*100:.1f}% of income, "
+                "which is high. Focus on clearing credit cards or high-interest personal loans first using the **Debt Avalanche** method "
+                "(pay extra towards the highest interest rate loan first). This frees up cash flow rapidly."
+            )
+        else:
+            reply = (
+                "Since your debt burden is a safe, low level, you should compare interest rates. If your loan interest rate is under 8-9% "
+                "(like a home loan), it might be better to maintain regular EMI payments and invest surplus cash in equity mutual funds "
+                "which historically return 12%+ over the long term. If it's a high-interest loan (12%+), prepay it immediately."
+            )
+
+    else:
+        reply = (
+            f"Hello! As your AI Coach, I see you have a monthly income of ₹{data.income:,.0f}, savings of ₹{data.savings:,.0f}, and "
+            f"debt obligations of ₹{data.debt:,.0f}. Ask me specific questions like: 'Can I afford Goa trip?', 'How can I save more?', "
+            "'Should I invest now?', or 'Should I close my loan?' and I'll compute custom answers!"
+        )
+
+    return {
+        "status": "success",
+        "reply": reply
+    }
+
+
+@app.post("/premium-dashboard-plots")
+def get_premium_dashboard_plots(data: DashboardPlotsRequest):
+    # Generates multiple plots as base64 images in a single payload
+    plots = {}
+    
+    # Helper to convert figure to base64
+    def fig_to_base64(fig):
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png', dpi=100, facecolor='#1f2937')
+        buf.seek(0)
+        img_str = base64.b64encode(buf.read()).decode('utf-8')
+        plt.close(fig)
+        return img_str
+
+    plt.style.use('dark_background')
+
+    # 1. Portfolio Pie Chart
+    try:
+        portfolio = data.portfolio
+        labels = [k.replace('_', ' ').title() for k, v in portfolio.items() if v > 0]
+        sizes = [v for k, v in portfolio.items() if v > 0]
+        
+        if sizes:
+            fig, ax = plt.subplots(figsize=(4, 3.5))
+            ax.pie(sizes, labels=labels, autopct='%1.0f%%', startangle=90, 
+                   colors=['#ef4444', '#3b82f6', '#eab308', '#10b981', '#a855f7', '#f97316'])
+            ax.set_title("Portfolio Breakdown", color='white', fontsize=10, pad=10)
+            fig.tight_layout()
+            plots["portfolio_pie"] = fig_to_base64(fig)
+        else:
+            plots["portfolio_pie"] = ""
+    except Exception as e:
+        print("Plot portfolio error:", e)
+        plots["portfolio_pie"] = ""
+
+    # 2. Net Worth Trend
+    try:
+        nw = data.net_worth_history
+        if nw:
+            months = [item["month"] for item in nw]
+            net_worth = [item["assets"] - item["liabilities"] for item in nw]
+            
+            fig, ax = plt.subplots(figsize=(4.5, 3.5))
+            ax.plot(months, net_worth, marker='o', linewidth=2, color='#10b981', label='Net Worth')
+            ax.fill_between(months, net_worth, color='#10b981', alpha=0.15)
+            ax.set_title("Net Worth Trend", color='white', fontsize=10)
+            ax.set_ylabel("Net Worth (₹)", color='#cbd5e1', fontsize=8)
+            plt.xticks(rotation=30, fontsize=8)
+            plt.yticks(fontsize=8)
+            fig.tight_layout()
+            plots["net_worth_trend"] = fig_to_base64(fig)
+        else:
+            plots["net_worth_trend"] = ""
+    except Exception as e:
+        print("Plot net worth error:", e)
+        plots["net_worth_trend"] = ""
+
+    # 3. Tax Breakdown
+    try:
+        tax = data.tax
+        if tax:
+            fig, ax = plt.subplots(figsize=(4, 3.5))
+            labels = ['Old Tax', 'New Tax', 'Optimized']
+            values = [tax.get("old_tax", 0), tax.get("new_tax", 0), tax.get("optimized_tax", 0)]
+            bars = ax.bar(labels, values, color=['#ef4444', '#3b82f6', '#10b981'], width=0.4)
+            ax.set_title("Tax Optimization Breakdown", color='white', fontsize=10)
+            ax.set_ylabel("Tax (₹)", color='#cbd5e1', fontsize=8)
+            plt.yticks(fontsize=8)
+            
+            for bar in bars:
+                height = bar.get_height()
+                ax.text(bar.get_x() + bar.get_width()/2.0, height + 100, f"₹{height:,.0f}", ha='center', va='bottom', color='white', fontsize=7)
+                
+            fig.tight_layout()
+            plots["tax_breakdown"] = fig_to_base64(fig)
+        else:
+            plots["tax_breakdown"] = ""
+    except Exception as e:
+        print("Plot tax error:", e)
+        plots["tax_breakdown"] = ""
+
+    # 4. Goal Progress
+    try:
+        goals = data.goals
+        if goals:
+            names = [g["name"][:12] for g in goals[:4]] # limit to 4 goals
+            progresses = [g["progress"] for g in goals[:4]]
+            
+            fig, ax = plt.subplots(figsize=(4.5, 3.5))
+            bars = ax.barh(names, progresses, color='#8b5cf6', edgecolor='white', height=0.4)
+            ax.set_title("Goal Progress Summary (%)", color='white', fontsize=10)
+            ax.set_xlim(0, 100)
+            plt.xticks(fontsize=8)
+            plt.yticks(fontsize=8)
+            
+            for bar in bars:
+                width = bar.get_width()
+                ax.text(width + 2, bar.get_y() + bar.get_height()/2.0, f"{width}%", ha='left', va='center', color='white', fontsize=8)
+                
+            fig.tight_layout()
+            plots["goal_progress"] = fig_to_base64(fig)
+        else:
+            plots["goal_progress"] = ""
+    except Exception as e:
+        print("Plot goals error:", e)
+        plots["goal_progress"] = ""
+
+    # 5. Investment Allocation
+    try:
+        investments = data.investments
+        labels = [k.replace('_', ' ').title() for k, v in investments.items() if v > 0]
+        values = [v for k, v in investments.items() if v > 0]
+        
+        if values:
+            fig, ax = plt.subplots(figsize=(4, 3.5))
+            ax.bar(labels, values, color='#ec4899', width=0.4)
+            ax.set_title("Investment Assets (₹)", color='white', fontsize=10)
+            plt.xticks(rotation=15, fontsize=8)
+            plt.yticks(fontsize=8)
+            fig.tight_layout()
+            plots["investment_allocation"] = fig_to_base64(fig)
+        else:
+            plots["investment_allocation"] = ""
+    except Exception as e:
+        print("Plot investments error:", e)
+        plots["investment_allocation"] = ""
+
+    # 6. Debt Analysis
+    try:
+        debt = data.debt
+        if debt:
+            fig, ax = plt.subplots(figsize=(4, 3.5))
+            categories = ['Income', 'Debt Payments']
+            values = [debt.get("monthly_income", 0), debt.get("current_emi", 0) + debt.get("other_debts", 0)]
+            ax.bar(categories, values, color=['#10b981', '#f43f5e'], width=0.4)
+            ax.set_title("Debt vs Monthly Income", color='white', fontsize=10)
+            ax.set_ylabel("Amount (₹)", color='#cbd5e1', fontsize=8)
+            plt.yticks(fontsize=8)
+            fig.tight_layout()
+            plots["debt_analysis"] = fig_to_base64(fig)
+        else:
+            plots["debt_analysis"] = ""
+    except Exception as e:
+        print("Plot debt error:", e)
+        plots["debt_analysis"] = ""
+
+    # 7. Financial Forecast
+    try:
+        forecast = data.forecast
+        if forecast:
+            hist_exp = forecast.get("historical_expenses", [])
+            hist_sav = forecast.get("historical_savings", [])
+            
+            fig, ax = plt.subplots(figsize=(4.5, 3.5))
+            indices = list(range(len(hist_exp)))
+            ax.plot(indices, hist_exp, label='Expenses', marker='x', color='#ef4444', linestyle='--')
+            ax.plot(indices, hist_sav, label='Savings', marker='o', color='#10b981')
+            ax.set_title("Historical Savings & Expenses", color='white', fontsize=10)
+            ax.legend(fontsize=8, loc='upper left')
+            plt.xticks(fontsize=8)
+            plt.yticks(fontsize=8)
+            fig.tight_layout()
+            plots["financial_forecast"] = fig_to_base64(fig)
+        else:
+            plots["financial_forecast"] = ""
+    except Exception as e:
+        print("Plot forecast error:", e)
+        plots["financial_forecast"] = ""
+
+    return {
+        "status": "success",
+        "plots": plots
+    }
+
 

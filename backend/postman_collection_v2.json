@@ -1,0 +1,428 @@
+{
+	"info": {
+		"_postman_id": "c6258410-b9a3-4876-b605-e3d82a170560",
+		"name": "FinPilot AI Phase 3 Premium",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register Premium User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Premium User\",\n  \"email\": \"test_premium@finpilot.com\",\n  \"password\": \"password123\",\n  \"age\": 32,\n  \"monthlyIncome\": 120000\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Premium User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.globals.set(\"premium_token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test_premium@finpilot.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle Premium status",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{premium_token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/auth/toggle-premium",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"auth",
+								"toggle-premium"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Premium Advisory",
+			"item": [
+				{
+					"name": "Tax Optimizer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{premium_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"annualIncome\": 1200000,\n  \"salaryStructure\": {\n    \"basic\": 540000,\n    \"hra\": 180000,\n    \"specialAllowance\": 300000,\n    \"other\": 180000\n  },\n  \"deductions80C\": 120000,\n  \"deductions80D\": 15000,\n  \"homeLoan\": 50000,\n  \"educationLoan\": 0,\n  \"rentPaid\": 144000\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/tax-optimizer",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"tax-optimizer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Loan Advisor",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{premium_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"income\": 100000,\n  \"age\": 30,\n  \"creditScore\": 760,\n  \"currentEmi\": 15000,\n  \"existingLoans\": 300000\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/loan-advisor",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"loan-advisor"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Insurance Gap",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{premium_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"coverageAmount\": 1500000,\n  \"dependents\": 2,\n  \"income\": 1200000\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/insurance-gap",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"insurance-gap"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Purchase Advisor",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{premium_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"item\": \"MacBook Pro 16-inch\",\n  \"cost\": 220000\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/purchase-advisor",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"purchase-advisor"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "What-If Simulator",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{premium_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"scenario\": \"salary_increase\",\n  \"value\": 20\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/what-if",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"what-if"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Portfolio Risk Analyzer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{premium_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"stocks\": 150000,\n  \"mutualFunds\": 200000,\n  \"gold\": 50000,\n  \"fd\": 100000,\n  \"crypto\": 10000,\n  \"property\": 0\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/portfolio-risk",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"portfolio-risk"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AI Financial Coach",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{premium_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"question\": \"Can I afford Goa trip?\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/financial-coach",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"financial-coach"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get PDF Report",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{premium_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reportType\": \"Monthly\",\n  \"format\": \"PDF\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/financial-report",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"financial-report"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get CSV Report",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{premium_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reportType\": \"Monthly\",\n  \"format\": \"CSV\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/financial-report",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"financial-report"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Premium Dashboard Data",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{premium_token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/premium-dashboard",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"premium-dashboard"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

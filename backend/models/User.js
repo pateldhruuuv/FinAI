@@ -29,6 +29,10 @@ const UserSchema = new mongoose.Schema({
     required: [true, 'Monthly income is required'],
     min: [0, 'Monthly income cannot be negative'],
   },
+  isPremium: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
