@@ -19,7 +19,7 @@ router.post('/recommend-insurance', auth, aiController.recommendInsurance);
 router.post('/predict-health', auth, aiController.predictHealth);
 
 // @route   POST /chat
-// @desc    Chat with simple rule-based AI financial advisor
+// @desc    Chat with Gemini-powered financial advisor
 // @access  Private
 router.post('/chat', auth, aiController.chat);
 

@@ -4,6 +4,44 @@ const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8000';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/interactions';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+
+const extractGeminiReply = (data) => {
+  if (data?.output_text) return data.output_text;
+
+  const modelOutput = data?.steps?.find((step) => step.type === 'model_output');
+  const textPart = modelOutput?.content?.find((part) => part.type === 'text');
+  return textPart?.text || 'Sorry, I could not generate a response right now.';
+};
+
+const buildChatPrompt = ({ message, context, history }) => {
+  const recentMessages = history
+    .map((chat) => `${chat.sender === 'user' ? 'User' : 'FinPilot'}: ${chat.message}`)
+    .join('\n');
+
+  return `You are FinPilot, a helpful financial assistant inside a personal finance app.
+
+Guidelines:
+- Give practical, simple, India-friendly financial guidance when relevant.
+- Use the user's available financial context, but do not invent missing facts.
+- Do not claim to be a certified financial advisor.
+- For investment, tax, loan, or insurance questions, include a short risk/disclaimer line.
+- Keep answers concise and action-oriented.
+
+User financial context:
+Age: ${context.age || 'Not available'}
+Income: ${context.income || 0}
+Expenses: ${context.expenses || 0}
+Savings: ${context.savings || 0}
+Debt: ${context.debt || 0}
+
+Recent conversation:
+${recentMessages || 'No previous messages.'}
+
+User message:
+${message}`;
+};
 
 // Helper to get user financials for AI context
 const getUserFinancialContext = async (userId) => {
@@ -227,29 +265,50 @@ exports.predictHealth = async (req, res) => {
 exports.chat = async (req, res) => {
   try {
     const { message } = req.body;
-    if (!message) {
+    if (!message?.trim()) {
       return res.status(400).json({ status: 'error', message: 'Message is required' });
     }
 
-    // Call FastAPI
-    const response = await fetch(`${AI_SERVICE_URL}/chat`, {
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({
+        status: 'error',
+        message: 'Gemini API key is not configured. Add GEMINI_API_KEY to backend/.env',
+      });
+    }
+
+    const context = await getUserFinancialContext(req.user);
+    const history = await ChatHistory.find({ userId: req.user }).sort({ timestamp: -1 }).limit(8).lean();
+    const prompt = buildChatPrompt({
+      message: message.trim(),
+      context,
+      history: history.reverse(),
+    });
+
+    const response = await fetch(GEMINI_API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message }),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': process.env.GEMINI_API_KEY,
+      },
+      body: JSON.stringify({
+        model: GEMINI_MODEL,
+        input: prompt,
+      }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      return res.status(response.status).json({ status: 'error', message: `AI Engine error: ${errorText}` });
+      return res.status(response.status).json({ status: 'error', message: `Gemini API error: ${errorText}` });
     }
 
     const result = await response.json();
+    const reply = extractGeminiReply(result);
 
     // Save user query to ChatHistory
     const userChat = new ChatHistory({
       userId: req.user,
       sender: 'user',
-      message: message,
+      message: message.trim(),
     });
     await userChat.save();
 
@@ -257,13 +316,13 @@ exports.chat = async (req, res) => {
     const aiChat = new ChatHistory({
       userId: req.user,
       sender: 'ai',
-      message: result.reply,
+      message: reply,
     });
     await aiChat.save();
 
     res.json({
       status: 'success',
-      reply: result.reply,
+      reply,
     });
   } catch (err) {
     console.error(err);

@@ -54,7 +54,7 @@ const Chatbot = () => {
       const errorMsg = {
         id: `err-${Date.now()}`,
         sender: 'ai',
-        text: 'Sorry, I am having trouble connecting to the financial core right now. Make sure the FastAPI service is online.',
+        text: 'Sorry, I am having trouble connecting to the financial core right now. Make sure the backend has a valid Gemini API key configured.',
         timestamp: new Date()
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -89,7 +89,7 @@ const Chatbot = () => {
           </div>
           <div>
             <h3 style={styles.chatTitle}>FinPilot Copilot</h3>
-            <span style={styles.chatStatus}>Rule-Based Model Active</span>
+            <span style={styles.chatStatus}>Gemini Model Active</span>
           </div>
         </div>
 
