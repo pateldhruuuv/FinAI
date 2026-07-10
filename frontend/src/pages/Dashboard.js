@@ -866,6 +866,28 @@ const Dashboard = () => {
                           </div>
                           <span style={styles.progressPctText}>{goal.progress}%</span>
                         </div>
+
+                        {/* AI Actionable Suggestion */}
+                        <div style={{
+                          marginTop: '16px',
+                          padding: '12px',
+                          borderRadius: '8px',
+                          background: goal.probability < 50 ? 'rgba(239, 68, 68, 0.05)' : 'rgba(16, 185, 129, 0.05)',
+                          border: `1px solid ${goal.probability < 50 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)'}`,
+                          fontSize: '12.5px',
+                          color: '#cbd5e1',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}>
+                          <Sparkles size={14} style={{ color: goal.probability < 50 ? '#ef4444' : '#10b981', flexShrink: 0 }} />
+                          <span>
+                            {goal.probability < 50
+                              ? `Low feasibility (${goal.probability}%). Suggestion: Extend target date or SIP ₹${Math.round(goal.monthlySavingsRequired * 1.2).toLocaleString()}/mo into UTI Nifty 50 Index Fund to increase success odds.`
+                              : `On Track! Suggestion: Automate a monthly transfer of ₹${goal.monthlySavingsRequired.toLocaleString()} to Unity Small Finance Bank FD at 9.0% rate or Parag Parikh Flexi Cap Fund.`
+                            }
+                          </span>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -991,6 +1013,28 @@ const Dashboard = () => {
                           ₹{tripResult.budgetRemaining.toLocaleString()}
                         </p>
                       </div>
+                    </div>
+
+                    {/* AI travel suggestion */}
+                    <div style={{
+                      marginTop: '20px',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      background: 'rgba(6, 182, 212, 0.05)',
+                      border: '1px solid rgba(6, 182, 212, 0.15)',
+                      fontSize: '13px',
+                      color: '#cbd5e1',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <Sparkles size={14} style={{ color: '#06b6d4', flexShrink: 0 }} />
+                      <span>
+                        {tripResult.recommendation === 'Safe To Travel'
+                          ? `Awesome choice! Travel suggestion: Lock in your accommodation 60 days ahead. Save 3.5% on FX markups by using a zero-markup travel credit card like Scapia or Niyo Global.`
+                          : `Budget constraint detected. Suggestion: Look into the alternative domestic options below, or create a targeted Trip Savings Goal on the Goal Planner tab.`
+                        }
+                      </span>
                     </div>
 
                     {/* Alternative options if Not Recommended */}

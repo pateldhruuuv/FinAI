@@ -8,8 +8,8 @@ exports.register = async (req, res) => {
     const { name, email, password, age, monthlyIncome } = req.body;
 
     // Validate inputs
-    if (!name || !email || !password || age === undefined || monthlyIncome === undefined) {
-      return res.status(400).json({ status: 'error', message: 'Please provide all required fields' });
+    if (!name || !email || !password) {
+      return res.status(400).json({ status: 'error', message: 'Please provide name, email, and password' });
     }
 
     // Check if user already exists
@@ -27,8 +27,8 @@ exports.register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      age: parseInt(age),
-      monthlyIncome: parseFloat(monthlyIncome),
+      age: age !== undefined ? parseInt(age) : undefined,
+      monthlyIncome: monthlyIncome !== undefined ? parseFloat(monthlyIncome) : undefined,
     });
 
     await user.save();
@@ -112,7 +112,9 @@ exports.togglePremium = async (req, res) => {
     if (!user) {
       return res.status(404).json({ status: 'error', message: 'User not found' });
     }
-    user.isPremium = !user.isPremium;
+    
+    // Once premium, there is no going back
+    user.isPremium = true;
     await user.save();
 
     res.json({
@@ -128,6 +130,37 @@ exports.togglePremium = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ status: 'error', message: 'Server error toggling premium status' });
+    res.status(500).json({ status: 'error', message: 'Server error upgrading premium status' });
+  }
+};
+
+// Update User Profile
+exports.updateProfile = async (req, res) => {
+  try {
+    const { age, monthlyIncome } = req.body;
+    const user = await User.findById(req.user);
+    if (!user) {
+      return res.status(404).json({ status: 'error', message: 'User not found' });
+    }
+    
+    if (age !== undefined) user.age = parseInt(age);
+    if (monthlyIncome !== undefined) user.monthlyIncome = parseFloat(monthlyIncome);
+    
+    await user.save();
+
+    res.json({
+      status: 'success',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        age: user.age,
+        monthlyIncome: user.monthlyIncome,
+        isPremium: user.isPremium,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: 'error', message: 'Server error updating profile' });
   }
 };

@@ -8,6 +8,7 @@ const UploadStatement = () => {
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState(null); // { type: 'success' | 'error', text: '' }
+  const [suggestions, setSuggestions] = useState([]);
   const navigate = useNavigate();
 
   const handleFileChange = (e) => {
@@ -74,10 +75,12 @@ const UploadStatement = () => {
           text: res.data.message || 'File uploaded and parsed successfully!'
         });
         setFile(null);
-        // Redirect to dashboard after a short delay
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 2500);
+        setSuggestions([
+          `Successfully processed and saved ${res.data.count} transactions into your database.`,
+          "Actionable Step 1: Head to the Cockpit Dashboard and run 'AI Diagnostics' to update your Financial Health Score.",
+          "Actionable Step 2: Use the 'Debt & Subscriptions' tab to identify subscription leakage and manage debt payoffs.",
+          "Actionable Step 3: Run the 'Tax Optimizer' under Tax Advisor to check potential tax savings from new expenses."
+        ]);
       }
     } catch (err) {
       console.error(err);
@@ -170,6 +173,24 @@ const UploadStatement = () => {
               </div>
             )}
           </form>
+
+          {suggestions.length > 0 && (
+            <div className="glass-card animate-fade-in" style={styles.suggestionsCard}>
+              <h3 style={styles.suggestionsTitle}>AI Copilot Insights & Actions</h3>
+              <ul style={styles.suggestionsList}>
+                {suggestions.map((sug, i) => (
+                  <li key={i} style={styles.suggestionsItem}>{sug}</li>
+                ))}
+              </ul>
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="btn btn-primary"
+                style={{ marginTop: '16px', width: '100%', fontFamily: 'Outfit, sans-serif' }}
+              >
+                Proceed to Cockpit Dashboard
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Guidelines (1 col) */}
@@ -375,6 +396,31 @@ const styles = {
     fontFamily: 'Courier New, monospace',
     overflowX: 'auto',
     lineHeight: '1.5'
+  },
+  suggestionsCard: {
+    marginTop: '24px',
+    padding: '20px',
+    border: '1px solid rgba(16, 185, 129, 0.2)',
+    background: 'rgba(16, 185, 129, 0.02)'
+  },
+  suggestionsTitle: {
+    fontSize: '16px',
+    color: '#ffffff',
+    marginBottom: '12px',
+    fontFamily: 'Outfit, sans-serif',
+    fontWeight: 600
+  },
+  suggestionsList: {
+    paddingLeft: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px'
+  },
+  suggestionsItem: {
+    fontSize: '13px',
+    color: '#cbd5e1',
+    lineHeight: '1.5',
+    listStyleType: 'disc'
   }
 };
 

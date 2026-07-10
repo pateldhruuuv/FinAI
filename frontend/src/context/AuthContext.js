@@ -30,13 +30,11 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password, age, monthlyIncome) => {
     setError(null);
     try {
-      const res = await axios.post('/auth/register', {
-        name,
-        email,
-        password,
-        age,
-        monthlyIncome,
-      });
+      const payload = { name, email, password };
+      if (age !== undefined && age !== null && age !== '') payload.age = age;
+      if (monthlyIncome !== undefined && monthlyIncome !== null && monthlyIncome !== '') payload.monthlyIncome = monthlyIncome;
+
+      const res = await axios.post('/auth/register', payload);
 
       const { token: userToken, user: userData } = res.data;
 
@@ -92,6 +90,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Update User Profile
+  const updateProfile = async (age, monthlyIncome) => {
+    setError(null);
+    try {
+      const res = await axios.put('/auth/profile', { age, monthlyIncome });
+      const updatedUser = res.data.user;
+
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      return updatedUser;
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to update profile';
+      setError(errMsg);
+      throw new Error(errMsg);
+    }
+  };
+
   // Logout User
   const logout = () => {
     localStorage.removeItem('token');
@@ -113,6 +128,7 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         togglePremium,
+        updateProfile,
         setError,
       }}
     >

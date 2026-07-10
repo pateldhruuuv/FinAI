@@ -7,8 +7,6 @@ const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [age, setAge] = useState('');
-  const [monthlyIncome, setMonthlyIncome] = useState('');
   const [localError, setLocalError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -27,7 +25,7 @@ const Register = () => {
     setLocalError('');
 
     // Field Validations
-    if (!name || !email || !password || !age || !monthlyIncome) {
+    if (!name || !email || !password) {
       setLocalError('Please fill in all the fields.');
       return;
     }
@@ -37,14 +35,9 @@ const Register = () => {
       return;
     }
 
-    if (parseInt(age) < 18) {
-      setLocalError('You must be 18 years or older to register.');
-      return;
-    }
-
     setSubmitting(true);
     try {
-      await register(name, email, password, parseInt(age), parseFloat(monthlyIncome));
+      await register(name, email, password);
       navigate('/dashboard');
     } catch (err) {
       setLocalError(err.message || 'Registration failed. Please try again.');
@@ -115,39 +108,6 @@ const Register = () => {
             </div>
           </div>
 
-          <div className="grid-cols-2" style={{ gap: '12px' }}>
-            <div className="form-group">
-              <label className="form-label" htmlFor="age">Age</label>
-              <div style={styles.inputWrapper}>
-                <Calendar size={18} style={styles.inputIcon} />
-                <input
-                  id="age"
-                  type="number"
-                  className="form-input"
-                  placeholder="25"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                  style={styles.inputWithIcon}
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="monthlyIncome">Income (Monthly)</label>
-              <div style={styles.inputWrapper}>
-                <Wallet size={18} style={styles.inputIcon} />
-                <input
-                  id="monthlyIncome"
-                  type="number"
-                  className="form-input"
-                  placeholder="50000"
-                  value={monthlyIncome}
-                  onChange={(e) => setMonthlyIncome(e.target.value)}
-                  style={styles.inputWithIcon}
-                />
-              </div>
-            </div>
-          </div>
 
           <button
             type="submit"

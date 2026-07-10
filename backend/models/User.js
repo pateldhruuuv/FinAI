@@ -21,12 +21,12 @@ const UserSchema = new mongoose.Schema({
   },
   age: {
     type: Number,
-    required: [true, 'Age is required'],
+    required: false,
     min: [18, 'Age must be at least 18'],
   },
   monthlyIncome: {
     type: Number,
-    required: [true, 'Monthly income is required'],
+    required: false,
     min: [0, 'Monthly income cannot be negative'],
   },
   isPremium: {

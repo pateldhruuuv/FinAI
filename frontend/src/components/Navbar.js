@@ -76,16 +76,18 @@ const Navbar = () => {
                   </span>
                 </div>
                 
-                <button 
-                  onClick={handleTogglePremium} 
-                  style={{
-                    ...styles.toggleBtn,
-                    ...(user.isPremium ? styles.downgradeBtn : styles.upgradeBtn)
-                  }}
-                  title={user.isPremium ? "Switch to Free tier" : "Upgrade to Premium tier"}
-                >
-                  {user.isPremium ? 'Go Free' : 'Go Premium'}
-                </button>
+                {!user.isPremium && (
+                  <button 
+                    onClick={handleTogglePremium} 
+                    style={{
+                      ...styles.toggleBtn,
+                      ...styles.upgradeBtn
+                    }}
+                    title="Upgrade to Premium tier"
+                  >
+                    Go Premium
+                  </button>
+                )}
 
                 <button onClick={handleLogout} style={styles.logoutBtn} title="Logout">
                   <LogOut size={16} />

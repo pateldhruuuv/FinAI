@@ -72,6 +72,53 @@ class SpendingInsightsRequest(BaseModel):
 
 # Helper to load pickled models
 models = {}
+market_trends = {}
+
+INVESTMENT_PRODUCTS = {
+    "Cash_FD": [
+        {"name": "Unity Small Finance Bank", "rate": "9.0% p.a.", "type": "High Yield FD"},
+        {"name": "IndusInd Bank", "rate": "7.75% p.a.", "type": "Regular Bank FD"},
+        {"name": "HDFC Bank / SBI", "rate": "7.10% p.a.", "type": "Safe/Systemic FD"},
+        {"name": "Aditya Birla Sun Life Liquid Fund", "rate": "Approx. 6.8% p.a.", "type": "Liquid Mutual Fund"}
+    ],
+    "Bonds_Debt": [
+        {"name": "Government Securities (G-Secs)", "yield": "6.76% p.a. (Elevated)", "type": "Sovereign Risk-Free"},
+        {"name": "Sovereign Gold Bonds (SGB)", "yield": "2.5% p.a. + Gold price gain", "type": "Sovereign Gold Debt"},
+        {"name": "HDFC Medium Term Debt Fund", "yield": "Approx. 7.5% - 8.0% p.a.", "type": "Corporate Debt Fund"}
+    ],
+    "Equities": [
+        {"name": "UTI Nifty 50 Index Fund (Direct)", "expense_ratio": "0.21%", "type": "Large Cap Index Fund"},
+        {"name": "Parag Parikh Flexi Cap Fund", "expense_ratio": "0.62%", "type": "Diversified Equity Fund"},
+        {"name": "Nifty Next 50 ETF (Junior BeES)", "expense_ratio": "0.15%", "type": "Junior Equity Index ETF"}
+    ]
+}
+
+INSURANCE_PRODUCTS = {
+    "Term_Life": [
+        {"provider": "HDFC Life Click 2 Protect", "claim_ratio": "99.5%", "key_feature": "Accident Rider included"},
+        {"provider": "Max Life Smart Secure Plus", "claim_ratio": "99.65%", "key_feature": "Premium back option"},
+        {"provider": "LIC Tech Term", "claim_ratio": "98.6%", "key_feature": "Strongest trust & network"}
+    ],
+    "Health_Insurance": [
+        {"plan": "Care Advantage (Care Health)", "sum_insured": "₹1 Crore", "key_feature": "No claim bonus up to 150%"},
+        {"plan": "Niva Bupa ReAssure 2.0", "sum_insured": "₹10L - ₹1Cr", "key_feature": "Unlimited lock-in restoration"},
+        {"plan": "HDFC Ergo Optima Secure", "sum_insured": "₹5L - ₹2Cr", "key_feature": "2x coverage from day one"}
+    ]
+}
+
+def load_market_trends():
+    global market_trends
+    import json
+    try:
+        trends_path = os.path.join(os.path.dirname(__file__), "data", "market_trends.json")
+        if os.path.exists(trends_path):
+            with open(trends_path, "r") as f:
+                market_trends = json.load(f)
+            print("Loaded SEBI Market Trends Successfully")
+        else:
+            print("Market trends file not found, using empty defaults")
+    except Exception as e:
+        print(f"Error loading market trends: {e}")
 
 def load_models():
     model_paths = {
@@ -95,6 +142,7 @@ def load_models():
 @app.on_event("startup")
 def startup_event():
     load_models()
+    load_market_trends()
 
 @app.get("/")
 def read_root():
@@ -170,11 +218,52 @@ def recommend_investment(data: InvestmentRequest):
     else:  # Aggressive
         allocations = {"Cash/FD": "10%", "Bonds/Debt": "15%", "Equity": "75%"}
         
+    # Generate dynamic SEBI trend suggestions
+    nifty_pe = market_trends.get("nifty_pe_ratio", 22.1)
+    nifty_pe_prev = market_trends.get("nifty_pe_previous_year", 24.2)
+    gsec_yield = market_trends.get("bond_gsec_10y_yield", 6.76)
+    bullion_grow = market_trends.get("bullion_index_mom_growth", 13.2)
+    bullion_streak = market_trends.get("bullion_growth_streak_months", 12)
+    
+    suggestions = []
+    
+    # Gold allocation suggestions
+    suggestions.append(
+        f"Gold ETFs / SGBs are highly recommended. SEBI statistics note that the Bullion index rose {bullion_grow}% "
+        f"last month, continuing a stellar {bullion_streak}-month consecutive growth streak."
+    )
+    
+    # Debt allocation suggestions
+    suggestions.append(
+        f"For fixed income, lock in 10-year Indian Government Bonds (G-Secs) yielding a stable {gsec_yield}% p.a."
+    )
+    
+    # Equity allocation suggestions
+    if data.risk_profile.capitalize() in ["Moderate", "Aggressive"]:
+        suggestions.append(
+            f"Equities are attractive. The Nifty trailing P/E ratio has corrected to {nifty_pe} (down from {nifty_pe_prev} last year), "
+            "representing a safer entry point for Index and Flexi Cap Mutual Funds."
+        )
+        suggestions.append("Sectoral recommendation: Add a small allocation to Metals (Nifty Metal index outperformed by +8.5%).")
+    else:
+        suggestions.append(
+            "Stick to a small, defensive equity allocation via Large Cap Nifty 50 Index funds."
+        )
+        
+    # Passive income strategies based on income source request
+    passive_strategies = [
+        "REITs Allocation: Invest 15% of your portfolio in high-yield Real Estate Investment Trusts (e.g. Embassy Office Parks REIT) to generate a stable 6.5% - 7.5% annual dividend payout.",
+        "Dividend SIP: Build a monthly Systematic Investment Plan in a Dividend Yield Mutual Fund to establish a steady cash flow stream."
+    ]
+
     return {
         "status": "success",
         "short_term": short_term,
         "long_term": long_term,
-        "recommended_allocations": allocations
+        "recommended_allocations": allocations,
+        "suggestions": suggestions,
+        "passive_income_strategies": passive_strategies,
+        "concrete_options": INVESTMENT_PRODUCTS
     }
 
 @app.post("/recommend-insurance")
@@ -215,7 +304,8 @@ def recommend_insurance(data: InsuranceRequest):
         "term_insurance_recommended": term_ins,
         "accident_insurance_recommended": accident_ins,
         "suggested_coverage_amount": coverage_amt,
-        "recommendations_summary": recommendations
+        "recommendations_summary": recommendations,
+        "concrete_options": INSURANCE_PRODUCTS
     }
 
 @app.post("/chat")

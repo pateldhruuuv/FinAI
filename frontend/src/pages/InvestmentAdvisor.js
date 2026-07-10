@@ -182,6 +182,82 @@ const InvestmentAdvisor = () => {
                   })}
                 </div>
               </div>
+
+              {/* SEBI Market Insights */}
+              {rec.suggestions && rec.suggestions.length > 0 && (
+                <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                  <h3 style={styles.sectionTitle}>SEBI Bulletin Trends & Insights</h3>
+                  <ul style={styles.bulletList}>
+                    {rec.suggestions.map((sug, i) => (
+                      <li key={i} style={styles.bulletItem}>{sug}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Passive Income Strategies */}
+              {rec.passiveIncomeStrategies && rec.passiveIncomeStrategies.length > 0 && (
+                <div style={{ marginTop: '24px' }}>
+                  <h3 style={styles.sectionTitle}>Passive Income Source Recommendations</h3>
+                  <ul style={styles.bulletList}>
+                    {rec.passiveIncomeStrategies.map((strat, i) => (
+                      <li key={i} style={styles.bulletItem}>{strat}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Live Investment Products */}
+              {rec.concreteOptions && (
+                <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                  <h3 style={styles.sectionTitle}>Live Investment Opportunities</h3>
+                  <p style={styles.sectionSubtitle}>Top-performing live products based on current yields and rates:</p>
+                  
+                  <div style={styles.productGrid}>
+                    {/* FDs */}
+                    <div style={styles.productCol}>
+                      <h4 style={styles.productColTitle}>Cash & Fixed Deposits</h4>
+                      {rec.concreteOptions.Cash_FD?.map((fd, i) => (
+                        <div key={i} style={styles.productCard}>
+                          <strong>{fd.name}</strong>
+                          <div style={styles.productMeta}>
+                            <span>Rate: <strong style={{ color: '#10b981' }}>{fd.rate}</strong></span>
+                            <span>{fd.type}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Bonds */}
+                    <div style={styles.productCol}>
+                      <h4 style={styles.productColTitle}>Bonds & Sovereign Debt</h4>
+                      {rec.concreteOptions.Bonds_Debt?.map((bond, i) => (
+                        <div key={i} style={styles.productCard}>
+                          <strong>{bond.name}</strong>
+                          <div style={styles.productMeta}>
+                            <span>Yield: <strong style={{ color: '#6366f1' }}>{bond.yield}</strong></span>
+                            <span>{bond.type}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Equities */}
+                    <div style={styles.productCol}>
+                      <h4 style={styles.productColTitle}>Equities & Index ETFs</h4>
+                      {rec.concreteOptions.Equities?.map((eq, i) => (
+                        <div key={i} style={styles.productCard}>
+                          <strong>{eq.name}</strong>
+                          <div style={styles.productMeta}>
+                            {eq.expense_ratio && <span>Expense: <strong>{eq.expense_ratio}</strong></span>}
+                            <span>{eq.type}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="glass-card" style={styles.placeholderCard}>
@@ -392,6 +468,70 @@ const styles = {
     minHeight: '400px',
     textAlign: 'center',
     color: '#64748b'
+  },
+  sectionTitle: {
+    fontSize: '16px',
+    color: '#ffffff',
+    marginBottom: '12px',
+    fontFamily: 'Outfit, sans-serif',
+    fontWeight: 600
+  },
+  sectionSubtitle: {
+    fontSize: '13px',
+    color: '#94a3b8',
+    marginBottom: '16px'
+  },
+  bulletList: {
+    paddingLeft: '20px',
+    marginBottom: '16px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px'
+  },
+  bulletItem: {
+    fontSize: '13px',
+    color: '#cbd5e1',
+    lineHeight: '1.5',
+    listStyleType: 'disc'
+  },
+  productGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '16px',
+    marginTop: '12px'
+  },
+  productCol: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    background: 'rgba(255, 255, 255, 0.01)',
+    border: '1px solid rgba(255, 255, 255, 0.04)',
+    borderRadius: '12px',
+    padding: '16px'
+  },
+  productColTitle: {
+    fontSize: '13px',
+    fontWeight: 700,
+    color: '#f8fafc',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+    paddingBottom: '8px',
+    marginBottom: '4px'
+  },
+  productCard: {
+    background: 'rgba(255, 255, 255, 0.02)',
+    border: '1px solid rgba(255, 255, 255, 0.05)',
+    borderRadius: '8px',
+    padding: '12px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px'
+  },
+  productMeta: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+    fontSize: '11px',
+    color: '#94a3b8'
   }
 };
 

@@ -19,4 +19,9 @@ router.post('/login', authController.login);
 // @access  Private
 router.post('/toggle-premium', auth, authController.togglePremium);
 
+// @route   PUT /auth/profile
+// @desc    Update user profile details (age, income)
+// @access  Private
+router.put('/profile', auth, authController.updateProfile);
+
 module.exports = router;

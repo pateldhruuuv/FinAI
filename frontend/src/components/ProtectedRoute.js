@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import ProfileDataModal from './ProfileDataModal';
 
 const ProtectedRoute = ({ children }) => {
   const { token, loading } = useContext(AuthContext);
@@ -34,7 +35,12 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  return (
+    <>
+      <ProfileDataModal />
+      {children}
+    </>
+  );
 };
 
 export default ProtectedRoute;

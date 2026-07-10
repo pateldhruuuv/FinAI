@@ -1,0 +1,37 @@
+{
+  "bulletin_month": "January 2026",
+  "source": "Securities and Exchange Board of India (SEBI)",
+  "nifty_pe_ratio": 22.1,
+  "nifty_pe_previous_year": 24.2,
+  "bond_gsec_10y_yield": 6.76,
+  "bullion_index_mom_growth": 13.2,
+  "bullion_growth_streak_months": 12,
+  "top_performing_sectors": [
+    {
+      "name": "Nifty Metal",
+      "mom_return_percentage": 8.5
+    },
+    {
+      "name": "BSE Commodities",
+      "mom_return_percentage": 4.1
+    }
+  ],
+  "underperforming_sectors": [
+    {
+      "name": "Nifty Capital Goods",
+      "mom_return_percentage": -3.0
+    },
+    {
+      "name": "Nifty Cons Durables",
+      "mom_return_percentage": -3.0
+    },
+    {
+      "name": "Nifty Realty",
+      "mom_return_percentage": -2.8
+    }
+  ],
+  "mutual_fund_trends": {
+    "net_equity_inflow_crores": 28035,
+    "highest_inflow_schemes": ["Gold ETFs", "Other ETFs", "Flexi Cap Funds"]
+  }
+}

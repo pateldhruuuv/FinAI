@@ -175,6 +175,9 @@ const runTests = async () => {
     const coachRes = await makeRequest('POST', '/financial-coach', authHeaders, {
       question: 'Should I invest now?'
     });
+    if (coachRes.statusCode !== 200) {
+      console.error("Coach response failed with body:", coachRes.body);
+    }
     assert.strictEqual(coachRes.statusCode, 200);
     assert.strictEqual(coachRes.body.status, 'success');
     assert.ok(coachRes.body.reply);

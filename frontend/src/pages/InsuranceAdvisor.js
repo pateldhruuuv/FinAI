@@ -165,6 +165,46 @@ const InsuranceAdvisor = () => {
                 </div>
               </div>
 
+              {/* Live Partner Policies */}
+              {rec.concreteOptions && (
+                <div style={{ marginBottom: '28px', paddingTop: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                  <h3 style={styles.sectionTitle}>Live Partner Opportunities</h3>
+                  <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '16px' }}>
+                    Top recommended plans and providers in India based on Claims Settlement Ratios (CSR) and restore features:
+                  </p>
+                  
+                  <div style={styles.productGrid}>
+                    {/* Term Insurance */}
+                    <div style={styles.productCol}>
+                      <h4 style={styles.productColTitle}>Term Life Insurance Policies</h4>
+                      {rec.concreteOptions.Term_Life?.map((term, i) => (
+                        <div key={i} style={styles.productCard}>
+                          <strong>{term.provider}</strong>
+                          <div style={styles.productMeta}>
+                            <span>Settlement Ratio: <strong style={{ color: '#10b981' }}>{term.claim_ratio}</strong></span>
+                            <span>{term.key_feature}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Health Insurance */}
+                    <div style={styles.productCol}>
+                      <h4 style={styles.productColTitle}>Comprehensive Health Plans</h4>
+                      {rec.concreteOptions.Health_Insurance?.map((health, i) => (
+                        <div key={i} style={styles.productCard}>
+                          <strong>{health.plan}</strong>
+                          <div style={styles.productMeta}>
+                            <span>Sum Insured: <strong style={{ color: '#06b6d4' }}>{health.sum_insured}</strong></span>
+                            <span>{health.key_feature}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Security info disclaimer */}
               <div style={styles.disclaimerBox}>
                 <ShieldAlert size={16} style={{ color: '#f59e0b', flexShrink: 0 }} />
@@ -352,6 +392,45 @@ const styles = {
     minHeight: '400px',
     textAlign: 'center',
     color: '#64748b'
+  },
+  productGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '16px',
+    marginTop: '12px'
+  },
+  productCol: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    background: 'rgba(255, 255, 255, 0.01)',
+    border: '1px solid rgba(255, 255, 255, 0.04)',
+    borderRadius: '12px',
+    padding: '16px'
+  },
+  productColTitle: {
+    fontSize: '13px',
+    fontWeight: 700,
+    color: '#f8fafc',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+    paddingBottom: '8px',
+    marginBottom: '4px'
+  },
+  productCard: {
+    background: 'rgba(255, 255, 255, 0.02)',
+    border: '1px solid rgba(255, 255, 255, 0.05)',
+    borderRadius: '8px',
+    padding: '12px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px'
+  },
+  productMeta: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+    fontSize: '11px',
+    color: '#94a3b8'
   }
 };
 

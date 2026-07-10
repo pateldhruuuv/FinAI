@@ -12,6 +12,45 @@ const PremiumRecommendations = require('../models/PremiumRecommendations');
 const PDFDocument = require('pdfkit');
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8000';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/interactions';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+
+const extractGeminiReply = (data) => {
+  if (data?.output_text) return data.output_text;
+
+  const modelOutput = data?.steps?.find((step) => step.type === 'model_output');
+  const textPart = modelOutput?.content?.find((part) => part.type === 'text');
+  return textPart?.text || 'Sorry, I could not generate a response right now.';
+};
+
+const buildChatPrompt = ({ message, context, history, advisorContext }) => {
+  const recentMessages = history
+    .map((chat) => `${chat.sender === 'user' ? 'User' : 'FinPilot'}: ${chat.message}`)
+    .join('\n');
+
+  return `You are FinPilot, a helpful financial assistant inside a personal finance app.
+
+CRITICAL INSTRUCTIONS:
+- You must ONLY answer questions regarding the user's financial details, portfolios, goals, tax optimization, loan eligibility, debt rescue, and purchase affordability in this app.
+- If the user asks general questions outside personal finance or this project (e.g. "who is the president", "explain photosynthesis", "write python code", "how to build a house"), you MUST decline politely: "I am your FinPilot assistant. I can only help you with questions related to your personal finances, investments, goals, and advisor utilities in this application."
+- Under no circumstances answer off-topic questions.
+- If a calculation result is provided under "Advisory Calculations", use those exact numbers and rephrase them nicely in a conversational, helpful personal advisor tone.
+
+User financial context:
+Age: ${context.age || 'Not available'}
+Income: ${context.income || 0}
+Expenses: ${context.expenses || 0}
+Savings: ${context.savings || 0}
+Debt: ${context.debt || 0}
+
+${advisorContext ? `Advisory Calculations:\n${advisorContext}\n` : ''}
+
+Recent conversation:
+${recentMessages || 'No previous messages.'}
+
+User message:
+${message}`;
+};
 
 // Helper to calculate user financials from transaction history
 const getUserFinancialContext = async (userId) => {
@@ -511,35 +550,76 @@ exports.getFinancialCoachAdvice = async (req, res) => {
         }
       : {};
 
-    // Call Python FastAPI
-    const response = await fetch(`${AI_SERVICE_URL}/financial-coach`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        question,
-        age: context.age,
-        income: context.income,
-        expenses: context.expenses,
-        savings: context.savings,
-        debt: context.debt,
-        goals: inputGoals,
-        investments: portfolioData,
-        insurance: {
-          current_coverage: 1000000, // standard placeholder or fetch insurance recommendations
-        },
-      }),
-    });
+    // 1. Call Python FastAPI first to run the advisor method
+    let reply = "I'm sorry, I could not calculate a response right now.";
+    try {
+      const response = await fetch(`${AI_SERVICE_URL}/financial-coach`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question,
+          age: context.age || 30,
+          income: context.income || 50000,
+          expenses: context.expenses || 0,
+          savings: context.savings || 0,
+          debt: context.debt || 0,
+          goals: inputGoals,
+          investments: portfolioData,
+          insurance: {
+            current_coverage: 1000000,
+          },
+        }),
+      });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      return res.status(response.status).json({ status: 'error', message: `AI Service Error: ${errText}` });
+      if (response.ok) {
+        const result = await response.json();
+        reply = result.reply;
+      }
+    } catch (err) {
+      console.warn("Failed to contact FastAPI advisor server:", err.message);
     }
 
-    const result = await response.json();
+    // 2. Try to rephrase nicely using Gemini if API key is configured
+    if (process.env.GEMINI_API_KEY) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 seconds timeout
+
+      try {
+        const prompt = buildChatPrompt({
+          message: question.trim(),
+          context,
+          history: [],
+          advisorContext: `[Advisory Calculation - Financial Coach Advice]: ${reply}`,
+        });
+
+        const geminiResponse = await fetch(GEMINI_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': process.env.GEMINI_API_KEY,
+          },
+          body: JSON.stringify({
+            model: GEMINI_MODEL,
+            input: prompt,
+          }),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (geminiResponse.ok) {
+          const geminiResult = await geminiResponse.json();
+          reply = extractGeminiReply(geminiResult);
+        }
+      } catch (geminiErr) {
+        clearTimeout(timeoutId);
+        console.warn("Gemini rephrasing failed; returning raw Python advice. Error:", geminiErr.message);
+      }
+    }
 
     res.json({
       status: 'success',
-      reply: result.reply,
+      reply,
     });
   } catch (err) {
     console.error(err);
