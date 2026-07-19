@@ -31,6 +31,9 @@ if (!fs.existsSync(uploadsDir)) {
 // Auth endpoints: POST /auth/register and POST /auth/login
 app.use('/auth', require('./routes/auth'));
 
+// Chat APIs
+app.use('/api/chat', require('./routes/chat'));
+
 // Root-level transaction/AI endpoints:
 // POST /upload-statement, GET /dashboard, POST /recommend-investment, POST /recommend-insurance, POST /predict-health, POST /chat
 app.use('/', require('./routes/transactions'));
