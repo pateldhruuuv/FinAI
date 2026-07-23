@@ -1394,3 +1394,111 @@ def get_premium_dashboard_plots(data: DashboardPlotsRequest):
     }
 
 
+# ==========================================
+# PREMIUM STOCK ADVISOR INTEGRATION ROUTE
+# ==========================================
+from typing import Optional
+from fastapi import Header
+import stock_universe
+import market_data
+import indicators as stock_indicators
+import ranking as stock_ranking
+import sentiment as stock_sentiment
+import explain as stock_explain
+from schemas import RecommendationRequest as StockRecRequest, RecommendationResponse as StockRecResponse, RecommendedStock
+
+@app.post("/recommend-stocks", response_model=StockRecResponse)
+def recommend_stocks(
+    request: StockRecRequest,
+    x_gemini_api_key: Optional[str] = Header(default=None)
+) -> StockRecResponse:
+    risk_profile = request.risk_profile.value
+    
+    # 1. Technical Shortlist
+    symbols = stock_universe.get_candidate_universe()
+    if not symbols:
+        raise HTTPException(status_code=503, detail="Stock universe is empty.")
+
+    price_history = market_data.get_price_history_bulk(symbols, period="1y")
+    if not price_history:
+        raise HTTPException(status_code=503, detail="Market data is currently unavailable.")
+
+    scored_technicals = []
+    for symbol, df in price_history.items():
+        try:
+            stock_ind = stock_indicators.calculate_indicators(df)
+        except Exception as exc:
+            continue
+
+        if not stock_ind:
+            continue
+
+        technical_score = stock_ranking.score_stock(stock_ind, {}, risk_profile)
+        scored_technicals.append({
+            "symbol": symbol,
+            "indicators": stock_ind,
+            "technical_score": technical_score,
+        })
+
+    scored_technicals.sort(key=lambda item: item["technical_score"], reverse=True)
+    shortlist = scored_technicals[:10]
+
+    if not shortlist:
+        raise HTTPException(status_code=503, detail="No stocks had sufficient data to analyze.")
+
+    # 2. Attach news sentiment (passing the gemini api key)
+    candidates = []
+    for item in shortlist:
+        symbol = item["symbol"]
+        company_query = symbol.replace(".NS", "")
+        try:
+            stock_sent = stock_sentiment.get_news_sentiment(company_query, api_key=x_gemini_api_key)
+        except Exception as exc:
+            stock_sent = {"sentiment": "Neutral", "score": 50, "summary": "", "headlines": []}
+
+        candidates.append({
+            "symbol": symbol,
+            "indicators": item["indicators"],
+            "sentiment": stock_sent,
+        })
+
+    # 3. Update scores and rank
+    try:
+        ranked_stocks = stock_ranking.rank_stocks(candidates, risk_profile)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Failed to rank stocks.")
+
+    # 4. Generate AI explanations using Gemini
+    try:
+        explanations = stock_explain.explain_recommendations(ranked_stocks, risk_profile, api_key=x_gemini_api_key)
+    except Exception as exc:
+        explanations = [
+            {"symbol": s["symbol"], "summary": "Explanation unavailable.", "pros": [], "risks": []}
+            for s in ranked_stocks
+        ]
+
+    explanations_by_symbol = {e["symbol"]: e for e in explanations}
+
+    recommendations = []
+    for stock in ranked_stocks:
+        explanation = explanations_by_symbol.get(stock["symbol"], {})
+        stock_ind = stock.get("indicators") or {}
+        recommendations.append(RecommendedStock(
+            symbol=stock["symbol"],
+            price=stock_ind.get("latest_close"),
+            price_change=stock_ind.get("price_change"),
+            price_change_percent=stock_ind.get("price_change_percent"),
+            score=stock["score"],
+            sentiment=stock["sentiment"].get("sentiment", "Neutral"),
+            summary=explanation.get("summary", ""),
+            pros=explanation.get("pros", []),
+            risks=explanation.get("risks", []),
+        ))
+
+    from datetime import datetime, timezone
+    return StockRecResponse(
+        recommendations=recommendations,
+        generated_at=datetime.now(timezone.utc),
+    )
+
+

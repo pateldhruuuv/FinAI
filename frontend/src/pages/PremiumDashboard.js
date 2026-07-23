@@ -126,6 +126,11 @@ const PremiumDashboard = () => {
               <span>Portfolio Risk</span>
               <ChevronRight size={14} style={styles.navArrow} />
             </Link>
+            <Link to="/stock-advisor" style={styles.navLink}>
+              <TrendingUp size={18} color="#10b981" />
+              <span>Stock Advisor</span>
+              <ChevronRight size={14} style={styles.navArrow} />
+            </Link>
             <Link to="/financial-coach" style={styles.navLink}>
               <MessageSquare size={18} color="#a855f7" />
               <span>AI Financial Coach</span>

@@ -23,6 +23,7 @@ import InsuranceGap from './pages/InsuranceGap';
 import PurchaseAdvisor from './pages/PurchaseAdvisor';
 import WhatIfSimulator from './pages/WhatIfSimulator';
 import PortfolioRisk from './pages/PortfolioRisk';
+import StockAdvisor from './pages/StockAdvisor';
 import FinancialCoach from './pages/FinancialCoach';
 import FinancialTwin from './pages/FinancialTwin';
 import FinancialReports from './pages/FinancialReports';
@@ -135,6 +136,14 @@ function App() {
               element={
                 <PremiumProtectedRoute>
                   <PortfolioRisk />
+                </PremiumProtectedRoute>
+              }
+            />
+            <Route
+              path="/stock-advisor"
+              element={
+                <PremiumProtectedRoute>
+                  <StockAdvisor />
                 </PremiumProtectedRoute>
               }
             />

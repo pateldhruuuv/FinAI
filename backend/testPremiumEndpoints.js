@@ -208,8 +208,20 @@ const runTests = async () => {
     assert.ok(finalDashRes.body.data.netWorth !== undefined);
     assert.ok(finalDashRes.body.data.plots);
 
+    // 14. Test Stock Advisor
+    console.log('14. Testing POST /recommend-stocks...');
+    const stockRes = await makeRequest('POST', '/recommend-stocks', authHeaders, {
+      riskProfile: 'Moderate',
+      investmentAmount: 10000,
+      investmentHorizon: 'medium_term'
+    });
+    assert.strictEqual(stockRes.statusCode, 200);
+    assert.strictEqual(stockRes.body.status, 'success');
+    assert.ok(stockRes.body.data.recommendations.length > 0);
+    assert.ok(stockRes.body.data.recommendations[0].symbol);
+
     console.log('\n=============================================');
-    console.log('ALL PHASE 3 PREMIUM API TESTS PASSED! (13/13)');
+    console.log('ALL PHASE 3 PREMIUM API TESTS PASSED! (14/14)');
     console.log('=============================================\n');
 
     // Cleanup

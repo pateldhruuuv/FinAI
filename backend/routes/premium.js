@@ -14,5 +14,6 @@ router.post('/financial-report', auth, premiumAuth, premiumController.generateFi
 router.post('/what-if', auth, premiumAuth, premiumController.runWhatIfSimulation);
 router.post('/financial-coach', auth, premiumAuth, premiumController.getFinancialCoachAdvice);
 router.get('/premium-dashboard', auth, premiumAuth, premiumController.getPremiumDashboardData);
+router.post('/recommend-stocks', auth, premiumAuth, premiumController.recommendStocks);
 
 module.exports = router;
