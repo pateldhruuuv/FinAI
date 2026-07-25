@@ -412,7 +412,8 @@ def get_financial_forecast(data: ForecastRequest):
     else:
         df = pd.DataFrame([t.dict() for t in txs])
         df['date'] = pd.to_datetime(df['date'])
-        df['month'] = df['date'].dt.to_period('M')
+        naive_date = df['date'].dt.tz_localize(None) if df['date'].dt.tz is not None else df['date']
+        df['month'] = naive_date.dt.to_period('M')
         
         monthly_grp = df.groupby(['month', 'type'])['amount'].sum().unstack(fill_value=0)
         
@@ -504,7 +505,8 @@ def get_spending_insights(data: SpendingInsightsRequest):
         if not month_sums.empty:
             highest_month = month_sums.idxmax()
             
-    df['month'] = df['date'].dt.to_period('M')
+    naive_date = df['date'].dt.tz_localize(None) if df['date'].dt.tz is not None else df['date']
+    df['month'] = naive_date.dt.to_period('M')
     monthly_inc = df[df['type'] == 'Credit'].groupby('month')['amount'].sum()
     monthly_exp = df[df['type'] == 'Debit'].groupby('month')['amount'].sum()
     

@@ -211,4 +211,36 @@ We have two automated test suites in the `backend/` directory:
 ### Postman Collections
 - **Phase 2**: Use `postman_collection.json` at the root.
 - **Phase 3 Premium**: Use `backend/postman_collection_v2.json` containing endpoints for all 9 premium advisory APIs.
+- **Phase 5 Statement Hub**: Use `postman_collection_phase5.json` in the root.
+
+---
+
+## Phase 5 Features Added (Universal Bank Statement Parser & AI Transaction Categorization)
+
+*   **Universal Statement Parser**: Parses CSV, XLSX, and PDF formats for major banks like SBI, HDFC, ICICI, Axis, Kotak, Canara, BoB, etc., using table extraction and regex line-by-line fallback.
+*   **Dynamic Column Mapping**: Identifies bank column variants (e.g. `Narration`/`Description`, `Dr Amount`/`Debit`) and maps them to standard terms.
+*   **Transaction Normalization**: Unifies all statements into a single schema: `date`, `description`, `merchant`, `category`, `amount`, `transactionType`, `balance`.
+*   **Merchant Recognition Engine**: Cleans messy descriptions and matches brand keywords using regex cleaning and database matching.
+*   **AI Transaction Categorizer**: Uses a TF-IDF + Random Forest model (87% Test Acc) to categorize transactions into 17 standard budget groups.
+*   **Active Learning System**: Captures user category corrections in a JSON database and retrains future classifications.
+*   **Subscription Detection**: Group-by interval scanning identifying monthly/yearly billing costs and renewal schedules.
+*   **Recurring Payments Dashboard**: Tracks EMIs, Rent, Utilities, Salaries, and Insurance Premiums.
+*   **Merchant Analytics Dashboard**: Generates Seaborn pie charts and inflow/outflow cash flow graphs encoded in base64.
+
+### New API Endpoints
+*   `POST /upload-statement` - Upload statement, run AI engine, normalized output save.
+*   `GET /transactions` - Fetch user's normalized transactions.
+*   `GET /subscriptions` - Fetch detected subscriptions.
+*   `GET /merchant-analysis` - Fetch merchant spend and base64 Seaborn plots.
+*   `GET /expense-summary` - Fetch cash flow metrics.
+*   `POST /update-category` - Save user correction and update learning database.
+
+### Running Phase 5 Integration Tests
+To test the statement parser end-to-end:
+```bash
+cd backend
+node testStatementParser.js
+```
+Make sure MongoDB, the FastAPI AI Engine (port 8000), and the Node.js backend (port 5000) are running beforehand.
+
 

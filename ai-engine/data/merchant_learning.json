@@ -1,0 +1,30 @@
+{
+  "pos lenskart 448 mumbai in": {
+    "merchant": "Zomato Correction",
+    "category": "Food"
+  },
+  "balance forward atm withdrawal self-switch at nfs 04:54:54/916704002072 00000000150000/inr 4585460013957031/361818 atm withdrawal self-switch at nfs 10:34:49/916910098754 00000000150000/inr 4585460013957031/090814 purchase ananda vilas hotel virudhunagar in 13:44:16/369548 00000000096600/inr 4585460013957031/916908040420 cradj/upi/axb/916616736180/2019-06- atm withdrawal self-switch at nfs 12:10:47/917012098764 00000000200000/inr 4585460013957031/961248 atm withdrawal self-switch at cashnt 15:38:29/917010593592 00000000150000/inr 4585460013957031/192131 upi/917209458811/ paytm/paytm@icici/icic0000555/ 0103sl00ipay/oid20190621050469855386@one9 7communic 917209458811/ upi/917221648564/ le travenues technology private ltd/ixigo@axisbank 1000129101465/le travenues technology private limi 917221648564/ atm withdrawal self-switch at nfs 22:31:27/917322019314 00000000100000/inr 4585460013957031/293386": {
+    "merchant": "Balance Forward Atm Withdrawal Self-Switch At Nfs 04 54 54 Inr 361818 Atm Withdrawal Self-Switch At Nfs 10 34 49 Inr 090814 Purchase Ananda Vilas Hotel Virudhunagar 13 44 16 369548 Inr Cradj Upi Axb 2019-06- Atm Withdrawal Self-Switch At Nfs 12 10 47 Inr 961248 Atm Withdrawal Self-Switch At Cashnt 15 38 29 Inr 192131 Upi Paytm Paytm Icici 0103Sl00Ipay Oid20190621050469855386 One9 7Communic Upi Le Travenues Technology Private Ltd Ixigo Axisbank Le Travenues Technology Private Limi Atm Withdrawal Self-Switch At Nfs 22 31 27 Inr 293386",
+    "category": "ATM"
+  },
+  "description": {
+    "merchant": "Description",
+    "category": "Utilities"
+  },
+  "atm withdrawal self-switch at nfs 04:54:54/916704002072 00000000150000/inr 4585460013957031/361818": {
+    "merchant": "Withdrawal Self-Switch At Nfs 04 54 54 Inr 361818",
+    "category": "ATM"
+  },
+  "atm withdrawal self-switch at nfs 10:34:49/916910098754 00000000150000/inr 4585460013957031/090814": {
+    "merchant": "Withdrawal Self-Switch At Nfs 10 34 49 Inr 090814",
+    "category": "ATM"
+  },
+  "purchase life style chennai in 20:56:43/040950 00000000359900/inr 4585460013957031/919415087373": {
+    "merchant": "Purchase Life Style Chennai 20 56 43 040950 Inr",
+    "category": "Shopping"
+  },
+  "ach indian oil 712 txn 1864": {
+    "merchant": "Zomato Correction",
+    "category": "Food"
+  }
+}

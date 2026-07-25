@@ -1,0 +1,3567 @@
+{
+  "Netflix": {
+    "category": "Entertainment",
+    "keywords": [
+      "netflix",
+      "netflixindia"
+    ],
+    "confidence": 1.0
+  },
+  "Spotify": {
+    "category": "Entertainment",
+    "keywords": [
+      "spotify",
+      "spotify premium"
+    ],
+    "confidence": 1.0
+  },
+  "Zomato": {
+    "category": "Food",
+    "keywords": [
+      "zomato",
+      "zomato online"
+    ],
+    "confidence": 1.0
+  },
+  "Swiggy": {
+    "category": "Food",
+    "keywords": [
+      "swiggy",
+      "swiggy payment"
+    ],
+    "confidence": 1.0
+  },
+  "Uber": {
+    "category": "Travel",
+    "keywords": [
+      "uber",
+      "uber trip"
+    ],
+    "confidence": 1.0
+  },
+  "Ola": {
+    "category": "Travel",
+    "keywords": [
+      "ola",
+      "olacabs",
+      "ola trip"
+    ],
+    "confidence": 1.0
+  },
+  "Amazon": {
+    "category": "Shopping",
+    "keywords": [
+      "amazon",
+      "amzn",
+      "amazon seller services"
+    ],
+    "confidence": 1.0
+  },
+  "Flipkart": {
+    "category": "Shopping",
+    "keywords": [
+      "flipkart",
+      "flipkart payment"
+    ],
+    "confidence": 1.0
+  },
+  "LIC": {
+    "category": "Insurance",
+    "keywords": [
+      "lic of india",
+      "lic life",
+      "lic premium"
+    ],
+    "confidence": 1.0
+  },
+  "SBI Life": {
+    "category": "Insurance",
+    "keywords": [
+      "sbi life",
+      "sbi life insurance"
+    ],
+    "confidence": 1.0
+  },
+  "HDFC Mutual Fund": {
+    "category": "Investment",
+    "keywords": [
+      "hdfc mf",
+      "hdfc mutual fund",
+      "hdfc sip"
+    ],
+    "confidence": 1.0
+  },
+  "Groww": {
+    "category": "Investment",
+    "keywords": [
+      "groww",
+      "nextbillion"
+    ],
+    "confidence": 1.0
+  },
+  "Zerodha": {
+    "category": "Investment",
+    "keywords": [
+      "zerodha",
+      "zerodha broking"
+    ],
+    "confidence": 1.0
+  },
+  "Uber 769": {
+    "category": "Travel",
+    "keywords": [
+      "uber769"
+    ],
+    "confidence": 0.81
+  },
+  "HDFC Ergo 764": {
+    "category": "Insurance",
+    "keywords": [
+      "hdfcergo764"
+    ],
+    "confidence": 0.77
+  },
+  "Reliance Digital 442": {
+    "category": "Shopping",
+    "keywords": [
+      "reliancedigital442"
+    ],
+    "confidence": 0.76
+  },
+  "Ajio 248": {
+    "category": "Shopping",
+    "keywords": [
+      "ajio248"
+    ],
+    "confidence": 0.85
+  },
+  "Playstation 213": {
+    "category": "Entertainment",
+    "keywords": [
+      "playstation213"
+    ],
+    "confidence": 0.89
+  },
+  "Axis ATM 469": {
+    "category": "ATM",
+    "keywords": [
+      "axisatm469"
+    ],
+    "confidence": 0.87
+  },
+  "SonyLIV 835": {
+    "category": "Entertainment",
+    "keywords": [
+      "sonyliv835"
+    ],
+    "confidence": 0.78
+  },
+  "Canara ATM 294": {
+    "category": "ATM",
+    "keywords": [
+      "canaraatm294"
+    ],
+    "confidence": 0.78
+  },
+  "Coursera 104": {
+    "category": "Education",
+    "keywords": [
+      "coursera104"
+    ],
+    "confidence": 0.83
+  },
+  "Bharat Petroleum 628": {
+    "category": "Fuel",
+    "keywords": [
+      "bharatpetroleum628"
+    ],
+    "confidence": 0.8
+  },
+  "Baskin Robbins 480": {
+    "category": "Food",
+    "keywords": [
+      "baskinrobbins480"
+    ],
+    "confidence": 0.86
+  },
+  "Self Transfer 575": {
+    "category": "Transfer",
+    "keywords": [
+      "selftransfer575"
+    ],
+    "confidence": 0.81
+  },
+  "CNG Station 206": {
+    "category": "Fuel",
+    "keywords": [
+      "cngstation206"
+    ],
+    "confidence": 0.89
+  },
+  "Haldirams 243": {
+    "category": "Food",
+    "keywords": [
+      "haldirams243"
+    ],
+    "confidence": 0.9
+  },
+  "Shoppers Stop 248": {
+    "category": "Shopping",
+    "keywords": [
+      "shoppersstop248"
+    ],
+    "confidence": 0.92
+  },
+  "Father Account 474": {
+    "category": "Transfer",
+    "keywords": [
+      "fatheraccount474"
+    ],
+    "confidence": 0.88
+  },
+  "HP Pump 389": {
+    "category": "Fuel",
+    "keywords": [
+      "hppump389"
+    ],
+    "confidence": 0.82
+  },
+  "SBI Mutual Fund 633": {
+    "category": "Investment",
+    "keywords": [
+      "sbimutualfund633"
+    ],
+    "confidence": 0.88
+  },
+  "HDFC Ergo 483": {
+    "category": "Insurance",
+    "keywords": [
+      "hdfcergo483"
+    ],
+    "confidence": 0.83
+  },
+  "Care Health 873": {
+    "category": "Insurance",
+    "keywords": [
+      "carehealth873"
+    ],
+    "confidence": 0.9
+  },
+  "McDonalds 851": {
+    "category": "Food",
+    "keywords": [
+      "mcdonalds851"
+    ],
+    "confidence": 0.76
+  },
+  "School Fee 284": {
+    "category": "Education",
+    "keywords": [
+      "schoolfee284"
+    ],
+    "confidence": 0.76
+  },
+  "Byjus 681": {
+    "category": "Education",
+    "keywords": [
+      "byjus681"
+    ],
+    "confidence": 0.85
+  },
+  "Wipro Salary 281": {
+    "category": "Salary",
+    "keywords": [
+      "wiprosalary281"
+    ],
+    "confidence": 0.78
+  },
+  "Nippon India MF 448": {
+    "category": "Investment",
+    "keywords": [
+      "nipponindiamf448"
+    ],
+    "confidence": 0.93
+  },
+  "Father Account 234": {
+    "category": "Transfer",
+    "keywords": [
+      "fatheraccount234"
+    ],
+    "confidence": 0.95
+  },
+  "Spencer's 515": {
+    "category": "Groceries",
+    "keywords": [
+      "spencer's515"
+    ],
+    "confidence": 0.77
+  },
+  "Cafe Coffee Day 122": {
+    "category": "Food",
+    "keywords": [
+      "cafecoffeeday122"
+    ],
+    "confidence": 0.78
+  },
+  "DishTV 706": {
+    "category": "Utilities",
+    "keywords": [
+      "dishtv706"
+    ],
+    "confidence": 0.83
+  },
+  "H&M 400": {
+    "category": "Shopping",
+    "keywords": [
+      "h&m400"
+    ],
+    "confidence": 0.87
+  },
+  "Accenture Salary 576": {
+    "category": "Salary",
+    "keywords": [
+      "accenturesalary576"
+    ],
+    "confidence": 0.92
+  },
+  "Hotstar 748": {
+    "category": "Entertainment",
+    "keywords": [
+      "hotstar748"
+    ],
+    "confidence": 0.77
+  },
+  "Angel One 124": {
+    "category": "Investment",
+    "keywords": [
+      "angelone124"
+    ],
+    "confidence": 0.81
+  },
+  "Hathway 13": {
+    "category": "Utilities",
+    "keywords": [
+      "hathway13"
+    ],
+    "confidence": 0.94
+  },
+  "Coin 790": {
+    "category": "Investment",
+    "keywords": [
+      "coin790"
+    ],
+    "confidence": 0.79
+  },
+  "Cleartrip 650": {
+    "category": "Travel",
+    "keywords": [
+      "cleartrip650"
+    ],
+    "confidence": 0.81
+  },
+  "General Expense 213": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "generalexpense213"
+    ],
+    "confidence": 0.78
+  },
+  "Airtel Mobile 986": {
+    "category": "Utilities",
+    "keywords": [
+      "airtelmobile986"
+    ],
+    "confidence": 0.91
+  },
+  "Local Store 623": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "localstore623"
+    ],
+    "confidence": 0.81
+  },
+  "Spotify 961": {
+    "category": "Entertainment",
+    "keywords": [
+      "spotify961"
+    ],
+    "confidence": 0.82
+  },
+  "Netmeds 69": {
+    "category": "Medical",
+    "keywords": [
+      "netmeds69"
+    ],
+    "confidence": 0.8
+  },
+  "Flipkart 759": {
+    "category": "Shopping",
+    "keywords": [
+      "flipkart759"
+    ],
+    "confidence": 0.85
+  },
+  "Lifestyle 555": {
+    "category": "Shopping",
+    "keywords": [
+      "lifestyle555"
+    ],
+    "confidence": 0.9
+  },
+  "Star Bazar 496": {
+    "category": "Groceries",
+    "keywords": [
+      "starbazar496"
+    ],
+    "confidence": 0.94
+  },
+  "Airtel Fiber 550": {
+    "category": "Utilities",
+    "keywords": [
+      "airtelfiber550"
+    ],
+    "confidence": 0.92
+  },
+  "Axis ATM 961": {
+    "category": "ATM",
+    "keywords": [
+      "axisatm961"
+    ],
+    "confidence": 0.86
+  },
+  "Property Tax Bill 418": {
+    "category": "Bills",
+    "keywords": [
+      "propertytaxbill418"
+    ],
+    "confidence": 0.95
+  },
+  "Shell 931": {
+    "category": "Fuel",
+    "keywords": [
+      "shell931"
+    ],
+    "confidence": 0.85
+  },
+  "Goibibo 240": {
+    "category": "Travel",
+    "keywords": [
+      "goibibo240"
+    ],
+    "confidence": 0.76
+  },
+  "Youtube Premium 577": {
+    "category": "Entertainment",
+    "keywords": [
+      "youtubepremium577"
+    ],
+    "confidence": 0.8
+  },
+  "LIC 82": {
+    "category": "Insurance",
+    "keywords": [
+      "lic82"
+    ],
+    "confidence": 0.89
+  },
+  "McDonalds 79": {
+    "category": "Food",
+    "keywords": [
+      "mcdonalds79"
+    ],
+    "confidence": 0.93
+  },
+  "Coursera 536": {
+    "category": "Education",
+    "keywords": [
+      "coursera536"
+    ],
+    "confidence": 0.8
+  },
+  "GST Payment 562": {
+    "category": "Taxes",
+    "keywords": [
+      "gstpayment562"
+    ],
+    "confidence": 0.78
+  },
+  "GST Payment 813": {
+    "category": "Taxes",
+    "keywords": [
+      "gstpayment813"
+    ],
+    "confidence": 0.84
+  },
+  "Axis ATM 106": {
+    "category": "ATM",
+    "keywords": [
+      "axisatm106"
+    ],
+    "confidence": 0.77
+  },
+  "Canara ATM 443": {
+    "category": "ATM",
+    "keywords": [
+      "canaraatm443"
+    ],
+    "confidence": 0.83
+  },
+  "Haldirams 679": {
+    "category": "Food",
+    "keywords": [
+      "haldirams679"
+    ],
+    "confidence": 0.95
+  },
+  "Uber 422": {
+    "category": "Travel",
+    "keywords": [
+      "uber422"
+    ],
+    "confidence": 0.9
+  },
+  "Goibibo 206": {
+    "category": "Travel",
+    "keywords": [
+      "goibibo206"
+    ],
+    "confidence": 0.79
+  },
+  "Wipro Salary 442": {
+    "category": "Salary",
+    "keywords": [
+      "wiprosalary442"
+    ],
+    "confidence": 0.79
+  },
+  "HDFC Corp Salary 905": {
+    "category": "Salary",
+    "keywords": [
+      "hdfccorpsalary905"
+    ],
+    "confidence": 0.93
+  },
+  "Infosys Salary 61": {
+    "category": "Salary",
+    "keywords": [
+      "infosyssalary61"
+    ],
+    "confidence": 0.88
+  },
+  "Spotify 958": {
+    "category": "Entertainment",
+    "keywords": [
+      "spotify958"
+    ],
+    "confidence": 0.9
+  },
+  "HDFC Ergo 426": {
+    "category": "Insurance",
+    "keywords": [
+      "hdfcergo426"
+    ],
+    "confidence": 0.85
+  },
+  "Mobile Bill 934": {
+    "category": "Bills",
+    "keywords": [
+      "mobilebill934"
+    ],
+    "confidence": 0.76
+  },
+  "Self Transfer 409": {
+    "category": "Transfer",
+    "keywords": [
+      "selftransfer409"
+    ],
+    "confidence": 0.8
+  },
+  "Accenture Salary 443": {
+    "category": "Salary",
+    "keywords": [
+      "accenturesalary443"
+    ],
+    "confidence": 0.89
+  },
+  "GST Payment 204": {
+    "category": "Taxes",
+    "keywords": [
+      "gstpayment204"
+    ],
+    "confidence": 0.81
+  },
+  "Chai Point 763": {
+    "category": "Food",
+    "keywords": [
+      "chaipoint763"
+    ],
+    "confidence": 0.86
+  },
+  "Udemy 61": {
+    "category": "Education",
+    "keywords": [
+      "udemy61"
+    ],
+    "confidence": 0.87
+  },
+  "General Expense 171": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "generalexpense171"
+    ],
+    "confidence": 0.76
+  },
+  "Local Store 881": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "localstore881"
+    ],
+    "confidence": 0.79
+  },
+  "Lenskart 892": {
+    "category": "Shopping",
+    "keywords": [
+      "lenskart892"
+    ],
+    "confidence": 0.8
+  },
+  "Rapido 593": {
+    "category": "Travel",
+    "keywords": [
+      "rapido593"
+    ],
+    "confidence": 0.8
+  },
+  "Chai Point 93": {
+    "category": "Food",
+    "keywords": [
+      "chaipoint93"
+    ],
+    "confidence": 0.83
+  },
+  "Interest Earned 967": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "interestearned967"
+    ],
+    "confidence": 0.8
+  },
+  "Byjus 281": {
+    "category": "Education",
+    "keywords": [
+      "byjus281"
+    ],
+    "confidence": 0.83
+  },
+  "Apollo Hospital 333": {
+    "category": "Medical",
+    "keywords": [
+      "apollohospital333"
+    ],
+    "confidence": 0.94
+  },
+  "Amazon 479": {
+    "category": "Shopping",
+    "keywords": [
+      "amazon479"
+    ],
+    "confidence": 0.87
+  },
+  "Ola 560": {
+    "category": "Travel",
+    "keywords": [
+      "ola560"
+    ],
+    "confidence": 0.79
+  },
+  "ICICI Prudential MF 965": {
+    "category": "Investment",
+    "keywords": [
+      "iciciprudentialmf965"
+    ],
+    "confidence": 0.82
+  },
+  "Westside 260": {
+    "category": "Shopping",
+    "keywords": [
+      "westside260"
+    ],
+    "confidence": 0.82
+  },
+  "Hathway 863": {
+    "category": "Utilities",
+    "keywords": [
+      "hathway863"
+    ],
+    "confidence": 0.86
+  },
+  "Lal PathLabs 836": {
+    "category": "Medical",
+    "keywords": [
+      "lalpathlabs836"
+    ],
+    "confidence": 0.88
+  },
+  "Hotstar 846": {
+    "category": "Entertainment",
+    "keywords": [
+      "hotstar846"
+    ],
+    "confidence": 0.86
+  },
+  "Rapido 147": {
+    "category": "Travel",
+    "keywords": [
+      "rapido147"
+    ],
+    "confidence": 0.8
+  },
+  "Agoda 576": {
+    "category": "Travel",
+    "keywords": [
+      "agoda576"
+    ],
+    "confidence": 0.78
+  },
+  "Lal PathLabs 225": {
+    "category": "Medical",
+    "keywords": [
+      "lalpathlabs225"
+    ],
+    "confidence": 0.89
+  },
+  "Property Tax Bill 527": {
+    "category": "Bills",
+    "keywords": [
+      "propertytaxbill527"
+    ],
+    "confidence": 0.85
+  },
+  "Swiggy 659": {
+    "category": "Food",
+    "keywords": [
+      "swiggy659"
+    ],
+    "confidence": 0.83
+  },
+  "HDFC Mutual Fund 13": {
+    "category": "Investment",
+    "keywords": [
+      "hdfcmutualfund13"
+    ],
+    "confidence": 0.82
+  },
+  "Star Bazar 278": {
+    "category": "Groceries",
+    "keywords": [
+      "starbazar278"
+    ],
+    "confidence": 0.78
+  },
+  "Cognizant Salary 584": {
+    "category": "Salary",
+    "keywords": [
+      "cognizantsalary584"
+    ],
+    "confidence": 0.75
+  },
+  "Westside 717": {
+    "category": "Shopping",
+    "keywords": [
+      "westside717"
+    ],
+    "confidence": 0.93
+  },
+  "Cafe Coffee Day 388": {
+    "category": "Food",
+    "keywords": [
+      "cafecoffeeday388"
+    ],
+    "confidence": 0.87
+  },
+  "Nature's Basket 140": {
+    "category": "Groceries",
+    "keywords": [
+      "nature'sbasket140"
+    ],
+    "confidence": 0.76
+  },
+  "Indian Oil 930": {
+    "category": "Fuel",
+    "keywords": [
+      "indianoil930"
+    ],
+    "confidence": 0.82
+  },
+  "SBI Life 372": {
+    "category": "Insurance",
+    "keywords": [
+      "sbilife372"
+    ],
+    "confidence": 0.91
+  },
+  "ICICI ATM 957": {
+    "category": "ATM",
+    "keywords": [
+      "iciciatm957"
+    ],
+    "confidence": 0.94
+  },
+  "DishTV 840": {
+    "category": "Utilities",
+    "keywords": [
+      "dishtv840"
+    ],
+    "confidence": 0.79
+  },
+  "SBI ATM 193": {
+    "category": "ATM",
+    "keywords": [
+      "sbiatm193"
+    ],
+    "confidence": 0.9
+  },
+  "School Fee 831": {
+    "category": "Education",
+    "keywords": [
+      "schoolfee831"
+    ],
+    "confidence": 0.88
+  },
+  "Max Life 173": {
+    "category": "Insurance",
+    "keywords": [
+      "maxlife173"
+    ],
+    "confidence": 0.91
+  },
+  "Air India 903": {
+    "category": "Travel",
+    "keywords": [
+      "airindia903"
+    ],
+    "confidence": 0.76
+  },
+  "GST Payment 214": {
+    "category": "Taxes",
+    "keywords": [
+      "gstpayment214"
+    ],
+    "confidence": 0.91
+  },
+  "Google India Salary 322": {
+    "category": "Salary",
+    "keywords": [
+      "googleindiasalary322"
+    ],
+    "confidence": 0.91
+  },
+  "ICICI Prudential 34": {
+    "category": "Insurance",
+    "keywords": [
+      "iciciprudential34"
+    ],
+    "confidence": 0.88
+  },
+  "Father Account 295": {
+    "category": "Transfer",
+    "keywords": [
+      "fatheraccount295"
+    ],
+    "confidence": 0.92
+  },
+  "Angel One 666": {
+    "category": "Investment",
+    "keywords": [
+      "angelone666"
+    ],
+    "confidence": 0.85
+  },
+  "Udemy 128": {
+    "category": "Education",
+    "keywords": [
+      "udemy128"
+    ],
+    "confidence": 0.93
+  },
+  "ICICI Prudential MF 604": {
+    "category": "Investment",
+    "keywords": [
+      "iciciprudentialmf604"
+    ],
+    "confidence": 0.94
+  },
+  "HDFC Mutual Fund 121": {
+    "category": "Investment",
+    "keywords": [
+      "hdfcmutualfund121"
+    ],
+    "confidence": 0.87
+  },
+  "Reliance Petroleum 815": {
+    "category": "Fuel",
+    "keywords": [
+      "reliancepetroleum815"
+    ],
+    "confidence": 0.81
+  },
+  "Local Store 404": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "localstore404"
+    ],
+    "confidence": 0.93
+  },
+  "Property Tax Bill 55": {
+    "category": "Bills",
+    "keywords": [
+      "propertytaxbill55"
+    ],
+    "confidence": 0.89
+  },
+  "Playstation 957": {
+    "category": "Entertainment",
+    "keywords": [
+      "playstation957"
+    ],
+    "confidence": 0.91
+  },
+  "Broadband Bill 451": {
+    "category": "Bills",
+    "keywords": [
+      "broadbandbill451"
+    ],
+    "confidence": 0.76
+  },
+  "Stationery Shop 331": {
+    "category": "Education",
+    "keywords": [
+      "stationeryshop331"
+    ],
+    "confidence": 0.88
+  },
+  "Agoda 931": {
+    "category": "Travel",
+    "keywords": [
+      "agoda931"
+    ],
+    "confidence": 0.81
+  },
+  "Max Healthcare 344": {
+    "category": "Medical",
+    "keywords": [
+      "maxhealthcare344"
+    ],
+    "confidence": 0.83
+  },
+  "SRL Diagnostics 140": {
+    "category": "Medical",
+    "keywords": [
+      "srldiagnostics140"
+    ],
+    "confidence": 0.79
+  },
+  "House Owner 776": {
+    "category": "Transfer",
+    "keywords": [
+      "houseowner776"
+    ],
+    "confidence": 0.93
+  },
+  "Max Healthcare 571": {
+    "category": "Medical",
+    "keywords": [
+      "maxhealthcare571"
+    ],
+    "confidence": 0.92
+  },
+  "Medplus 225": {
+    "category": "Medical",
+    "keywords": [
+      "medplus225"
+    ],
+    "confidence": 0.84
+  },
+  "College Tuition 462": {
+    "category": "Education",
+    "keywords": [
+      "collegetuition462"
+    ],
+    "confidence": 0.84
+  },
+  "Electricity Bill 822": {
+    "category": "Bills",
+    "keywords": [
+      "electricitybill822"
+    ],
+    "confidence": 0.93
+  },
+  "Vi Mobile 96": {
+    "category": "Utilities",
+    "keywords": [
+      "vimobile96"
+    ],
+    "confidence": 0.81
+  },
+  "Coursera 848": {
+    "category": "Education",
+    "keywords": [
+      "coursera848"
+    ],
+    "confidence": 0.94
+  },
+  "Max Life 240": {
+    "category": "Insurance",
+    "keywords": [
+      "maxlife240"
+    ],
+    "confidence": 0.91
+  },
+  "BigBasket 57": {
+    "category": "Groceries",
+    "keywords": [
+      "bigbasket57"
+    ],
+    "confidence": 0.8
+  },
+  "Income Tax Refund 476": {
+    "category": "Taxes",
+    "keywords": [
+      "incometaxrefund476"
+    ],
+    "confidence": 0.83
+  },
+  "Mobile Bill 516": {
+    "category": "Bills",
+    "keywords": [
+      "mobilebill516"
+    ],
+    "confidence": 0.83
+  },
+  "Star Bazar 714": {
+    "category": "Groceries",
+    "keywords": [
+      "starbazar714"
+    ],
+    "confidence": 0.75
+  },
+  "Expedia 445": {
+    "category": "Travel",
+    "keywords": [
+      "expedia445"
+    ],
+    "confidence": 0.79
+  },
+  "Refund Received 61": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "refundreceived61"
+    ],
+    "confidence": 0.86
+  },
+  "IRCTC 146": {
+    "category": "Travel",
+    "keywords": [
+      "irctc146"
+    ],
+    "confidence": 0.91
+  },
+  "General Expense 619": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "generalexpense619"
+    ],
+    "confidence": 0.81
+  },
+  "Cognizant Salary 860": {
+    "category": "Salary",
+    "keywords": [
+      "cognizantsalary860"
+    ],
+    "confidence": 0.93
+  },
+  "Wipro Salary 771": {
+    "category": "Salary",
+    "keywords": [
+      "wiprosalary771"
+    ],
+    "confidence": 0.92
+  },
+  "Accenture Salary 779": {
+    "category": "Salary",
+    "keywords": [
+      "accenturesalary779"
+    ],
+    "confidence": 0.8
+  },
+  "Coin 506": {
+    "category": "Investment",
+    "keywords": [
+      "coin506"
+    ],
+    "confidence": 0.88
+  },
+  "Kuvera 89": {
+    "category": "Investment",
+    "keywords": [
+      "kuvera89"
+    ],
+    "confidence": 0.89
+  },
+  "Max Life 353": {
+    "category": "Insurance",
+    "keywords": [
+      "maxlife353"
+    ],
+    "confidence": 0.81
+  },
+  "Myntra 164": {
+    "category": "Shopping",
+    "keywords": [
+      "myntra164"
+    ],
+    "confidence": 0.8
+  },
+  "Patangali 229": {
+    "category": "Groceries",
+    "keywords": [
+      "patangali229"
+    ],
+    "confidence": 0.76
+  },
+  "Canara ATM 565": {
+    "category": "ATM",
+    "keywords": [
+      "canaraatm565"
+    ],
+    "confidence": 0.84
+  },
+  "McDonalds 862": {
+    "category": "Food",
+    "keywords": [
+      "mcdonalds862"
+    ],
+    "confidence": 0.83
+  },
+  "Audible 911": {
+    "category": "Entertainment",
+    "keywords": [
+      "audible911"
+    ],
+    "confidence": 0.9
+  },
+  "Mother Account 16": {
+    "category": "Transfer",
+    "keywords": [
+      "motheraccount16"
+    ],
+    "confidence": 0.94
+  },
+  "Max Healthcare 883": {
+    "category": "Medical",
+    "keywords": [
+      "maxhealthcare883"
+    ],
+    "confidence": 0.93
+  },
+  "Axis ATM 509": {
+    "category": "ATM",
+    "keywords": [
+      "axisatm509"
+    ],
+    "confidence": 0.79
+  },
+  "PNB ATM 39": {
+    "category": "ATM",
+    "keywords": [
+      "pnbatm39"
+    ],
+    "confidence": 0.83
+  },
+  "House Owner 179": {
+    "category": "Transfer",
+    "keywords": [
+      "houseowner179"
+    ],
+    "confidence": 0.92
+  },
+  "Jiomart 556": {
+    "category": "Groceries",
+    "keywords": [
+      "jiomart556"
+    ],
+    "confidence": 0.76
+  },
+  "Friend Transfer 587": {
+    "category": "Transfer",
+    "keywords": [
+      "friendtransfer587"
+    ],
+    "confidence": 0.88
+  },
+  "Lenskart 448": {
+    "category": "Shopping",
+    "keywords": [
+      "lenskart448"
+    ],
+    "confidence": 0.78
+  },
+  "Wipro Salary 61": {
+    "category": "Salary",
+    "keywords": [
+      "wiprosalary61"
+    ],
+    "confidence": 0.8
+  },
+  "Byjus 475": {
+    "category": "Education",
+    "keywords": [
+      "byjus475"
+    ],
+    "confidence": 0.82
+  },
+  "Father Account 780": {
+    "category": "Transfer",
+    "keywords": [
+      "fatheraccount780"
+    ],
+    "confidence": 0.94
+  },
+  "Kotak ATM 864": {
+    "category": "ATM",
+    "keywords": [
+      "kotakatm864"
+    ],
+    "confidence": 0.77
+  },
+  "Zee5 562": {
+    "category": "Entertainment",
+    "keywords": [
+      "zee5562"
+    ],
+    "confidence": 0.76
+  },
+  "HP Pump 675": {
+    "category": "Fuel",
+    "keywords": [
+      "hppump675"
+    ],
+    "confidence": 0.76
+  },
+  "Barbeque Nation 41": {
+    "category": "Food",
+    "keywords": [
+      "barbequenation41"
+    ],
+    "confidence": 0.94
+  },
+  "Indane Gas 646": {
+    "category": "Bills",
+    "keywords": [
+      "indanegas646"
+    ],
+    "confidence": 0.78
+  },
+  "More Retail 695": {
+    "category": "Groceries",
+    "keywords": [
+      "moreretail695"
+    ],
+    "confidence": 0.77
+  },
+  "Electricity Bill 726": {
+    "category": "Bills",
+    "keywords": [
+      "electricitybill726"
+    ],
+    "confidence": 0.8
+  },
+  "HP Pump 630": {
+    "category": "Fuel",
+    "keywords": [
+      "hppump630"
+    ],
+    "confidence": 0.87
+  },
+  "Expedia 848": {
+    "category": "Travel",
+    "keywords": [
+      "expedia848"
+    ],
+    "confidence": 0.78
+  },
+  "Pharmeasy 602": {
+    "category": "Medical",
+    "keywords": [
+      "pharmeasy602"
+    ],
+    "confidence": 0.76
+  },
+  "Lal PathLabs 703": {
+    "category": "Medical",
+    "keywords": [
+      "lalpathlabs703"
+    ],
+    "confidence": 0.93
+  },
+  "Mother Account 974": {
+    "category": "Transfer",
+    "keywords": [
+      "motheraccount974"
+    ],
+    "confidence": 0.89
+  },
+  "Reliance Digital 717": {
+    "category": "Shopping",
+    "keywords": [
+      "reliancedigital717"
+    ],
+    "confidence": 0.92
+  },
+  "SBI Life 723": {
+    "category": "Insurance",
+    "keywords": [
+      "sbilife723"
+    ],
+    "confidence": 0.9
+  },
+  "Expedia 589": {
+    "category": "Travel",
+    "keywords": [
+      "expedia589"
+    ],
+    "confidence": 0.91
+  },
+  "CNG Station 448": {
+    "category": "Fuel",
+    "keywords": [
+      "cngstation448"
+    ],
+    "confidence": 0.88
+  },
+  "Tata Cliq 673": {
+    "category": "Shopping",
+    "keywords": [
+      "tatacliq673"
+    ],
+    "confidence": 0.82
+  },
+  "PNB ATM 118": {
+    "category": "ATM",
+    "keywords": [
+      "pnbatm118"
+    ],
+    "confidence": 0.84
+  },
+  "Reliance Petroleum 922": {
+    "category": "Fuel",
+    "keywords": [
+      "reliancepetroleum922"
+    ],
+    "confidence": 0.92
+  },
+  "Nature's Basket 190": {
+    "category": "Groceries",
+    "keywords": [
+      "nature'sbasket190"
+    ],
+    "confidence": 0.9
+  },
+  "Nippon India MF 837": {
+    "category": "Investment",
+    "keywords": [
+      "nipponindiamf837"
+    ],
+    "confidence": 0.93
+  },
+  "Tax Department 456": {
+    "category": "Taxes",
+    "keywords": [
+      "taxdepartment456"
+    ],
+    "confidence": 0.92
+  },
+  "Angel One 882": {
+    "category": "Investment",
+    "keywords": [
+      "angelone882"
+    ],
+    "confidence": 0.8
+  },
+  "Nykaa 912": {
+    "category": "Shopping",
+    "keywords": [
+      "nykaa912"
+    ],
+    "confidence": 0.84
+  },
+  "Cognizant Salary 354": {
+    "category": "Salary",
+    "keywords": [
+      "cognizantsalary354"
+    ],
+    "confidence": 0.76
+  },
+  "Edx 509": {
+    "category": "Education",
+    "keywords": [
+      "edx509"
+    ],
+    "confidence": 0.79
+  },
+  "Angel One 296": {
+    "category": "Investment",
+    "keywords": [
+      "angelone296"
+    ],
+    "confidence": 0.93
+  },
+  "Coin 20": {
+    "category": "Investment",
+    "keywords": [
+      "coin20"
+    ],
+    "confidence": 0.85
+  },
+  "HP Gas 257": {
+    "category": "Bills",
+    "keywords": [
+      "hpgas257"
+    ],
+    "confidence": 0.89
+  },
+  "GST Payment 717": {
+    "category": "Taxes",
+    "keywords": [
+      "gstpayment717"
+    ],
+    "confidence": 0.85
+  },
+  "Tax Department 821": {
+    "category": "Taxes",
+    "keywords": [
+      "taxdepartment821"
+    ],
+    "confidence": 0.75
+  },
+  "Netmeds 424": {
+    "category": "Medical",
+    "keywords": [
+      "netmeds424"
+    ],
+    "confidence": 0.89
+  },
+  "Lal PathLabs 387": {
+    "category": "Medical",
+    "keywords": [
+      "lalpathlabs387"
+    ],
+    "confidence": 0.84
+  },
+  "Interest Earned 445": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "interestearned445"
+    ],
+    "confidence": 0.95
+  },
+  "Simplilearn 729": {
+    "category": "Education",
+    "keywords": [
+      "simplilearn729"
+    ],
+    "confidence": 0.84
+  },
+  "Medplus 246": {
+    "category": "Medical",
+    "keywords": [
+      "medplus246"
+    ],
+    "confidence": 0.77
+  },
+  "Broadband Bill 132": {
+    "category": "Bills",
+    "keywords": [
+      "broadbandbill132"
+    ],
+    "confidence": 0.9
+  },
+  "MSEDCL 231": {
+    "category": "Utilities",
+    "keywords": [
+      "msedcl231"
+    ],
+    "confidence": 0.9
+  },
+  "Nippon India MF 788": {
+    "category": "Investment",
+    "keywords": [
+      "nipponindiamf788"
+    ],
+    "confidence": 0.85
+  },
+  "Pharmeasy 862": {
+    "category": "Medical",
+    "keywords": [
+      "pharmeasy862"
+    ],
+    "confidence": 0.79
+  },
+  "Care Health 193": {
+    "category": "Insurance",
+    "keywords": [
+      "carehealth193"
+    ],
+    "confidence": 0.81
+  },
+  "DMart 56": {
+    "category": "Groceries",
+    "keywords": [
+      "dmart56"
+    ],
+    "confidence": 0.94
+  },
+  "1mg 663": {
+    "category": "Medical",
+    "keywords": [
+      "1mg663"
+    ],
+    "confidence": 0.92
+  },
+  "Income Tax Refund 903": {
+    "category": "Taxes",
+    "keywords": [
+      "incometaxrefund903"
+    ],
+    "confidence": 0.75
+  },
+  "Apollo Hospital 500": {
+    "category": "Medical",
+    "keywords": [
+      "apollohospital500"
+    ],
+    "confidence": 0.84
+  },
+  "BESCOM 268": {
+    "category": "Utilities",
+    "keywords": [
+      "bescom268"
+    ],
+    "confidence": 0.94
+  },
+  "Income Tax Refund 851": {
+    "category": "Taxes",
+    "keywords": [
+      "incometaxrefund851"
+    ],
+    "confidence": 0.76
+  },
+  "Income Tax Refund 600": {
+    "category": "Taxes",
+    "keywords": [
+      "incometaxrefund600"
+    ],
+    "confidence": 0.88
+  },
+  "Starbucks 162": {
+    "category": "Food",
+    "keywords": [
+      "starbucks162"
+    ],
+    "confidence": 0.91
+  },
+  "Pharmeasy 264": {
+    "category": "Medical",
+    "keywords": [
+      "pharmeasy264"
+    ],
+    "confidence": 0.77
+  },
+  "Axis ATM 804": {
+    "category": "ATM",
+    "keywords": [
+      "axisatm804"
+    ],
+    "confidence": 0.85
+  },
+  "Tech Mahindra Salary 314": {
+    "category": "Salary",
+    "keywords": [
+      "techmahindrasalary314"
+    ],
+    "confidence": 0.92
+  },
+  "Kotak ATM 592": {
+    "category": "ATM",
+    "keywords": [
+      "kotakatm592"
+    ],
+    "confidence": 0.87
+  },
+  "Expedia 222": {
+    "category": "Travel",
+    "keywords": [
+      "expedia222"
+    ],
+    "confidence": 0.88
+  },
+  "SBI Mutual Fund 170": {
+    "category": "Investment",
+    "keywords": [
+      "sbimutualfund170"
+    ],
+    "confidence": 0.8
+  },
+  "Myntra 12": {
+    "category": "Shopping",
+    "keywords": [
+      "myntra12"
+    ],
+    "confidence": 0.83
+  },
+  "TDS Deducted 43": {
+    "category": "Taxes",
+    "keywords": [
+      "tdsdeducted43"
+    ],
+    "confidence": 0.8
+  },
+  "Apollo Hospital 82": {
+    "category": "Medical",
+    "keywords": [
+      "apollohospital82"
+    ],
+    "confidence": 0.89
+  },
+  "Nippon India MF 687": {
+    "category": "Investment",
+    "keywords": [
+      "nipponindiamf687"
+    ],
+    "confidence": 0.91
+  },
+  "Mobile Bill 127": {
+    "category": "Bills",
+    "keywords": [
+      "mobilebill127"
+    ],
+    "confidence": 0.86
+  },
+  "DMart 856": {
+    "category": "Groceries",
+    "keywords": [
+      "dmart856"
+    ],
+    "confidence": 0.78
+  },
+  "Starbucks 821": {
+    "category": "Food",
+    "keywords": [
+      "starbucks821"
+    ],
+    "confidence": 0.81
+  },
+  "Apollo Hospital 137": {
+    "category": "Medical",
+    "keywords": [
+      "apollohospital137"
+    ],
+    "confidence": 0.84
+  },
+  "Max Healthcare 975": {
+    "category": "Medical",
+    "keywords": [
+      "maxhealthcare975"
+    ],
+    "confidence": 0.8
+  },
+  "Tax Department 92": {
+    "category": "Taxes",
+    "keywords": [
+      "taxdepartment92"
+    ],
+    "confidence": 0.87
+  },
+  "Canara ATM 628": {
+    "category": "ATM",
+    "keywords": [
+      "canaraatm628"
+    ],
+    "confidence": 0.8
+  },
+  "Ajio 994": {
+    "category": "Shopping",
+    "keywords": [
+      "ajio994"
+    ],
+    "confidence": 0.88
+  },
+  "SonyLIV 698": {
+    "category": "Entertainment",
+    "keywords": [
+      "sonyliv698"
+    ],
+    "confidence": 0.91
+  },
+  "Barbeque Nation 784": {
+    "category": "Food",
+    "keywords": [
+      "barbequenation784"
+    ],
+    "confidence": 0.79
+  },
+  "Refund Received 948": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "refundreceived948"
+    ],
+    "confidence": 0.81
+  },
+  "PNB ATM 103": {
+    "category": "ATM",
+    "keywords": [
+      "pnbatm103"
+    ],
+    "confidence": 0.84
+  },
+  "Canara ATM 338": {
+    "category": "ATM",
+    "keywords": [
+      "canaraatm338"
+    ],
+    "confidence": 0.88
+  },
+  "JioFiber 431": {
+    "category": "Utilities",
+    "keywords": [
+      "jiofiber431"
+    ],
+    "confidence": 0.89
+  },
+  "Max Healthcare 843": {
+    "category": "Medical",
+    "keywords": [
+      "maxhealthcare843"
+    ],
+    "confidence": 0.9
+  },
+  "KFC 100": {
+    "category": "Food",
+    "keywords": [
+      "kfc100"
+    ],
+    "confidence": 0.81
+  },
+  "Coursera 801": {
+    "category": "Education",
+    "keywords": [
+      "coursera801"
+    ],
+    "confidence": 0.83
+  },
+  "Local Store 683": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "localstore683"
+    ],
+    "confidence": 0.92
+  },
+  "Cognizant Salary 65": {
+    "category": "Salary",
+    "keywords": [
+      "cognizantsalary65"
+    ],
+    "confidence": 0.79
+  },
+  "CNG Station 784": {
+    "category": "Fuel",
+    "keywords": [
+      "cngstation784"
+    ],
+    "confidence": 0.85
+  },
+  "TCS Salary 218": {
+    "category": "Salary",
+    "keywords": [
+      "tcssalary218"
+    ],
+    "confidence": 0.8
+  },
+  "DMart 458": {
+    "category": "Groceries",
+    "keywords": [
+      "dmart458"
+    ],
+    "confidence": 0.93
+  },
+  "Income Tax Refund 39": {
+    "category": "Taxes",
+    "keywords": [
+      "incometaxrefund39"
+    ],
+    "confidence": 0.94
+  },
+  "HDFC Ergo 328": {
+    "category": "Insurance",
+    "keywords": [
+      "hdfcergo328"
+    ],
+    "confidence": 0.86
+  },
+  "HDFC ATM 240": {
+    "category": "ATM",
+    "keywords": [
+      "hdfcatm240"
+    ],
+    "confidence": 0.95
+  },
+  "IRCTC 979": {
+    "category": "Travel",
+    "keywords": [
+      "irctc979"
+    ],
+    "confidence": 0.77
+  },
+  "More Retail 965": {
+    "category": "Groceries",
+    "keywords": [
+      "moreretail965"
+    ],
+    "confidence": 0.89
+  },
+  "Interest Earned 435": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "interestearned435"
+    ],
+    "confidence": 0.92
+  },
+  "GST Payment 477": {
+    "category": "Taxes",
+    "keywords": [
+      "gstpayment477"
+    ],
+    "confidence": 0.86
+  },
+  "Rent Pay 953": {
+    "category": "Transfer",
+    "keywords": [
+      "rentpay953"
+    ],
+    "confidence": 0.87
+  },
+  "Blinkit 292": {
+    "category": "Groceries",
+    "keywords": [
+      "blinkit292"
+    ],
+    "confidence": 0.9
+  },
+  "Canara ATM 966": {
+    "category": "ATM",
+    "keywords": [
+      "canaraatm966"
+    ],
+    "confidence": 0.91
+  },
+  "HDFC Mutual Fund 299": {
+    "category": "Investment",
+    "keywords": [
+      "hdfcmutualfund299"
+    ],
+    "confidence": 0.9
+  },
+  "GST Payment 467": {
+    "category": "Taxes",
+    "keywords": [
+      "gstpayment467"
+    ],
+    "confidence": 0.86
+  },
+  "Bharat Petroleum 575": {
+    "category": "Fuel",
+    "keywords": [
+      "bharatpetroleum575"
+    ],
+    "confidence": 0.9
+  },
+  "Mother Account 965": {
+    "category": "Transfer",
+    "keywords": [
+      "motheraccount965"
+    ],
+    "confidence": 0.81
+  },
+  "Municipal Water 595": {
+    "category": "Bills",
+    "keywords": [
+      "municipalwater595"
+    ],
+    "confidence": 0.83
+  },
+  "SBI ATM 335": {
+    "category": "ATM",
+    "keywords": [
+      "sbiatm335"
+    ],
+    "confidence": 0.9
+  },
+  "Mother Account 689": {
+    "category": "Transfer",
+    "keywords": [
+      "motheraccount689"
+    ],
+    "confidence": 0.91
+  },
+  "More Retail 997": {
+    "category": "Groceries",
+    "keywords": [
+      "moreretail997"
+    ],
+    "confidence": 0.76
+  },
+  "General Expense 349": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "generalexpense349"
+    ],
+    "confidence": 0.92
+  },
+  "Infosys Salary 548": {
+    "category": "Salary",
+    "keywords": [
+      "infosyssalary548"
+    ],
+    "confidence": 0.93
+  },
+  "Zee5 157": {
+    "category": "Entertainment",
+    "keywords": [
+      "zee5157"
+    ],
+    "confidence": 0.83
+  },
+  "Blinkit 490": {
+    "category": "Groceries",
+    "keywords": [
+      "blinkit490"
+    ],
+    "confidence": 0.91
+  },
+  "Angel One 648": {
+    "category": "Investment",
+    "keywords": [
+      "angelone648"
+    ],
+    "confidence": 0.89
+  },
+  "Shoppers Stop 346": {
+    "category": "Shopping",
+    "keywords": [
+      "shoppersstop346"
+    ],
+    "confidence": 0.92
+  },
+  "Father Account 651": {
+    "category": "Transfer",
+    "keywords": [
+      "fatheraccount651"
+    ],
+    "confidence": 0.89
+  },
+  "Income Tax Refund 642": {
+    "category": "Taxes",
+    "keywords": [
+      "incometaxrefund642"
+    ],
+    "confidence": 0.76
+  },
+  "Netmeds 774": {
+    "category": "Medical",
+    "keywords": [
+      "netmeds774"
+    ],
+    "confidence": 0.77
+  },
+  "Expedia 658": {
+    "category": "Travel",
+    "keywords": [
+      "expedia658"
+    ],
+    "confidence": 0.89
+  },
+  "IRCTC 180": {
+    "category": "Travel",
+    "keywords": [
+      "irctc180"
+    ],
+    "confidence": 0.89
+  },
+  "Netflix 342": {
+    "category": "Entertainment",
+    "keywords": [
+      "netflix342"
+    ],
+    "confidence": 0.91
+  },
+  "Fortis Hospital 393": {
+    "category": "Medical",
+    "keywords": [
+      "fortishospital393"
+    ],
+    "confidence": 0.84
+  },
+  "Bajaj Allianz 431": {
+    "category": "Insurance",
+    "keywords": [
+      "bajajallianz431"
+    ],
+    "confidence": 0.86
+  },
+  "Tata Power 189": {
+    "category": "Utilities",
+    "keywords": [
+      "tatapower189"
+    ],
+    "confidence": 0.77
+  },
+  "Friend Transfer 709": {
+    "category": "Transfer",
+    "keywords": [
+      "friendtransfer709"
+    ],
+    "confidence": 0.8
+  },
+  "Zepto 482": {
+    "category": "Groceries",
+    "keywords": [
+      "zepto482"
+    ],
+    "confidence": 0.88
+  },
+  "Accenture Salary 692": {
+    "category": "Salary",
+    "keywords": [
+      "accenturesalary692"
+    ],
+    "confidence": 0.75
+  },
+  "Accenture Salary 703": {
+    "category": "Salary",
+    "keywords": [
+      "accenturesalary703"
+    ],
+    "confidence": 0.86
+  },
+  "Decathlon 977": {
+    "category": "Shopping",
+    "keywords": [
+      "decathlon977"
+    ],
+    "confidence": 0.82
+  },
+  "Max Healthcare 716": {
+    "category": "Medical",
+    "keywords": [
+      "maxhealthcare716"
+    ],
+    "confidence": 0.8
+  },
+  "Netmeds 403": {
+    "category": "Medical",
+    "keywords": [
+      "netmeds403"
+    ],
+    "confidence": 0.92
+  },
+  "Goibibo 400": {
+    "category": "Travel",
+    "keywords": [
+      "goibibo400"
+    ],
+    "confidence": 0.86
+  },
+  "Medplus 32": {
+    "category": "Medical",
+    "keywords": [
+      "medplus32"
+    ],
+    "confidence": 0.95
+  },
+  "Father Account 18": {
+    "category": "Transfer",
+    "keywords": [
+      "fatheraccount18"
+    ],
+    "confidence": 0.86
+  },
+  "Tacobell 630": {
+    "category": "Food",
+    "keywords": [
+      "tacobell630"
+    ],
+    "confidence": 0.9
+  },
+  "Netmeds 631": {
+    "category": "Medical",
+    "keywords": [
+      "netmeds631"
+    ],
+    "confidence": 0.91
+  },
+  "ICICI Prudential 645": {
+    "category": "Insurance",
+    "keywords": [
+      "iciciprudential645"
+    ],
+    "confidence": 0.8
+  },
+  "Star Bazar 109": {
+    "category": "Groceries",
+    "keywords": [
+      "starbazar109"
+    ],
+    "confidence": 0.93
+  },
+  "Domino's 817": {
+    "category": "Food",
+    "keywords": [
+      "domino's817"
+    ],
+    "confidence": 0.84
+  },
+  "Reliance Petroleum 144": {
+    "category": "Fuel",
+    "keywords": [
+      "reliancepetroleum144"
+    ],
+    "confidence": 0.77
+  },
+  "Fortis Hospital 775": {
+    "category": "Medical",
+    "keywords": [
+      "fortishospital775"
+    ],
+    "confidence": 0.83
+  },
+  "Bharat Gas 815": {
+    "category": "Bills",
+    "keywords": [
+      "bharatgas815"
+    ],
+    "confidence": 0.86
+  },
+  "CNG Station 523": {
+    "category": "Fuel",
+    "keywords": [
+      "cngstation523"
+    ],
+    "confidence": 0.93
+  },
+  "Airtel Fiber 945": {
+    "category": "Utilities",
+    "keywords": [
+      "airtelfiber945"
+    ],
+    "confidence": 0.91
+  },
+  "TDS Deducted 774": {
+    "category": "Taxes",
+    "keywords": [
+      "tdsdeducted774"
+    ],
+    "confidence": 0.92
+  },
+  "IRCTC 996": {
+    "category": "Travel",
+    "keywords": [
+      "irctc996"
+    ],
+    "confidence": 0.77
+  },
+  "Niva Bupa 876": {
+    "category": "Insurance",
+    "keywords": [
+      "nivabupa876"
+    ],
+    "confidence": 0.91
+  },
+  "Indian Oil 819": {
+    "category": "Fuel",
+    "keywords": [
+      "indianoil819"
+    ],
+    "confidence": 0.83
+  },
+  "Coin 136": {
+    "category": "Investment",
+    "keywords": [
+      "coin136"
+    ],
+    "confidence": 0.84
+  },
+  "Nippon India MF 400": {
+    "category": "Investment",
+    "keywords": [
+      "nipponindiamf400"
+    ],
+    "confidence": 0.91
+  },
+  "Indian Oil 701": {
+    "category": "Fuel",
+    "keywords": [
+      "indianoil701"
+    ],
+    "confidence": 0.8
+  },
+  "Youtube Premium 915": {
+    "category": "Entertainment",
+    "keywords": [
+      "youtubepremium915"
+    ],
+    "confidence": 0.94
+  },
+  "Stationery Shop 236": {
+    "category": "Education",
+    "keywords": [
+      "stationeryshop236"
+    ],
+    "confidence": 0.88
+  },
+  "Accenture Salary 674": {
+    "category": "Salary",
+    "keywords": [
+      "accenturesalary674"
+    ],
+    "confidence": 0.83
+  },
+  "BigBasket 978": {
+    "category": "Groceries",
+    "keywords": [
+      "bigbasket978"
+    ],
+    "confidence": 0.76
+  },
+  "Income Tax Refund 109": {
+    "category": "Taxes",
+    "keywords": [
+      "incometaxrefund109"
+    ],
+    "confidence": 0.8
+  },
+  "Nature's Basket 474": {
+    "category": "Groceries",
+    "keywords": [
+      "nature'sbasket474"
+    ],
+    "confidence": 0.82
+  },
+  "ICICI ATM 916": {
+    "category": "ATM",
+    "keywords": [
+      "iciciatm916"
+    ],
+    "confidence": 0.83
+  },
+  "Cleartrip 511": {
+    "category": "Travel",
+    "keywords": [
+      "cleartrip511"
+    ],
+    "confidence": 0.87
+  },
+  "HDFC Mutual Fund 716": {
+    "category": "Investment",
+    "keywords": [
+      "hdfcmutualfund716"
+    ],
+    "confidence": 0.82
+  },
+  "Tech Mahindra Salary 983": {
+    "category": "Salary",
+    "keywords": [
+      "techmahindrasalary983"
+    ],
+    "confidence": 0.8
+  },
+  "Indian Oil 712": {
+    "category": "Fuel",
+    "keywords": [
+      "indianoil712"
+    ],
+    "confidence": 0.82
+  },
+  "Indian Oil 417": {
+    "category": "Fuel",
+    "keywords": [
+      "indianoil417"
+    ],
+    "confidence": 0.81
+  },
+  "Cleartrip 853": {
+    "category": "Travel",
+    "keywords": [
+      "cleartrip853"
+    ],
+    "confidence": 0.84
+  },
+  "Indane Gas 61": {
+    "category": "Bills",
+    "keywords": [
+      "indanegas61"
+    ],
+    "confidence": 0.91
+  },
+  "HDFC Ergo 815": {
+    "category": "Insurance",
+    "keywords": [
+      "hdfcergo815"
+    ],
+    "confidence": 0.86
+  },
+  "Shoppers Stop 793": {
+    "category": "Shopping",
+    "keywords": [
+      "shoppersstop793"
+    ],
+    "confidence": 0.86
+  },
+  "Municipal Water 346": {
+    "category": "Bills",
+    "keywords": [
+      "municipalwater346"
+    ],
+    "confidence": 0.9
+  },
+  "Apple Music 889": {
+    "category": "Entertainment",
+    "keywords": [
+      "applemusic889"
+    ],
+    "confidence": 0.95
+  },
+  "Spencer's 266": {
+    "category": "Groceries",
+    "keywords": [
+      "spencer's266"
+    ],
+    "confidence": 0.91
+  },
+  "Booking.com 897": {
+    "category": "Travel",
+    "keywords": [
+      "booking.com897"
+    ],
+    "confidence": 0.76
+  },
+  "BookMyShow 818": {
+    "category": "Entertainment",
+    "keywords": [
+      "bookmyshow818"
+    ],
+    "confidence": 0.91
+  },
+  "Udemy 188": {
+    "category": "Education",
+    "keywords": [
+      "udemy188"
+    ],
+    "confidence": 0.8
+  },
+  "Patangali 441": {
+    "category": "Groceries",
+    "keywords": [
+      "patangali441"
+    ],
+    "confidence": 0.86
+  },
+  "Decathlon 469": {
+    "category": "Shopping",
+    "keywords": [
+      "decathlon469"
+    ],
+    "confidence": 0.91
+  },
+  "General Expense 121": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "generalexpense121"
+    ],
+    "confidence": 0.84
+  },
+  "Tata AIG 54": {
+    "category": "Insurance",
+    "keywords": [
+      "tataaig54"
+    ],
+    "confidence": 0.9
+  },
+  "Interest Earned 479": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "interestearned479"
+    ],
+    "confidence": 0.88
+  },
+  "Netflix 500": {
+    "category": "Entertainment",
+    "keywords": [
+      "netflix500"
+    ],
+    "confidence": 0.92
+  },
+  "HDFC ATM 512": {
+    "category": "ATM",
+    "keywords": [
+      "hdfcatm512"
+    ],
+    "confidence": 0.89
+  },
+  "Infosys Salary 930": {
+    "category": "Salary",
+    "keywords": [
+      "infosyssalary930"
+    ],
+    "confidence": 0.77
+  },
+  "Blinkit 139": {
+    "category": "Groceries",
+    "keywords": [
+      "blinkit139"
+    ],
+    "confidence": 0.81
+  },
+  "School Fee 621": {
+    "category": "Education",
+    "keywords": [
+      "schoolfee621"
+    ],
+    "confidence": 0.86
+  },
+  "Cognizant Salary 111": {
+    "category": "Salary",
+    "keywords": [
+      "cognizantsalary111"
+    ],
+    "confidence": 0.91
+  },
+  "Cleartrip 680": {
+    "category": "Travel",
+    "keywords": [
+      "cleartrip680"
+    ],
+    "confidence": 0.88
+  },
+  "Mobile Bill 472": {
+    "category": "Bills",
+    "keywords": [
+      "mobilebill472"
+    ],
+    "confidence": 0.93
+  },
+  "Canara ATM 857": {
+    "category": "ATM",
+    "keywords": [
+      "canaraatm857"
+    ],
+    "confidence": 0.84
+  },
+  "HDFC ATM 330": {
+    "category": "ATM",
+    "keywords": [
+      "hdfcatm330"
+    ],
+    "confidence": 0.84
+  },
+  "Angel One 986": {
+    "category": "Investment",
+    "keywords": [
+      "angelone986"
+    ],
+    "confidence": 0.78
+  },
+  "Income Tax Refund 103": {
+    "category": "Taxes",
+    "keywords": [
+      "incometaxrefund103"
+    ],
+    "confidence": 0.92
+  },
+  "H&M 108": {
+    "category": "Shopping",
+    "keywords": [
+      "h&m108"
+    ],
+    "confidence": 0.9
+  },
+  "HP Pump 579": {
+    "category": "Fuel",
+    "keywords": [
+      "hppump579"
+    ],
+    "confidence": 0.76
+  },
+  "Coursera 430": {
+    "category": "Education",
+    "keywords": [
+      "coursera430"
+    ],
+    "confidence": 0.82
+  },
+  "SBI ATM 304": {
+    "category": "ATM",
+    "keywords": [
+      "sbiatm304"
+    ],
+    "confidence": 0.87
+  },
+  "Indian Oil 601": {
+    "category": "Fuel",
+    "keywords": [
+      "indianoil601"
+    ],
+    "confidence": 0.85
+  },
+  "Star Bazar 503": {
+    "category": "Groceries",
+    "keywords": [
+      "starbazar503"
+    ],
+    "confidence": 0.79
+  },
+  "Indigo 875": {
+    "category": "Travel",
+    "keywords": [
+      "indigo875"
+    ],
+    "confidence": 0.86
+  },
+  "Expedia 295": {
+    "category": "Travel",
+    "keywords": [
+      "expedia295"
+    ],
+    "confidence": 0.86
+  },
+  "SBI ATM 633": {
+    "category": "ATM",
+    "keywords": [
+      "sbiatm633"
+    ],
+    "confidence": 0.94
+  },
+  "HDFC Mutual Fund 194": {
+    "category": "Investment",
+    "keywords": [
+      "hdfcmutualfund194"
+    ],
+    "confidence": 0.8
+  },
+  "Fortis Hospital 369": {
+    "category": "Medical",
+    "keywords": [
+      "fortishospital369"
+    ],
+    "confidence": 0.75
+  },
+  "Jiomart 683": {
+    "category": "Groceries",
+    "keywords": [
+      "jiomart683"
+    ],
+    "confidence": 0.83
+  },
+  "Patangali 658": {
+    "category": "Groceries",
+    "keywords": [
+      "patangali658"
+    ],
+    "confidence": 0.94
+  },
+  "Uniqlo 553": {
+    "category": "Shopping",
+    "keywords": [
+      "uniqlo553"
+    ],
+    "confidence": 0.79
+  },
+  "PNB ATM 359": {
+    "category": "ATM",
+    "keywords": [
+      "pnbatm359"
+    ],
+    "confidence": 0.78
+  },
+  "Fortis Hospital 805": {
+    "category": "Medical",
+    "keywords": [
+      "fortishospital805"
+    ],
+    "confidence": 0.94
+  },
+  "Westside 63": {
+    "category": "Shopping",
+    "keywords": [
+      "westside63"
+    ],
+    "confidence": 0.78
+  },
+  "Haldirams 93": {
+    "category": "Food",
+    "keywords": [
+      "haldirams93"
+    ],
+    "confidence": 0.8
+  },
+  "PNB ATM 631": {
+    "category": "ATM",
+    "keywords": [
+      "pnbatm631"
+    ],
+    "confidence": 0.84
+  },
+  "Groww 783": {
+    "category": "Investment",
+    "keywords": [
+      "groww783"
+    ],
+    "confidence": 0.85
+  },
+  "Shell 123": {
+    "category": "Fuel",
+    "keywords": [
+      "shell123"
+    ],
+    "confidence": 0.81
+  },
+  "TDS Deducted 56": {
+    "category": "Taxes",
+    "keywords": [
+      "tdsdeducted56"
+    ],
+    "confidence": 0.79
+  },
+  "Zomato 219": {
+    "category": "Food",
+    "keywords": [
+      "zomato219"
+    ],
+    "confidence": 0.81
+  },
+  "Bharat Gas 792": {
+    "category": "Bills",
+    "keywords": [
+      "bharatgas792"
+    ],
+    "confidence": 0.8
+  },
+  "Coursera 17": {
+    "category": "Education",
+    "keywords": [
+      "coursera17"
+    ],
+    "confidence": 0.85
+  },
+  "ICICI ATM 142": {
+    "category": "ATM",
+    "keywords": [
+      "iciciatm142"
+    ],
+    "confidence": 0.83
+  },
+  "Bajaj Allianz 582": {
+    "category": "Insurance",
+    "keywords": [
+      "bajajallianz582"
+    ],
+    "confidence": 0.92
+  },
+  "Indian Oil 416": {
+    "category": "Fuel",
+    "keywords": [
+      "indianoil416"
+    ],
+    "confidence": 0.92
+  },
+  "Subway 29": {
+    "category": "Food",
+    "keywords": [
+      "subway29"
+    ],
+    "confidence": 0.84
+  },
+  "Shoppers Stop 330": {
+    "category": "Shopping",
+    "keywords": [
+      "shoppersstop330"
+    ],
+    "confidence": 0.87
+  },
+  "House Owner 665": {
+    "category": "Transfer",
+    "keywords": [
+      "houseowner665"
+    ],
+    "confidence": 0.83
+  },
+  "Air India 31": {
+    "category": "Travel",
+    "keywords": [
+      "airindia31"
+    ],
+    "confidence": 0.94
+  },
+  "DishTV 980": {
+    "category": "Utilities",
+    "keywords": [
+      "dishtv980"
+    ],
+    "confidence": 0.87
+  },
+  "Indian Oil 457": {
+    "category": "Fuel",
+    "keywords": [
+      "indianoil457"
+    ],
+    "confidence": 0.92
+  },
+  "Niva Bupa 613": {
+    "category": "Insurance",
+    "keywords": [
+      "nivabupa613"
+    ],
+    "confidence": 0.83
+  },
+  "H&M 901": {
+    "category": "Shopping",
+    "keywords": [
+      "h&m901"
+    ],
+    "confidence": 0.81
+  },
+  "Byjus 351": {
+    "category": "Education",
+    "keywords": [
+      "byjus351"
+    ],
+    "confidence": 0.91
+  },
+  "Tata Cliq 658": {
+    "category": "Shopping",
+    "keywords": [
+      "tatacliq658"
+    ],
+    "confidence": 0.77
+  },
+  "Cash Deposit 937": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "cashdeposit937"
+    ],
+    "confidence": 0.91
+  },
+  "Reliance Petroleum 991": {
+    "category": "Fuel",
+    "keywords": [
+      "reliancepetroleum991"
+    ],
+    "confidence": 0.91
+  },
+  "Zepto 115": {
+    "category": "Groceries",
+    "keywords": [
+      "zepto115"
+    ],
+    "confidence": 0.78
+  },
+  "Bharat Gas 626": {
+    "category": "Bills",
+    "keywords": [
+      "bharatgas626"
+    ],
+    "confidence": 0.78
+  },
+  "Myntra 984": {
+    "category": "Shopping",
+    "keywords": [
+      "myntra984"
+    ],
+    "confidence": 0.9
+  },
+  "Tax Department 782": {
+    "category": "Taxes",
+    "keywords": [
+      "taxdepartment782"
+    ],
+    "confidence": 0.86
+  },
+  "Google India Salary 894": {
+    "category": "Salary",
+    "keywords": [
+      "googleindiasalary894"
+    ],
+    "confidence": 0.94
+  },
+  "Edx 460": {
+    "category": "Education",
+    "keywords": [
+      "edx460"
+    ],
+    "confidence": 0.76
+  },
+  "Accenture Salary 825": {
+    "category": "Salary",
+    "keywords": [
+      "accenturesalary825"
+    ],
+    "confidence": 0.8
+  },
+  "Pizza Hut 529": {
+    "category": "Food",
+    "keywords": [
+      "pizzahut529"
+    ],
+    "confidence": 0.76
+  },
+  "Tech Mahindra Salary 48": {
+    "category": "Salary",
+    "keywords": [
+      "techmahindrasalary48"
+    ],
+    "confidence": 0.76
+  },
+  "Pharmeasy 670": {
+    "category": "Medical",
+    "keywords": [
+      "pharmeasy670"
+    ],
+    "confidence": 0.92
+  },
+  "Reliance Digital 618": {
+    "category": "Shopping",
+    "keywords": [
+      "reliancedigital618"
+    ],
+    "confidence": 0.85
+  },
+  "TCS Salary 470": {
+    "category": "Salary",
+    "keywords": [
+      "tcssalary470"
+    ],
+    "confidence": 0.93
+  },
+  "Broadband Bill 629": {
+    "category": "Bills",
+    "keywords": [
+      "broadbandbill629"
+    ],
+    "confidence": 0.85
+  },
+  "BigBasket 471": {
+    "category": "Groceries",
+    "keywords": [
+      "bigbasket471"
+    ],
+    "confidence": 0.77
+  },
+  "Coursera 526": {
+    "category": "Education",
+    "keywords": [
+      "coursera526"
+    ],
+    "confidence": 0.88
+  },
+  "McDonalds 734": {
+    "category": "Food",
+    "keywords": [
+      "mcdonalds734"
+    ],
+    "confidence": 0.84
+  },
+  "Wipro Salary 382": {
+    "category": "Salary",
+    "keywords": [
+      "wiprosalary382"
+    ],
+    "confidence": 0.82
+  },
+  "Max Healthcare 428": {
+    "category": "Medical",
+    "keywords": [
+      "maxhealthcare428"
+    ],
+    "confidence": 0.9
+  },
+  "Barbeque Nation 656": {
+    "category": "Food",
+    "keywords": [
+      "barbequenation656"
+    ],
+    "confidence": 0.88
+  },
+  "Zara 106": {
+    "category": "Shopping",
+    "keywords": [
+      "zara106"
+    ],
+    "confidence": 0.86
+  },
+  "Father Account 268": {
+    "category": "Transfer",
+    "keywords": [
+      "fatheraccount268"
+    ],
+    "confidence": 0.89
+  },
+  "Reliance Smart 93": {
+    "category": "Groceries",
+    "keywords": [
+      "reliancesmart93"
+    ],
+    "confidence": 0.87
+  },
+  "Reliance Smart 327": {
+    "category": "Groceries",
+    "keywords": [
+      "reliancesmart327"
+    ],
+    "confidence": 0.94
+  },
+  "Rent Pay 619": {
+    "category": "Transfer",
+    "keywords": [
+      "rentpay619"
+    ],
+    "confidence": 0.89
+  },
+  "Nykaa 582": {
+    "category": "Shopping",
+    "keywords": [
+      "nykaa582"
+    ],
+    "confidence": 0.83
+  },
+  "Edx 696": {
+    "category": "Education",
+    "keywords": [
+      "edx696"
+    ],
+    "confidence": 0.89
+  },
+  "Local Store 671": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "localstore671"
+    ],
+    "confidence": 0.88
+  },
+  "Interest Earned 28": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "interestearned28"
+    ],
+    "confidence": 0.82
+  },
+  "MSEDCL 359": {
+    "category": "Utilities",
+    "keywords": [
+      "msedcl359"
+    ],
+    "confidence": 0.94
+  },
+  "GST Payment 241": {
+    "category": "Taxes",
+    "keywords": [
+      "gstpayment241"
+    ],
+    "confidence": 0.95
+  },
+  "Blinkit 312": {
+    "category": "Groceries",
+    "keywords": [
+      "blinkit312"
+    ],
+    "confidence": 0.92
+  },
+  "Redbus 799": {
+    "category": "Travel",
+    "keywords": [
+      "redbus799"
+    ],
+    "confidence": 0.86
+  },
+  "Local Store 687": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "localstore687"
+    ],
+    "confidence": 0.82
+  },
+  "Jiomart 395": {
+    "category": "Groceries",
+    "keywords": [
+      "jiomart395"
+    ],
+    "confidence": 0.78
+  },
+  "Tata Play 799": {
+    "category": "Utilities",
+    "keywords": [
+      "tataplay799"
+    ],
+    "confidence": 0.87
+  },
+  "Tata Play 458": {
+    "category": "Utilities",
+    "keywords": [
+      "tataplay458"
+    ],
+    "confidence": 0.76
+  },
+  "Reliance Petroleum 746": {
+    "category": "Fuel",
+    "keywords": [
+      "reliancepetroleum746"
+    ],
+    "confidence": 0.8
+  },
+  "Accenture Salary 780": {
+    "category": "Salary",
+    "keywords": [
+      "accenturesalary780"
+    ],
+    "confidence": 0.9
+  },
+  "HDFC Corp Salary 556": {
+    "category": "Salary",
+    "keywords": [
+      "hdfccorpsalary556"
+    ],
+    "confidence": 0.8
+  },
+  "GST Payment 386": {
+    "category": "Taxes",
+    "keywords": [
+      "gstpayment386"
+    ],
+    "confidence": 0.89
+  },
+  "Tech Mahindra Salary 797": {
+    "category": "Salary",
+    "keywords": [
+      "techmahindrasalary797"
+    ],
+    "confidence": 0.81
+  },
+  "Friend Transfer 550": {
+    "category": "Transfer",
+    "keywords": [
+      "friendtransfer550"
+    ],
+    "confidence": 0.83
+  },
+  "MSEDCL 830": {
+    "category": "Utilities",
+    "keywords": [
+      "msedcl830"
+    ],
+    "confidence": 0.87
+  },
+  "HDFC Mutual Fund 666": {
+    "category": "Investment",
+    "keywords": [
+      "hdfcmutualfund666"
+    ],
+    "confidence": 0.85
+  },
+  "CNG Station 966": {
+    "category": "Fuel",
+    "keywords": [
+      "cngstation966"
+    ],
+    "confidence": 0.77
+  },
+  "Local Store 301": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "localstore301"
+    ],
+    "confidence": 0.77
+  },
+  "Airtel Fiber 470": {
+    "category": "Utilities",
+    "keywords": [
+      "airtelfiber470"
+    ],
+    "confidence": 0.93
+  },
+  "Nature's Basket 103": {
+    "category": "Groceries",
+    "keywords": [
+      "nature'sbasket103"
+    ],
+    "confidence": 0.94
+  },
+  "Star Health 915": {
+    "category": "Insurance",
+    "keywords": [
+      "starhealth915"
+    ],
+    "confidence": 0.82
+  },
+  "Steam 64": {
+    "category": "Entertainment",
+    "keywords": [
+      "steam64"
+    ],
+    "confidence": 0.83
+  },
+  "HP Pump 405": {
+    "category": "Fuel",
+    "keywords": [
+      "hppump405"
+    ],
+    "confidence": 0.95
+  },
+  "HP Pump 38": {
+    "category": "Fuel",
+    "keywords": [
+      "hppump38"
+    ],
+    "confidence": 0.81
+  },
+  "Cleartrip 741": {
+    "category": "Travel",
+    "keywords": [
+      "cleartrip741"
+    ],
+    "confidence": 0.88
+  },
+  "Instamart 49": {
+    "category": "Groceries",
+    "keywords": [
+      "instamart49"
+    ],
+    "confidence": 0.81
+  },
+  "GST Payment 787": {
+    "category": "Taxes",
+    "keywords": [
+      "gstpayment787"
+    ],
+    "confidence": 0.89
+  },
+  "TCS Salary 937": {
+    "category": "Salary",
+    "keywords": [
+      "tcssalary937"
+    ],
+    "confidence": 0.77
+  },
+  "Groww 865": {
+    "category": "Investment",
+    "keywords": [
+      "groww865"
+    ],
+    "confidence": 0.78
+  },
+  "Refund Received 123": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "refundreceived123"
+    ],
+    "confidence": 0.91
+  },
+  "Max Life 134": {
+    "category": "Insurance",
+    "keywords": [
+      "maxlife134"
+    ],
+    "confidence": 0.76
+  },
+  "PNB ATM 74": {
+    "category": "ATM",
+    "keywords": [
+      "pnbatm74"
+    ],
+    "confidence": 0.77
+  },
+  "Income Tax Refund 657": {
+    "category": "Taxes",
+    "keywords": [
+      "incometaxrefund657"
+    ],
+    "confidence": 0.85
+  },
+  "HDFC Ergo 308": {
+    "category": "Insurance",
+    "keywords": [
+      "hdfcergo308"
+    ],
+    "confidence": 0.84
+  },
+  "HP Pump 594": {
+    "category": "Fuel",
+    "keywords": [
+      "hppump594"
+    ],
+    "confidence": 0.83
+  },
+  "Tata Cliq 379": {
+    "category": "Shopping",
+    "keywords": [
+      "tatacliq379"
+    ],
+    "confidence": 0.76
+  },
+  "General Expense 529": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "generalexpense529"
+    ],
+    "confidence": 0.91
+  },
+  "General Expense 30": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "generalexpense30"
+    ],
+    "confidence": 0.83
+  },
+  "Income Tax Refund 660": {
+    "category": "Taxes",
+    "keywords": [
+      "incometaxrefund660"
+    ],
+    "confidence": 0.83
+  },
+  "Bharat Petroleum 775": {
+    "category": "Fuel",
+    "keywords": [
+      "bharatpetroleum775"
+    ],
+    "confidence": 0.75
+  },
+  "Zara 256": {
+    "category": "Shopping",
+    "keywords": [
+      "zara256"
+    ],
+    "confidence": 0.9
+  },
+  "Expedia 605": {
+    "category": "Travel",
+    "keywords": [
+      "expedia605"
+    ],
+    "confidence": 0.9
+  },
+  "Edx 55": {
+    "category": "Education",
+    "keywords": [
+      "edx55"
+    ],
+    "confidence": 0.82
+  },
+  "Edx 860": {
+    "category": "Education",
+    "keywords": [
+      "edx860"
+    ],
+    "confidence": 0.91
+  },
+  "Tech Mahindra Salary 656": {
+    "category": "Salary",
+    "keywords": [
+      "techmahindrasalary656"
+    ],
+    "confidence": 0.79
+  },
+  "Blinkit 743": {
+    "category": "Groceries",
+    "keywords": [
+      "blinkit743"
+    ],
+    "confidence": 0.91
+  },
+  "TCS Salary 310": {
+    "category": "Salary",
+    "keywords": [
+      "tcssalary310"
+    ],
+    "confidence": 0.79
+  },
+  "Indane Gas 333": {
+    "category": "Bills",
+    "keywords": [
+      "indanegas333"
+    ],
+    "confidence": 0.94
+  },
+  "Refund Received 844": {
+    "category": "Miscellaneous",
+    "keywords": [
+      "refundreceived844"
+    ],
+    "confidence": 0.86
+  },
+  "HDFC Mutual Fund 781": {
+    "category": "Investment",
+    "keywords": [
+      "hdfcmutualfund781"
+    ],
+    "confidence": 0.88
+  },
+  "Fortis Hospital 892": {
+    "category": "Medical",
+    "keywords": [
+      "fortishospital892"
+    ],
+    "confidence": 0.91
+  },
+  "Unacademy 137": {
+    "category": "Education",
+    "keywords": [
+      "unacademy137"
+    ],
+    "confidence": 0.91
+  },
+  "Union Bank ATM 771": {
+    "category": "ATM",
+    "keywords": [
+      "unionbankatm771"
+    ],
+    "confidence": 0.84
+  },
+  "Father Account 201": {
+    "category": "Transfer",
+    "keywords": [
+      "fatheraccount201"
+    ],
+    "confidence": 0.85
+  },
+  "TDS Deducted 956": {
+    "category": "Taxes",
+    "keywords": [
+      "tdsdeducted956"
+    ],
+    "confidence": 0.91
+  },
+  "SBI Mutual Fund 754": {
+    "category": "Investment",
+    "keywords": [
+      "sbimutualfund754"
+    ],
+    "confidence": 0.83
+  },
+  "ICICI ATM 568": {
+    "category": "ATM",
+    "keywords": [
+      "iciciatm568"
+    ],
+    "confidence": 0.81
+  },
+  "Ola 345": {
+    "category": "Travel",
+    "keywords": [
+      "ola345"
+    ],
+    "confidence": 0.88
+  },
+  "Apollo Hospital 627": {
+    "category": "Medical",
+    "keywords": [
+      "apollohospital627"
+    ],
+    "confidence": 0.89
+  },
+  "Tata Play 464": {
+    "category": "Utilities",
+    "keywords": [
+      "tataplay464"
+    ],
+    "confidence": 0.82
+  },
+  "Baskin Robbins 900": {
+    "category": "Food",
+    "keywords": [
+      "baskinrobbins900"
+    ],
+    "confidence": 0.93
+  },
+  "Kotak ATM 664": {
+    "category": "ATM",
+    "keywords": [
+      "kotakatm664"
+    ],
+    "confidence": 0.95
+  },
+  "Swiggy 697": {
+    "category": "Food",
+    "keywords": [
+      "swiggy697"
+    ],
+    "confidence": 0.88
+  },
+  "CNG Station 830": {
+    "category": "Fuel",
+    "keywords": [
+      "cngstation830"
+    ],
+    "confidence": 0.9
+  },
+  "BESCOM 156": {
+    "category": "Utilities",
+    "keywords": [
+      "bescom156"
+    ],
+    "confidence": 0.92
+  },
+  "TCS Salary 139": {
+    "category": "Salary",
+    "keywords": [
+      "tcssalary139"
+    ],
+    "confidence": 0.76
+  },
+  "Bharat Petroleum 402": {
+    "category": "Fuel",
+    "keywords": [
+      "bharatpetroleum402"
+    ],
+    "confidence": 0.94
+  },
+  "Chai Point 167": {
+    "category": "Food",
+    "keywords": [
+      "chaipoint167"
+    ],
+    "confidence": 0.89
+  },
+  "Bharat Petroleum 464": {
+    "category": "Fuel",
+    "keywords": [
+      "bharatpetroleum464"
+    ],
+    "confidence": 0.9
+  },
+  "Spencer's 385": {
+    "category": "Groceries",
+    "keywords": [
+      "spencer's385"
+    ],
+    "confidence": 0.83
+  },
+  "Groww 993": {
+    "category": "Investment",
+    "keywords": [
+      "groww993"
+    ],
+    "confidence": 0.77
+  },
+  "Hathway 540": {
+    "category": "Utilities",
+    "keywords": [
+      "hathway540"
+    ],
+    "confidence": 0.83
+  },
+  "Yatra 803": {
+    "category": "Travel",
+    "keywords": [
+      "yatra803"
+    ],
+    "confidence": 0.8
+  },
+  "HDFC Corp Salary 636": {
+    "category": "Salary",
+    "keywords": [
+      "hdfccorpsalary636"
+    ],
+    "confidence": 0.81
+  },
+  "GST Payment 135": {
+    "category": "Taxes",
+    "keywords": [
+      "gstpayment135"
+    ],
+    "confidence": 0.78
+  },
+  "Decathlon 186": {
+    "category": "Shopping",
+    "keywords": [
+      "decathlon186"
+    ],
+    "confidence": 0.93
+  },
+  "Infosys Salary 839": {
+    "category": "Salary",
+    "keywords": [
+      "infosyssalary839"
+    ],
+    "confidence": 0.89
+  },
+  "Simplilearn 736": {
+    "category": "Education",
+    "keywords": [
+      "simplilearn736"
+    ],
+    "confidence": 0.76
+  },
+  "Medplus 881": {
+    "category": "Medical",
+    "keywords": [
+      "medplus881"
+    ],
+    "confidence": 0.78
+  },
+  "Zomato Correction": {
+    "category": "Food",
+    "keywords": [
+      "zomatocorrection",
+      "poslenskart448mumbaiin"
+    ],
+    "confidence": 1.0
+  },
+  "Balance Forward Atm Withdrawal Self-Switch At Nfs 04 54 54 Inr 361818 Atm Withdrawal Self-Switch At Nfs 10 34 49 Inr 090814 Purchase Ananda Vilas Hotel Virudhunagar 13 44 16 369548 Inr Cradj Upi Axb 2019-06- Atm Withdrawal Self-Switch At Nfs 12 10 47 Inr 961248 Atm Withdrawal Self-Switch At Cashnt 15 38 29 Inr 192131 Upi Paytm Paytm Icici 0103Sl00Ipay Oid20190621050469855386 One9 7Communic Upi Le Travenues Technology Private Ltd Ixigo Axisbank Le Travenues Technology Private Limi Atm Withdrawal Self-Switch At Nfs 22 31 27 Inr 293386": {
+    "category": "ATM",
+    "keywords": [
+      "balanceforwardatmwithdrawalself-switchatnfs045454inr361818atmwithdrawalself-switchatnfs103449inr090814purchaseanandavilashotelvirudhunagar134416369548inrcradjupiaxb2019-06-atmwithdrawalself-switchatnfs121047inr961248atmwithdrawalself-switchatcashnt153829inr192131upipaytmpaytmicici0103sl00ipayoid20190621050469855386one97communicupiletravenuestechnologyprivateltdixigoaxisbankletravenuestechnologyprivatelimiatmwithdrawalself-switchatnfs223127inr293386",
+      "balanceforwardatmwithdrawalself-switchatnfs04:54:54/91670400207200000000150000/inr4585460013957031/361818atmwithdrawalself-switchatnfs10:34:49/91691009875400000000150000/inr4585460013957031/090814purchaseanandavilashotelvirudhunagarin13:44:16/36954800000000096600/inr4585460013957031/916908040420cradj/upi/axb/916616736180/2019-06-atmwithdrawalself-switchatnfs12:10:47/91701209876400000000200000/inr4585460013957031/961248atmwithdrawalself-switchatcashnt15:38:29/91701059359200000000150000/inr4585460013957031/192131upi/917209458811/paytm/paytm@icici/icic0000555/0103sl00ipay/oid20190621050469855386@one97communic917209458811/upi/917221648564/letravenuestechnologyprivateltd/ixigo@axisbank1000129101465/letravenuestechnologyprivatelimi917221648564/atmwithdrawalself-switchatnfs22:31:27/91732201931400000000100000/inr4585460013957031/293386"
+    ],
+    "confidence": 1.0
+  },
+  "Description": {
+    "category": "Utilities",
+    "keywords": [
+      "description",
+      "description"
+    ],
+    "confidence": 1.0
+  },
+  "Withdrawal Self-Switch At Nfs 04 54 54 Inr 361818": {
+    "category": "ATM",
+    "keywords": [
+      "withdrawalself-switchatnfs045454inr361818",
+      "atmwithdrawalself-switchatnfs04:54:54/91670400207200000000150000/inr4585460013957031/361818"
+    ],
+    "confidence": 1.0
+  },
+  "Withdrawal Self-Switch At Nfs 10 34 49 Inr 090814": {
+    "category": "ATM",
+    "keywords": [
+      "withdrawalself-switchatnfs103449inr090814",
+      "atmwithdrawalself-switchatnfs10:34:49/91691009875400000000150000/inr4585460013957031/090814"
+    ],
+    "confidence": 1.0
+  },
+  "Purchase Life Style Chennai 20 56 43 040950 Inr": {
+    "category": "Shopping",
+    "keywords": [
+      "purchaselifestylechennai205643040950inr",
+      "purchaselifestylechennaiin20:56:43/04095000000000359900/inr4585460013957031/919415087373"
+    ],
+    "confidence": 1.0
+  }
+}

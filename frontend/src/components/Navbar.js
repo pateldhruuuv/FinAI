@@ -40,7 +40,7 @@ const Navbar = () => {
               </Link>
               <Link to="/upload" style={{ ...styles.link, ...(isActive('/upload') ? styles.activeLink : {}) }}>
                 <UploadCloud size={18} />
-                Upload CSV
+                Statement Hub
               </Link>
               <Link to="/investments" style={{ ...styles.link, ...(isActive('/investments') ? styles.activeLink : {}) }}>
                 <Compass size={18} />
