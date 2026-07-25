@@ -2,7 +2,9 @@ import os
 import pickle
 import re
 import math
-from fastapi import FastAPI, HTTPException
+import shutil
+from typing import Optional
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import pandas as pd
@@ -14,6 +16,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import io
 import base64
+
+# Import Statement Parser & Expense Analyzer components
+from statement_parser import parse_statement_file
+from normalizer import normalize_transactions
+from subscription_detector import detect_subscriptions, detect_recurring_payments
+from expense_analyzer import generate_expense_analysis
+from merchant_learning import save_correction
 
 app = FastAPI(title="FinPilot AI Engine", version="1.0.0")
 
@@ -1394,6 +1403,86 @@ def get_premium_dashboard_plots(data: DashboardPlotsRequest):
         "status": "success",
         "plots": plots
     }
+
+
+# ==========================================
+# STATEMENT PARSING & EXPENSE ANALYSIS ROUTES
+# ==========================================
+
+class ExpenseAnalysisRequest(BaseModel):
+    transactions: list[dict]
+
+class UpdateLearningRequest(BaseModel):
+    description: str
+    merchant: Optional[str] = None
+    category: str
+
+TEMP_DIR = os.path.join(os.path.dirname(__file__), "temp")
+os.makedirs(TEMP_DIR, exist_ok=True)
+
+@app.post("/parse-statement")
+def parse_statement(file: UploadFile = File(...)):
+    # Save the file temporarily
+    file_path = os.path.join(TEMP_DIR, file.filename)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    try:
+        df = parse_statement_file(file_path)
+        if df.empty:
+            raise HTTPException(status_code=400, detail="Could not parse statement file or file is empty")
+            
+        transactions, mapped_columns = normalize_transactions(df)
+        if not transactions:
+            raise HTTPException(status_code=400, detail="No transactions found or failed to normalize transactions")
+            
+        subscriptions = detect_subscriptions(transactions)
+        recurring_expenses = detect_recurring_payments(transactions)
+        
+        ext = os.path.splitext(file.filename)[1].lower()
+        detected_format = ext.replace(".", "").upper()
+        detected_bank = df.attrs.get("detected_bank", "Generic")
+        metadata = df.attrs.get("metadata", None)
+        reward_points = df.attrs.get("reward_points", [])
+        validations = df.attrs.get("validations", None)
+        
+        return {
+            "transactions": transactions,
+            "subscriptions": subscriptions,
+            "recurring_expenses": recurring_expenses,
+            "detected_bank": detected_bank,
+            "detected_format": detected_format,
+            "mapped_columns": mapped_columns,
+            "metadata": metadata,
+            "reward_points": reward_points,
+            "validations": validations
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to parse statement in AI Engine: {str(e)}")
+    finally:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+@app.post("/expense-analysis")
+def expense_analysis(data: ExpenseAnalysisRequest):
+    try:
+        analysis_results = generate_expense_analysis(data.transactions)
+        return {
+            "status": "success",
+            "data": analysis_results
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate expense analysis: {str(e)}")
+
+@app.post("/update-learning")
+def update_learning(data: UpdateLearningRequest):
+    try:
+        res = save_correction(data.description, data.merchant, data.category)
+        return res
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update category learning: {str(e)}")
 
 
 # ==========================================

@@ -26,5 +26,9 @@
   "ach indian oil 712 txn 1864": {
     "merchant": "Zomato Correction",
     "category": "Food"
+  },
+  "pos msedcl 830 mumbai in": {
+    "merchant": "Zomato Correction",
+    "category": "Food"
   }
 }
