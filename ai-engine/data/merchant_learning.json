@@ -30,5 +30,13 @@
   "pos msedcl 830 mumbai in": {
     "merchant": "Zomato Correction",
     "category": "Food"
+  },
+  "discount on fuel pu visa pos on 140": {
+    "merchant": "Discount On Fuel Pu Visa Pos On 140",
+    "category": "Fuel"
+  },
+  "in3670190710m982 sbin319191137575 oasys neft state bank of india": {
+    "merchant": "In3670190710M982 Sbin319191137575 Oasys Neft State Bank Of India",
+    "category": "Investment"
   }
 }
