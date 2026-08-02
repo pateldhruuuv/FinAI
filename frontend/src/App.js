@@ -14,6 +14,7 @@ import UploadStatement from './pages/UploadStatement';
 import InvestmentAdvisor from './pages/InvestmentAdvisor';
 import InsuranceAdvisor from './pages/InsuranceAdvisor';
 import Chatbot from './pages/Chatbot';
+import Settings from './pages/Settings';
 
 // Import Premium Pages
 import PremiumDashboard from './pages/PremiumDashboard';
@@ -78,6 +79,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Chatbot />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
                 </ProtectedRoute>
               }
             />

@@ -34,6 +34,12 @@ app.use('/auth', require('./routes/auth'));
 // Chat APIs
 app.use('/api/chat', require('./routes/chat'));
 
+// Settings and Profile APIs
+app.use('/', require('./routes/settings'));
+
+// Serve Uploads Directory Statically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Root-level transaction/AI endpoints:
 // POST /upload-statement, GET /dashboard, POST /recommend-investment, POST /recommend-insurance, POST /predict-health, POST /chat
 app.use('/', require('./routes/transactions'));

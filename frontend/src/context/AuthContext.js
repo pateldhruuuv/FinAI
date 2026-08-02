@@ -107,25 +107,54 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout User
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    delete axios.defaults.headers.common['Authorization'];
-    setToken(null);
-    setUser(null);
+  // Login with Google
+  const loginWithGoogle = async (googleToken) => {
     setError(null);
+    try {
+      const res = await axios.post('/auth/google', { token: googleToken });
+      const { token: userToken, user: userData } = res.data;
+
+      localStorage.setItem('token', userToken);
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      axios.defaults.headers.common['Authorization'] = `Bearer ${userToken}`;
+      setToken(userToken);
+      setUser(userData);
+      return true;
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Google Authentication failed';
+      setError(errMsg);
+      throw new Error(errMsg);
+    }
+  };
+
+  // Logout User
+  const logout = async () => {
+    try {
+      await axios.post('/auth/logout');
+    } catch (err) {
+      console.warn('Backend logout call failed:', err.message);
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      delete axios.defaults.headers.common['Authorization'];
+      setToken(null);
+      setUser(null);
+      setError(null);
+    }
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        setUser,
         token,
         loading,
         error,
         register,
         login,
+        loginWithGoogle,
         logout,
         togglePremium,
         updateProfile,

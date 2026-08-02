@@ -1,7 +1,8 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { Landmark, Compass, ShieldAlert, MessageSquare, LogOut, LayoutDashboard, UploadCloud, Lock, Zap } from 'lucide-react';
+import { Landmark, Compass, ShieldAlert, MessageSquare, LogOut, LayoutDashboard, UploadCloud, Lock, Zap, Settings } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout, togglePremium } = useContext(AuthContext);
@@ -67,8 +68,25 @@ const Navbar = () => {
                 {user.isPremium ? <Zap size={18} color="#eab308" /> : <Lock size={18} color="#94a3b8" />}
                 Premium Hub
               </Link>
+
+              <Link to="/settings" style={{ ...styles.link, ...(isActive('/settings') ? styles.activeLink : {}) }}>
+                <Settings size={18} />
+                Settings
+              </Link>
               
               <div style={styles.userSection}>
+                {user.profileImage ? (
+                  <img 
+                    src={user.profileImage.startsWith('http') ? user.profileImage : axios.defaults.baseURL + user.profileImage} 
+                    alt={user.name} 
+                    style={styles.avatar} 
+                  />
+                ) : (
+                  <div style={styles.avatarFallback}>
+                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                )}
+                
                 <div style={styles.userInfo}>
                   <span style={styles.userName}>Hello, {user.name}</span>
                   <span style={user.isPremium ? styles.premiumBadge : styles.freeBadge}>
@@ -210,6 +228,26 @@ const styles = {
     marginLeft: '16px',
     paddingLeft: '16px',
     borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
+  },
+  avatar: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    objectFit: 'cover',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+  },
+  avatarFallback: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+    color: '#ffffff',
+    fontSize: '14px',
+    fontWeight: 700,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
   },
   userInfo: {
     display: 'flex',

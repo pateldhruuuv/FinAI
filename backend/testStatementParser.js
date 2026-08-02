@@ -147,7 +147,7 @@ const runTests = async () => {
     console.log('ALL INTEGRATION TESTS PASSED SUCCESSFULLY!');
     process.exit(0);
   } catch (err) {
-    console.error('INTEGRATION TEST FAILED:', err.message);
+    console.error('INTEGRATION TEST FAILED:', err);
     process.exit(1);
   }
 };

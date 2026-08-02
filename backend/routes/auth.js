@@ -24,4 +24,19 @@ router.post('/toggle-premium', auth, authController.togglePremium);
 // @access  Private
 router.put('/profile', auth, authController.updateProfile);
 
+// @route   POST /auth/google
+// @desc    Authenticate with Google OAuth
+// @access  Public
+router.post('/google', authController.googleLogin);
+
+// @route   GET /auth/me
+// @desc    Get current user profile
+// @access  Private
+router.get('/me', auth, authController.getMe);
+
+// @route   POST /auth/logout
+// @desc    Logout user
+// @access  Private
+router.post('/logout', auth, authController.logout);
+
 module.exports = router;

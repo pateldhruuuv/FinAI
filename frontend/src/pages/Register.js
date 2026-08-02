@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { useGoogleLogin } from '@react-oauth/google';
 import { User, Mail, Lock, Calendar, Wallet, UserPlus } from 'lucide-react';
 
 const Register = () => {
@@ -10,7 +11,8 @@ const Register = () => {
   const [localError, setLocalError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const { register, token, error, setError } = useContext(AuthContext);
+  const { register, loginWithGoogle, token, error, setError } = useContext(AuthContext);
+  const [googleSubmitting, setGoogleSubmitting] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,6 +21,29 @@ const Register = () => {
     }
     setError(null);
   }, [token, navigate, setError]);
+
+  const handleGoogleSuccess = async (tokenResponse) => {
+    setGoogleSubmitting(true);
+    setLocalError('');
+    try {
+      const accessToken = tokenResponse.access_token;
+      await loginWithGoogle(accessToken);
+      navigate('/dashboard');
+    } catch (err) {
+      setLocalError(err.message || 'Google Sign-In failed. Please try again.');
+    } finally {
+      setGoogleSubmitting(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setLocalError('Google Sign-In popup closed or failed.');
+  };
+
+  const triggerGoogleLogin = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: handleGoogleError,
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -113,10 +138,28 @@ const Register = () => {
             type="submit"
             className="btn btn-primary"
             style={styles.submitBtn}
-            disabled={submitting}
+            disabled={submitting || googleSubmitting}
           >
             <UserPlus size={18} />
             {submitting ? 'Creating Profile...' : 'Sign Up'}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => triggerGoogleLogin()}
+            style={{
+              ...styles.googleBtn,
+              ...((googleSubmitting || submitting) ? styles.disabledBtn : {})
+            }}
+            disabled={googleSubmitting || submitting}
+          >
+            <svg style={{ marginRight: '10px' }} width="18" height="18" viewBox="0 0 18 18">
+              <path fill="#4285F4" d="M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.4h4.8c-.2 1.1-.8 2-1.8 2.6v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.4z"/>
+              <path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.5-1.8.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H1v2.3C2.5 16 5.5 18 9 18z"/>
+              <path fill="#FBBC05" d="M3.9 10.7c-.2-.5-.3-1.1-.3-1.7s.1-1.2.3-1.7V5H1C.4 6.2 0 7.6 0 9s.4 2.8 1 4l2.9-2.3z"/>
+              <path fill="#EA4335" d="M9 3.6c1.3 0 2.5.4 3.4 1.3l2.6-2.6C13.4 1 11.4 0 9 0 5.5 0 2.5 2 1 5l2.9 2.3c.7-2.2 2.7-3.7 5.1-3.7z"/>
+            </svg>
+            {googleSubmitting ? 'Authenticating...' : 'Continue with Google'}
           </button>
         </form>
 
@@ -202,6 +245,28 @@ const styles = {
     color: '#6366f1',
     textDecoration: 'none',
     fontWeight: 600,
+  },
+  googleBtn: {
+    marginTop: '16px',
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '12px',
+    backgroundColor: '#ffffff',
+    color: '#1f2937',
+    border: '1px solid rgba(0, 0, 0, 0.1)',
+    borderRadius: '8px',
+    fontSize: '15px',
+    fontWeight: 600,
+    fontFamily: 'Outfit, sans-serif',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+  },
+  disabledBtn: {
+    opacity: 0.6,
+    cursor: 'not-allowed',
   },
 };
 
