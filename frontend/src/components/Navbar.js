@@ -5,7 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { Landmark, Compass, ShieldAlert, MessageSquare, LogOut, LayoutDashboard, UploadCloud, Lock, Zap, Settings } from 'lucide-react';
 
 const Navbar = () => {
-  const { user, logout, togglePremium } = useContext(AuthContext);
+  const { user, logout, togglePremium, t } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -37,23 +37,23 @@ const Navbar = () => {
             <>
               <Link to="/dashboard" style={{ ...styles.link, ...(isActive('/dashboard') ? styles.activeLink : {}) }}>
                 <LayoutDashboard size={18} />
-                Dashboard
+                {t('dashboard')}
               </Link>
               <Link to="/upload" style={{ ...styles.link, ...(isActive('/upload') ? styles.activeLink : {}) }}>
                 <UploadCloud size={18} />
-                Statement Hub
+                {t('statementHub')}
               </Link>
               <Link to="/investments" style={{ ...styles.link, ...(isActive('/investments') ? styles.activeLink : {}) }}>
                 <Compass size={18} />
-                Investments
+                {t('investments')}
               </Link>
               <Link to="/insurance" style={{ ...styles.link, ...(isActive('/insurance') ? styles.activeLink : {}) }}>
                 <ShieldAlert size={18} />
-                Insurance
+                {t('insurance')}
               </Link>
               <Link to="/chatbot" style={{ ...styles.link, ...(isActive('/chatbot') ? styles.activeLink : {}) }}>
                 <MessageSquare size={18} />
-                AI Assistant
+                {t('aiAssistant')}
               </Link>
               
               {/* Premium Hub Link */}
@@ -66,12 +66,12 @@ const Navbar = () => {
                 }}
               >
                 {user.isPremium ? <Zap size={18} color="#eab308" /> : <Lock size={18} color="#94a3b8" />}
-                Premium Hub
+                {t('premiumHub')}
               </Link>
 
               <Link to="/settings" style={{ ...styles.link, ...(isActive('/settings') ? styles.activeLink : {}) }}>
                 <Settings size={18} />
-                Settings
+                {t('settings')}
               </Link>
               
               <div style={styles.userSection}>
@@ -88,7 +88,7 @@ const Navbar = () => {
                 )}
                 
                 <div style={styles.userInfo}>
-                  <span style={styles.userName}>Hello, {user.name}</span>
+                  <span style={styles.userName}>{t('hello')}, {user.name}</span>
                   <span style={user.isPremium ? styles.premiumBadge : styles.freeBadge}>
                     {user.isPremium ? 'PREMIUM' : 'FREE'}
                   </span>
@@ -103,20 +103,20 @@ const Navbar = () => {
                     }}
                     title="Upgrade to Premium tier"
                   >
-                    Go Premium
+                    {t('goPremium')}
                   </button>
                 )}
 
-                <button onClick={handleLogout} style={styles.logoutBtn} title="Logout">
+                <button onClick={handleLogout} style={styles.logoutBtn} title={t('logout')}>
                   <LogOut size={16} />
-                  Logout
+                  {t('logout')}
                 </button>
               </div>
             </>
           ) : (
             <>
-              <Link to="/login" style={{ ...styles.link, ...(isActive('/login') ? styles.activeLink : {}) }}>Login</Link>
-              <Link to="/register" style={{ ...styles.link, ...(isActive('/register') ? styles.btnLink : {}) }}>Get Started</Link>
+              <Link to="/login" style={{ ...styles.link, ...(isActive('/login') ? styles.activeLink : {}) }}>{t('login')}</Link>
+              <Link to="/register" style={{ ...styles.link, ...(isActive('/register') ? styles.btnLink : {}) }}>{t('getStarted')}</Link>
             </>
           )}
         </div>

@@ -363,8 +363,8 @@ exports.updateNotifications = async (req, res) => {
 exports.changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
-    if (!oldPassword || !newPassword) {
-      return res.status(400).json({ status: 'error', message: 'Both old and new passwords are required' });
+    if (!newPassword) {
+      return res.status(400).json({ status: 'error', message: 'New password is required' });
     }
 
     if (newPassword.length < 6) {
@@ -376,10 +376,15 @@ exports.changePassword = async (req, res) => {
       return res.status(404).json({ status: 'error', message: 'User not found' });
     }
 
-    // Verify old password
-    const isMatch = await bcrypt.compare(oldPassword, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ status: 'error', message: 'Current password incorrect' });
+    // Verify old password only for traditional password-login users
+    if (user.provider !== 'google') {
+      if (!oldPassword) {
+        return res.status(400).json({ status: 'error', message: 'Current password is required' });
+      }
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ status: 'error', message: 'Current password incorrect' });
+      }
     }
 
     // Hash and save new password

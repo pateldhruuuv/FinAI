@@ -1,0 +1,222 @@
+{
+  "FY2023-24": {
+    "standard_deduction": {
+      "salaried": {
+        "old": 50000,
+        "new": 50000
+      }
+    },
+    "rebate_87A": {
+      "old": {
+        "income_limit": 500000,
+        "max_rebate": 12500
+      },
+      "new": {
+        "income_limit": 700000,
+        "max_rebate": 25000
+      }
+    },
+    "cess_rate": 0.04,
+    "deductions": {
+      "sec_80C": { "max_limit": 150000 },
+      "sec_80CCD_1B": { "max_limit": 50000 },
+      "sec_80D": {
+        "default": 25000,
+        "senior": 50000
+      },
+      "sec_24B": { "max_limit": 200000 }
+    },
+    "surcharge": {
+      "old": [
+        { "limit": 5000000, "rate": 0.10 },
+        { "limit": 10000000, "rate": 0.15 },
+        { "limit": 20000000, "rate": 0.25 },
+        { "limit": 50000000, "rate": 0.37 }
+      ],
+      "new": [
+        { "limit": 5000000, "rate": 0.10 },
+        { "limit": 10000000, "rate": 0.15 },
+        { "limit": 20000000, "rate": 0.25 },
+        { "limit": 50000000, "rate": 0.25 }
+      ]
+    },
+    "slabs": {
+      "old": {
+        "general": [
+          { "min": 0, "max": 250000, "rate": 0.0 },
+          { "min": 250000, "max": 500000, "rate": 0.05 },
+          { "min": 500000, "max": 1000000, "rate": 0.20 },
+          { "min": 1000000, "max": -1, "rate": 0.30 }
+        ],
+        "senior": [
+          { "min": 0, "max": 300000, "rate": 0.0 },
+          { "min": 300000, "max": 500000, "rate": 0.05 },
+          { "min": 500000, "max": 1000000, "rate": 0.20 },
+          { "min": 1000000, "max": -1, "rate": 0.30 }
+        ],
+        "super_senior": [
+          { "min": 0, "max": 500000, "rate": 0.0 },
+          { "min": 500000, "max": 1000000, "rate": 0.20 },
+          { "min": 1000000, "max": -1, "rate": 0.30 }
+        ]
+      },
+      "new": {
+        "general": [
+          { "min": 0, "max": 300000, "rate": 0.0 },
+          { "min": 300000, "max": 600000, "rate": 0.05 },
+          { "min": 600000, "max": 900000, "rate": 0.10 },
+          { "min": 900000, "max": 1200000, "rate": 0.15 },
+          { "min": 1200000, "max": 1500000, "rate": 0.20 },
+          { "min": 1500000, "max": -1, "rate": 0.30 }
+        ]
+      }
+    }
+  },
+  "FY2024-25": {
+    "standard_deduction": {
+      "salaried": {
+        "old": 50000,
+        "new": 75000
+      }
+    },
+    "rebate_87A": {
+      "old": {
+        "income_limit": 500000,
+        "max_rebate": 12500
+      },
+      "new": {
+        "income_limit": 700000,
+        "max_rebate": 20000
+      }
+    },
+    "cess_rate": 0.04,
+    "deductions": {
+      "sec_80C": { "max_limit": 150000 },
+      "sec_80CCD_1B": { "max_limit": 50000 },
+      "sec_80D": {
+        "default": 25000,
+        "senior": 50000
+      },
+      "sec_24B": { "max_limit": 200000 }
+    },
+    "surcharge": {
+      "old": [
+        { "limit": 5000000, "rate": 0.10 },
+        { "limit": 10000000, "rate": 0.15 },
+        { "limit": 20000000, "rate": 0.25 },
+        { "limit": 50000000, "rate": 0.37 }
+      ],
+      "new": [
+        { "limit": 5000000, "rate": 0.10 },
+        { "limit": 10000000, "rate": 0.15 },
+        { "limit": 20000000, "rate": 0.25 },
+        { "limit": 50000000, "rate": 0.25 }
+      ]
+    },
+    "slabs": {
+      "old": {
+        "general": [
+          { "min": 0, "max": 250000, "rate": 0.0 },
+          { "min": 250000, "max": 500000, "rate": 0.05 },
+          { "min": 500000, "max": 1000000, "rate": 0.20 },
+          { "min": 1000000, "max": -1, "rate": 0.30 }
+        ],
+        "senior": [
+          { "min": 0, "max": 300000, "rate": 0.0 },
+          { "min": 300000, "max": 500000, "rate": 0.05 },
+          { "min": 500000, "max": 1000000, "rate": 0.20 },
+          { "min": 1000000, "max": -1, "rate": 0.30 }
+        ],
+        "super_senior": [
+          { "min": 0, "max": 500000, "rate": 0.0 },
+          { "min": 500000, "max": 1000000, "rate": 0.20 },
+          { "min": 1000000, "max": -1, "rate": 0.30 }
+        ]
+      },
+      "new": {
+        "general": [
+          { "min": 0, "max": 300000, "rate": 0.0 },
+          { "min": 300000, "max": 700000, "rate": 0.05 },
+          { "min": 700000, "max": 1000000, "rate": 0.10 },
+          { "min": 1000000, "max": 1200000, "rate": 0.15 },
+          { "min": 1200000, "max": 1500000, "rate": 0.20 },
+          { "min": 1500000, "max": -1, "rate": 0.30 }
+        ]
+      }
+    }
+  },
+  "FY2025-26": {
+    "standard_deduction": {
+      "salaried": {
+        "old": 50000,
+        "new": 75000
+      }
+    },
+    "rebate_87A": {
+      "old": {
+        "income_limit": 500000,
+        "max_rebate": 12500
+      },
+      "new": {
+        "income_limit": 1200000,
+        "max_rebate": 60000
+      }
+    },
+    "cess_rate": 0.04,
+    "deductions": {
+      "sec_80C": { "max_limit": 150000 },
+      "sec_80CCD_1B": { "max_limit": 50000 },
+      "sec_80D": {
+        "default": 25000,
+        "senior": 50000
+      },
+      "sec_24B": { "max_limit": 200000 }
+    },
+    "surcharge": {
+      "old": [
+        { "limit": 5000000, "rate": 0.10 },
+        { "limit": 10000000, "rate": 0.15 },
+        { "limit": 20000000, "rate": 0.25 },
+        { "limit": 50000000, "rate": 0.37 }
+      ],
+      "new": [
+        { "limit": 5000000, "rate": 0.10 },
+        { "limit": 10000000, "rate": 0.15 },
+        { "limit": 20000000, "rate": 0.25 },
+        { "limit": 50000000, "rate": 0.25 }
+      ]
+    },
+    "slabs": {
+      "old": {
+        "general": [
+          { "min": 0, "max": 250000, "rate": 0.0 },
+          { "min": 250000, "max": 500000, "rate": 0.05 },
+          { "min": 500000, "max": 1000000, "rate": 0.20 },
+          { "min": 1000000, "max": -1, "rate": 0.30 }
+        ],
+        "senior": [
+          { "min": 0, "max": 300000, "rate": 0.0 },
+          { "min": 300000, "max": 500000, "rate": 0.05 },
+          { "min": 500000, "max": 1000000, "rate": 0.20 },
+          { "min": 1000000, "max": -1, "rate": 0.30 }
+        ],
+        "super_senior": [
+          { "min": 0, "max": 500000, "rate": 0.0 },
+          { "min": 500000, "max": 1000000, "rate": 0.20 },
+          { "min": 1000000, "max": -1, "rate": 0.30 }
+        ]
+      },
+      "new": {
+        "general": [
+          { "min": 0, "max": 400000, "rate": 0.0 },
+          { "min": 400000, "max": 800000, "rate": 0.05 },
+          { "min": 800000, "max": 1200000, "rate": 0.10 },
+          { "min": 1200000, "max": 1600000, "rate": 0.15 },
+          { "min": 1600000, "max": 2000000, "rate": 0.20 },
+          { "min": 2000000, "max": 2400000, "rate": 0.25 },
+          { "min": 2400000, "max": -1, "rate": 0.30 }
+        ]
+      }
+    }
+  }
+}

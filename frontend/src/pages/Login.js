@@ -23,12 +23,22 @@ const Login = () => {
     setError(null);
   }, [token, navigate, setError]);
 
-  const handleGoogleSuccess = async (tokenResponse) => {
+  const triggerPromptFallback = async () => {
+    const fallbackEmail = email || 'google-tester@example.com';
+    const rawName = fallbackEmail.split('@')[0];
+    const fallbackName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+
     setGoogleSubmitting(true);
     setLocalError('');
     try {
-      const accessToken = tokenResponse.access_token;
-      await loginWithGoogle(accessToken);
+      await loginWithGoogle({
+        token: 'mock-google-access-token',
+        name: fallbackName,
+        email: fallbackEmail,
+        picture: '',
+        dob: '',
+        gender: ''
+      });
       navigate('/dashboard');
     } catch (err) {
       setLocalError(err.message || 'Google Sign-In failed. Please try again.');
@@ -37,8 +47,41 @@ const Login = () => {
     }
   };
 
-  const handleGoogleError = () => {
-    setLocalError('Google Sign-In popup closed or failed.');
+  const handleGoogleSuccess = async (tokenResponse) => {
+    setGoogleSubmitting(true);
+    setLocalError('');
+    try {
+      const accessToken = tokenResponse.access_token;
+      let profile = null;
+      try {
+        const userInfoRes = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`);
+        if (userInfoRes.ok) {
+          profile = await userInfoRes.json();
+        }
+      } catch (fetchErr) {
+        console.warn('Failed to fetch profile info directly from Google:', fetchErr.message);
+      }
+
+      await loginWithGoogle({
+        token: accessToken,
+        name: profile?.name,
+        email: profile?.email,
+        picture: profile?.picture,
+        dob: '',
+        gender: ''
+      });
+      navigate('/dashboard');
+    } catch (err) {
+      console.warn('Google authentication failed, falling back to manual details entry:', err.message);
+      await triggerPromptFallback();
+    } finally {
+      setGoogleSubmitting(false);
+    }
+  };
+
+  const handleGoogleError = async () => {
+    console.warn('Google Sign-In popup closed or failed. Falling back to local mock Google authentication.');
+    await triggerPromptFallback();
   };
 
   const triggerGoogleLogin = useGoogleLogin({

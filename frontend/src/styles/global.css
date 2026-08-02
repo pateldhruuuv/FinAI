@@ -36,6 +36,20 @@
   --transition-normal: 0.3s ease;
 }
 
+html.light, :root.light {
+  --bg-dark: #f8fafc;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-card-hover: rgba(241, 245, 249, 0.9);
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-color-focus: rgba(99, 102, 241, 0.5);
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+
+  --grad-card: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.95) 100%);
+}
+
 /* Base resets */
 * {
   box-sizing: border-box;

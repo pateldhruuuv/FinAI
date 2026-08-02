@@ -26,6 +26,87 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  // Persist user context updates to localStorage
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+  }, [user]);
+
+  // Apply theme class dynamically to html element
+  useEffect(() => {
+    if (user && user.theme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+  }, [user]);
+
+  const translations = {
+    en: {
+      dashboard: "Dashboard",
+      statementHub: "Statement Hub",
+      investments: "Investments",
+      insurance: "Insurance",
+      aiAssistant: "AI Assistant",
+      premiumHub: "Premium Hub",
+      settings: "Settings",
+      logout: "Logout",
+      login: "Login",
+      getStarted: "Get Started",
+      hello: "Hello",
+      goPremium: "Go Premium"
+    },
+    hi: {
+      dashboard: "डैशबोर्ड",
+      statementHub: "स्टेटमेंट हब",
+      investments: "निवेश",
+      insurance: "बीमा",
+      aiAssistant: "एआई सहायक",
+      premiumHub: "प्रीमियम हब",
+      settings: "सेटिंग्स",
+      logout: "लॉगआउट",
+      login: "लॉगिन",
+      getStarted: "शुरू करें",
+      hello: "नमस्ते",
+      goPremium: "प्रीमियम बनें"
+    },
+    es: {
+      dashboard: "Tablero",
+      statementHub: "Centro de Declaraciones",
+      investments: "Inversiones",
+      insurance: "Seguro",
+      aiAssistant: "Asistente de IA",
+      premiumHub: "Centro Premium",
+      settings: "Ajustes",
+      logout: "Cerrar sesión",
+      login: "Iniciar sesión",
+      getStarted: "Empezar",
+      hello: "Hola",
+      goPremium: "Hacerse Premium"
+    },
+    fr: {
+      dashboard: "Tableau de bord",
+      statementHub: "Centre de Déclarations",
+      investments: "Investissements",
+      insurance: "Assurance",
+      aiAssistant: "Assistant IA",
+      premiumHub: "Premium Hub",
+      settings: "Paramètres",
+      logout: "Se déconnecter",
+      login: "Connexion",
+      getStarted: "Commencer",
+      hello: "Bonjour",
+      goPremium: "Devenir Premium"
+    }
+  };
+
+  const t = (key) => {
+    const lang = user?.language || 'en';
+    const langTranslations = translations[lang] || translations.en;
+    return langTranslations[key] || translations.en[key] || key;
+  };
+
   // Register User
   const register = async (name, email, password, age, monthlyIncome) => {
     setError(null);
@@ -108,10 +189,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Login with Google
-  const loginWithGoogle = async (googleToken) => {
+  const loginWithGoogle = async (googleData) => {
     setError(null);
     try {
-      const res = await axios.post('/auth/google', { token: googleToken });
+      const payload = typeof googleData === 'string' ? { token: googleData } : googleData;
+      const res = await axios.post('/auth/google', payload);
       const { token: userToken, user: userData } = res.data;
 
       localStorage.setItem('token', userToken);
@@ -159,6 +241,7 @@ export const AuthProvider = ({ children }) => {
         togglePremium,
         updateProfile,
         setError,
+        t,
       }}
     >
       {children}

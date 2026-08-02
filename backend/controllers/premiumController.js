@@ -112,30 +112,70 @@ exports.getTaxOptimization = async (req, res) => {
     const special = salaryStructure?.specialAllowance || 0;
     const other = salaryStructure?.other || 0;
 
-    // Call Python FastAPI
-    const response = await fetch(`${AI_SERVICE_URL}/tax-optimizer`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        annual_income: parseFloat(annualIncome),
-        salary_basic: parseFloat(basic),
-        salary_hra: parseFloat(hra),
-        salary_special: parseFloat(special),
-        salary_other: parseFloat(other),
-        deductions_80c: parseFloat(deductions80C || 0),
-        deductions_80d: parseFloat(deductions80D || 0),
-        home_loan: parseFloat(homeLoan || 0),
-        education_loan: parseFloat(educationLoan || 0),
-        rent_paid: parseFloat(rentPaid || 0),
-      }),
+    const taxCalculator = require('../utils/taxCalculator');
+
+    // Prepare inputs
+    const grossIncome = taxCalculator.calculateGrossIncome({
+      annualSalary: annualIncome,
+      businessIncome: 0,
+      rentalIncome: 0,
+      capitalGains: 0,
+      otherIncome: 0
     });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      return res.status(response.status).json({ status: 'error', message: `AI Service Error: ${errText}` });
-    }
+    const oldDeductionsBreakdown = taxCalculator.calculateDeductions({
+      annualSalary: annualIncome,
+      basicSalary: basic,
+      rentPaid: rentPaid || 0,
+      hraReceived: hra,
+      deductions: {
+        ppf: 0, elss: 0, epf: 0, taxSavingFD: 0, other80C: deductions80C || 0,
+        healthInsurance: deductions80D || 0, other80D: 0, nps: 0, homeLoanInterest: homeLoan || 0,
+        educationLoanInterest: educationLoan || 0, donations: 0
+      },
+      regime: 'old',
+      fy: 'FY 2024-25',
+      age: 30
+    });
 
-    const result = await response.json();
+    const taxableOld = taxCalculator.calculateTaxableIncome(grossIncome, oldDeductionsBreakdown);
+    const oldRegimeTax = taxCalculator.calculateOldRegimeTax(taxableOld, 'FY 2024-25', 30);
+    const cessOld = taxCalculator.calculateCess(oldRegimeTax.taxAfterRebate, 'FY 2024-25');
+    const oldTaxVal = taxCalculator.calculateNetTax(oldRegimeTax.taxAfterRebate, cessOld);
+
+    const newDeductionsBreakdown = taxCalculator.calculateDeductions({
+      annualSalary: annualIncome,
+      basicSalary: basic,
+      rentPaid: rentPaid || 0,
+      hraReceived: hra,
+      deductions: {},
+      regime: 'new',
+      fy: 'FY 2024-25',
+      age: 30
+    });
+    const taxableNew = taxCalculator.calculateTaxableIncome(grossIncome, newDeductionsBreakdown);
+    const newRegimeTax = taxCalculator.calculateNewRegimeTax(taxableNew, 'FY 2024-25');
+    const cessNew = taxCalculator.calculateCess(newRegimeTax.taxAfterRebate, 'FY 2024-25');
+    const newTaxVal = taxCalculator.calculateNetTax(newRegimeTax.taxAfterRebate, cessNew);
+
+    // Prepare recommendations
+    const suggestions = [];
+    const recommendedInvestments = [];
+    if (deductions80C < 150000) {
+      const diff = 150000 - deductions80C;
+      suggestions.append ? suggestions.append(`Invest ₹${diff.toLocaleString()} more in ELSS / PPF to maximize Section 80C.`) : suggestions.push(`Invest ₹${diff.toLocaleString()} more in ELSS / PPF to maximize Section 80C.`);
+      recommendedInvestments.push(`ELSS / PPF: ₹${diff}`);
+    }
+    if (deductions80D < 25000) {
+      const diff = 25000 - deductions80D;
+      suggestions.append ? suggestions.append(`Purchase Health Insurance up to ₹${diff.toLocaleString()} under Section 80D.`) : suggestions.push(`Purchase Health Insurance up to ₹${diff.toLocaleString()} under Section 80D.`);
+      recommendedInvestments.push(`Health Insurance: ₹${diff}`);
+    }
+    suggestions.push("Invest ₹50,000 in NPS to claim Section 80CCD(1B) deduction.");
+    recommendedInvestments.push("NPS: ₹50000");
+
+    const bestCurrentTax = Math.min(oldTaxVal, newTaxVal);
+    const potentialSavings = Math.max(oldTaxVal - bestCurrentTax, 0);
 
     // Save to Database
     const taxAnalysis = new TaxAnalysis({
@@ -147,11 +187,11 @@ exports.getTaxOptimization = async (req, res) => {
       homeLoanInterest: homeLoan || 0,
       educationLoanInterest: educationLoan || 0,
       rentPaid: rentPaid || 0,
-      taxableIncome: result.taxable_income,
-      currentTax: result.old_tax,
-      potentialSavings: result.potential_savings,
-      recommendedInvestments: result.recommended_investments,
-      taxBreakdownChart: result.tax_breakdown_chart,
+      taxableIncome: taxableOld,
+      currentTax: oldTaxVal,
+      potentialSavings,
+      recommendedInvestments,
+      taxBreakdownChart: "", // Client-side Plotly takes care of rendering
     });
     await taxAnalysis.save();
 
@@ -159,7 +199,7 @@ exports.getTaxOptimization = async (req, res) => {
     await PremiumRecommendations.findOneAndUpdate(
       { userId: req.user },
       {
-        taxAdvice: `Potential tax savings: ₹${result.potential_savings.toLocaleString()}. Suggestions: ${result.suggestions.join(' ')}`,
+        taxAdvice: `Potential tax savings: ₹${potentialSavings.toLocaleString()}. Suggestions: ${suggestions.join(' ')}`,
         updatedAt: Date.now(),
       },
       { upsert: true, new: true }
@@ -168,13 +208,13 @@ exports.getTaxOptimization = async (req, res) => {
     res.json({
       status: 'success',
       data: {
-        taxableIncome: result.taxable_income,
-        oldTax: result.old_tax,
-        newTax: result.new_tax,
-        potentialSavings: result.potential_savings,
-        suggestions: result.suggestions,
-        recommendedInvestments: result.recommended_investments,
-        taxBreakdownChart: result.tax_breakdown_chart,
+        taxableIncome: taxableOld,
+        oldTax: oldTaxVal,
+        newTax: newTaxVal,
+        potentialSavings,
+        suggestions,
+        recommendedInvestments,
+        taxBreakdownChart: "",
         id: taxAnalysis._id,
       },
     });

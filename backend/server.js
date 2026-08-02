@@ -46,6 +46,7 @@ app.use('/', require('./routes/transactions'));
 app.use('/', require('./routes/ai'));
 app.use('/', require('./routes/planners'));
 app.use('/', require('./routes/premium'));
+app.use('/tax', require('./routes/tax'));
 
 // Basic error handler middleware
 app.use((err, req, res, next) => {

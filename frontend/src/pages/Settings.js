@@ -272,8 +272,9 @@ const Settings = () => {
 
   const handleSecuritySubmit = async (e) => {
     e.preventDefault();
-    if (!securityData.oldPassword || !securityData.newPassword) {
-      showToast('Please enter both old and new passwords.', 'error');
+    const isGoogleUser = user && user.provider === 'google';
+    if ((!isGoogleUser && !securityData.oldPassword) || !securityData.newPassword) {
+      showToast(isGoogleUser ? 'Please enter a new password.' : 'Please enter both old and new passwords.', 'error');
       return;
     }
     if (securityData.newPassword !== securityData.confirmPassword) {
@@ -539,7 +540,6 @@ const Settings = () => {
               { id: 'financial', label: 'Financial Profile', icon: Wallet },
               { id: 'security', label: 'Security', icon: Shield },
               { id: 'notifications', label: 'Notifications', icon: Bell },
-              { id: 'preferences', label: 'Preferences', icon: SettingsIcon },
               { id: 'premium', label: 'Premium Membership', icon: Award },
               { id: 'linked', label: 'Linked Accounts', icon: Landmark },
               { id: 'privacy', label: 'Privacy', icon: Lock },
@@ -980,12 +980,10 @@ const Settings = () => {
           {activeTab === 'notifications' && (
             <form onSubmit={handleNotificationsSubmit}>
               <h2 style={styles.sectionHeader}>Notification Toggles</h2>
-              <p style={styles.sectionSubtitle}>Turn on or off notifications across email and SMS delivery modules.</p>
+              <p style={styles.sectionSubtitle}>Turn on or off notifications across advisory and analysis modules.</p>
               
               <div style={styles.settingsList}>
                 {[
-                  { key: 'email', title: 'Email Notifications', desc: 'Monthly audit ledgers and security log reports sent to email.' },
-                  { key: 'sms', title: 'SMS Alerts', desc: 'Critical security changes and transaction diagnostic SMS updates.' },
                   { key: 'investmentAlerts', title: 'Investment Alerts', desc: 'Market rebalancing alerts and index entry notifications.' },
                   { key: 'billReminders', title: 'Bill Reminders', desc: 'Monthly subscription scans and scheduled bill reminder logs.' },
                   { key: 'subscriptionRenewal', title: 'Subscription Renewal Alerts', desc: 'Advance warnings regarding recurring auto-debit payments.' },
