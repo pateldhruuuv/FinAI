@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Scale, ArrowLeft, ShieldAlert, CheckCircle2, AlertTriangle, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const LoanAdvisor = () => {
@@ -48,377 +47,191 @@ const LoanAdvisor = () => {
 
   const getRiskColor = (risk) => {
     if (risk === 'Low') return '#10b981';
-    if (risk === 'Medium') return '#f59e0b';
+    if (risk === 'Medium') return '#ffb59d';
     return '#ef4444';
   };
 
   return (
-    <div style={styles.page}>
-      <header style={styles.header}>
-        <Link to="/premium-dashboard" style={styles.backLink}>
-          <ArrowLeft size={16} />
+    <div className="md:pl-20 mt-16 px-6 md:px-8 pt-10 md:pt-14 pb-6 md:pb-8 min-h-screen bg-background text-on-background font-sans max-w-[1600px] mx-auto animate-fade-in">
+
+      {/* Header */}
+      <header className="mb-8 border-b border-outline-variant pb-6">
+        <Link to="/premium-dashboard" className="inline-flex items-center gap-2 text-xs text-on-surface-variant hover:text-on-surface font-semibold mb-4 transition-colors">
+          <span className="material-symbols-outlined text-sm">arrow_back</span>
           Back to Hub
         </Link>
-        <div style={styles.titleRow}>
-          <Scale size={28} color="#3b82f6" />
-          <h1 style={styles.title}>Loan Eligibility Advisor</h1>
+        <div className="flex items-center gap-3">
+          <span className="material-symbols-outlined text-3xl text-primary-container font-bold">scale</span>
+          <h1 className="font-display-hero text-3xl font-bold tracking-tight text-on-surface">Loan Eligibility Advisor</h1>
         </div>
-        <p style={styles.subtitle}>Determine your multi-loan borrowing limits, safe EMI budgets, and credit risk levels.</p>
+        <p className="text-sm text-on-surface-variant mt-1 m-2">Determine your multi-loan borrowing limits, safe EMI budgets, and credit risk levels.</p>
       </header>
 
-      <div style={styles.container}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+
         {/* Form Panel */}
-        <form onSubmit={handleSubmit} style={styles.formCard}>
-          <h3 style={styles.sectionTitle}>Borrowing Profile</h3>
-          
-          <div style={styles.formGrid}>
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Monthly Income (Net, ₹) *</label>
-              <input type="number" name="income" required value={formData.income} onChange={handleChange} placeholder="e.g. 80000" style={styles.input} />
+        <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-6 md:p-8 border border-outline-variant/40 shadow-sm space-y-5">
+          <h3 className="font-headline-sm text-headline-sm font-bold font-serif text-on-surface border-b border-outline-variant/40 pb-3">Borrowing Profile Parameters</h3>
+
+          <div className="space-y-4 font-sans">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-on-surface-variant block ml-1">Net Monthly Income (₹) *</label>
+              <input
+                type="number"
+                name="income"
+                required
+                value={formData.income}
+                onChange={handleChange}
+                placeholder="e.g. 80000"
+                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
+              />
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Age (Years) *</label>
-              <input type="number" name="age" required value={formData.age} onChange={handleChange} placeholder="e.g. 30" style={styles.input} />
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-on-surface-variant block ml-1">Current Age (Years) *</label>
+              <input
+                type="number"
+                name="age"
+                required
+                value={formData.age}
+                onChange={handleChange}
+                placeholder="e.g. 30"
+                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
+              />
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Credit Score (Approx)</label>
-              <input type="number" name="creditScore" value={formData.creditScore} onChange={handleChange} placeholder="e.g. 750 (300-900)" style={styles.input} />
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-on-surface-variant block ml-1">Credit Score (300 - 900)</label>
+              <input
+                type="number"
+                name="creditScore"
+                value={formData.creditScore}
+                onChange={handleChange}
+                placeholder="e.g. 750"
+                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
+              />
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Current Monthly EMIs (₹)</label>
-              <input type="number" name="currentEmi" value={formData.currentEmi} onChange={handleChange} placeholder="e.g. 15000" style={styles.input} />
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-on-surface-variant block ml-1">Current Monthly EMI Commitments (₹)</label>
+              <input
+                type="number"
+                name="currentEmi"
+                value={formData.currentEmi}
+                onChange={handleChange}
+                placeholder="e.g. 15000"
+                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
+              />
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Total Existing Outstanding Loans (₹)</label>
-              <input type="number" name="existingLoans" value={formData.existingLoans} onChange={handleChange} placeholder="e.g. 500000" style={styles.input} />
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-on-surface-variant block ml-1">Total Outstanding Loans Principal (₹)</label>
+              <input
+                type="number"
+                name="existingLoans"
+                value={formData.existingLoans}
+                onChange={handleChange}
+                placeholder="e.g. 500000"
+                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
+              />
             </div>
           </div>
 
-          <button type="submit" disabled={loading} style={styles.submitBtn}>
-            {loading ? 'Evaluating Eligibility...' : 'Evaluate Loan Eligibility'}
+          <button
+            type="submit"
+            className="w-full bg-primary-container hover:bg-primary text-on-primary-container font-semibold py-3 rounded-full transition-all flex items-center justify-center gap-2 cursor-pointer text-sm mt-6 shadow-md"
+            disabled={loading}
+          >
+            <span className="material-symbols-outlined text-md">scale</span>
+            {loading ? 'Evaluating Borrowing Capacity...' : 'Evaluate Borrowing Capacity'}
           </button>
         </form>
 
         {/* Results Panel */}
-        <div style={styles.resultContainer}>
-          {error && <div style={styles.errorBox}>{error}</div>}
-          
+        <div className="min-h-[400px]">
+          {error && (
+            <div className="bg-error-container/20 border-l-4 border-error text-error p-4 rounded-xl text-sm mb-6 flex items-center gap-2">
+              <span className="material-symbols-outlined text-lg">report_problem</span>
+              <span>{error}</span>
+            </div>
+          )}
+
           {result ? (
-            <div style={styles.resultCard}>
-              <div style={styles.resultHeader}>
-                <Scale size={20} color="#3b82f6" />
-                <h3 style={styles.resultTitle}>Eligible Borrowing Limits</h3>
-                <span style={{ 
-                  ...styles.riskBadge, 
-                  color: getRiskColor(result.loanRisk), 
-                  borderColor: getRiskColor(result.loanRisk),
-                  background: `${getRiskColor(result.loanRisk)}15`
-                }}>
-                  {result.loanRisk} Risk Profile
+            <div className="glass-card rounded-2xl p-6 md:p-8 border border-outline-variant/40 shadow-sm space-y-6 animate-fade-in font-serif">
+              <div className="flex justify-between items-center border-b border-outline-variant/40 pb-4 mb-4 flex-wrap gap-2">
+                <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Eligibility Diagnosis</h3>
+                <span
+                  className="px-3 py-1 rounded-full text-xs font-bold tracking-wider border"
+                  style={{
+                    borderColor: getRiskColor(result.creditRiskLevel),
+                    color: getRiskColor(result.creditRiskLevel),
+                    backgroundColor: `${getRiskColor(result.creditRiskLevel)}15`
+                  }}
+                >
+                  {result.creditRiskLevel} Risk Profile
                 </span>
               </div>
 
-              <div style={styles.emiSummary}>
-                <div style={styles.emiBox}>
-                  <span style={styles.emiLabel}>Safe Monthly EMI</span>
-                  <strong style={{ ...styles.emiVal, color: '#10b981' }}>₹{result.safeEmi.toLocaleString()}</strong>
-                  <span style={styles.emiNote}>35% of monthly income</span>
+              {/* EMI Box */}
+              <div className="grid grid-cols-2 bg-surface-container/30 border border-outline-variant/40 rounded-xl overflow-hidden divide-x divide-outline-variant/30">
+                <div className="p-4 text-center">
+                  <span className="text-[10px] text-on-surface-variant uppercase tracking-widest block mb-1">Max Safe EMI Budget</span>
+                  <strong className="text-xl font-bold text-emerald-400 font-serif">₹{Math.round(result.maxSafeEmi).toLocaleString()}</strong>
+                  <span className="text-[9px] text-on-surface-variant/40 font-sans block mt-1">Based on FOIR 50%</span>
                 </div>
-                <div style={{ ...styles.emiBox, borderRight: 'none' }}>
-                  <span style={styles.emiLabel}>Maximum Monthly EMI</span>
-                  <strong style={{ ...styles.emiVal, color: '#ef4444' }}>₹{result.maximumEmi.toLocaleString()}</strong>
-                  <span style={styles.emiNote}>50% of monthly income</span>
-                </div>
-              </div>
-
-              <div style={styles.limitsSection}>
-                <h4 style={styles.limitsHeading}>Eligible Loan Amount Breakdown</h4>
-                
-                <div style={styles.limitGrid}>
-                  <div style={styles.limitItem}>
-                    <div style={styles.limitIconCol}>
-                      <div style={{ ...styles.colorDot, background: '#10b981' }}></div>
-                      <span>Home Loan Limit:</span>
-                    </div>
-                    <strong>₹{result.breakdown.homeLoan.toLocaleString()}</strong>
-                  </div>
-
-                  <div style={styles.limitItem}>
-                    <div style={styles.limitIconCol}>
-                      <div style={{ ...styles.colorDot, background: '#3b82f6' }}></div>
-                      <span>Car Loan Limit:</span>
-                    </div>
-                    <strong>₹{result.breakdown.carLoan.toLocaleString()}</strong>
-                  </div>
-
-                  <div style={styles.limitItem}>
-                    <div style={styles.limitIconCol}>
-                      <div style={{ ...styles.colorDot, background: '#a855f7' }}></div>
-                      <span>Personal Loan Limit:</span>
-                    </div>
-                    <strong>₹{result.breakdown.personalLoan.toLocaleString()}</strong>
-                  </div>
-
-                  <div style={styles.limitItem}>
-                    <div style={styles.limitIconCol}>
-                      <div style={{ ...styles.colorDot, background: '#eab308' }}></div>
-                      <span>Education Loan Limit:</span>
-                    </div>
-                    <strong>₹{result.breakdown.educationLoan.toLocaleString()}</strong>
-                  </div>
+                <div className="p-4 text-center">
+                  <span className="text-[10px] text-on-surface-variant uppercase tracking-widest block mb-1">Available EMI Buffer</span>
+                  <strong className={`text-xl font-bold font-serif ${result.additionalEmiBuffer > 0 ? 'text-primary' : 'text-rose-400'}`}>
+                    ₹{Math.round(result.additionalEmiBuffer).toLocaleString()}
+                  </strong>
+                  <span className="text-[9px] text-on-surface-variant/40 font-sans block mt-1">Free capacity</span>
                 </div>
               </div>
 
-              <div style={styles.advisoryAlert}>
-                <Info size={16} color="#3b82f6" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <p style={styles.advisoryText}>
-                  {result.loanRisk === 'High' 
-                    ? "WARNING: Your outstanding debts or credit history put you in a High Risk category. Clearing existing loans is highly recommended before applying for new leverage."
-                    : "Safe limit values are calculated based on debt amortization formulas. Banks evaluate additional parameters such as employer reputation and job history."
-                  }
+              {/* Limits list */}
+              <div>
+                <h4 className="text-sm font-bold text-on-surface mb-3 uppercase tracking-wider font-serif">Eligible Borrowing Caps</h4>
+                <div className="grid grid-cols-1 gap-2 text-xs">
+                  {Object.entries(result.eligibleLimits).map(([type, limit], index) => {
+                    const colors = ['#ff6b35', '#918cff', '#10b981'];
+                    const color = colors[index % colors.length];
+
+                    return (
+                      <div key={type} className="flex justify-between items-center bg-surface-container/30 border border-outline-variant/20 rounded-xl p-3.5">
+                        <div className="flex items-center gap-2.5 text-on-surface font-sans">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }}></span>
+                          <span>{type.replace(/([A-Z])/g, ' $1').trim()} Limit</span>
+                        </div>
+                        <strong className="text-sm font-bold font-serif">₹{Math.round(limit).toLocaleString()}</strong>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Advisory note */}
+              <div className="bg-primary-container/5 border border-primary-container/15 rounded-xl p-4 flex gap-3 items-start">
+                <span className="material-symbols-outlined text-primary-container text-xl mt-0.5">psychology</span>
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  {result.additionalEmiBuffer > 0
+                    ? `Safe margin is available. Suggestion: Maintain credit score by limiting credit inquiries. Ensure total EMI remains under 40% of net income for high financial stability.`
+                    : `Debt-to-income margin is tight or over limit. Suggestion: Focus on paying off high-interest outstanding balances first before locking in new loan EMI vectors.`}
                 </p>
               </div>
             </div>
           ) : (
-            <div style={styles.emptyState}>
-              <Scale size={44} color="rgba(255, 255, 255, 0.1)" />
-              <h3>Awaiting Profile Details</h3>
-              <p>Fill out your borrowing profile to view eligible limits and safe debt budgets.</p>
+            <div className="glass-card rounded-2xl p-12 border border-outline-variant/40 shadow-sm text-center flex flex-col items-center justify-center min-h-[300px] border-dashed">
+              <span className="material-symbols-outlined text-5xl text-on-surface-variant/40 mb-4">account_balance_wallet</span>
+              <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface font-serif">Awaiting Inputs</h3>
+              <p className="text-sm text-on-surface-variant max-w-sm mt-2 font-serif leading-relaxed">
+                Provide your income base and liability structures to evaluate multi-loan safety caps.
+              </p>
             </div>
           )}
         </div>
       </div>
     </div>
   );
-};
-
-const styles = {
-  page: {
-    minHeight: '100vh',
-    marginTop: '64px',
-    backgroundColor: '#030712',
-    color: '#f8fafc',
-    fontFamily: 'Outfit, sans-serif',
-    padding: '40px 24px',
-  },
-  header: {
-    maxWidth: '1200px',
-    margin: '0 auto 32px auto',
-  },
-  backLink: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    color: '#94a3b8',
-    textDecoration: 'none',
-    fontSize: '13px',
-    fontWeight: 500,
-    marginBottom: '16px',
-    width: 'fit-content',
-  },
-  titleRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    marginBottom: '8px',
-  },
-  title: {
-    fontSize: '28px',
-    fontWeight: 800,
-    color: '#ffffff',
-  },
-  subtitle: {
-    color: '#cbd5e1',
-    fontSize: '14px',
-  },
-  container: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    display: 'grid',
-    gridTemplateColumns: '1fr 1.2fr',
-    gap: '32px',
-    alignItems: 'start',
-  },
-  formCard: {
-    background: 'rgba(17, 24, 39, 0.45)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '20px',
-    padding: '32px',
-    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.2)',
-  },
-  sectionTitle: {
-    fontSize: '18px',
-    fontWeight: 700,
-    marginBottom: '20px',
-    color: '#ffffff',
-  },
-  formGrid: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-  },
-  label: {
-    fontSize: '12px',
-    fontWeight: 600,
-    color: '#94a3b8',
-  },
-  input: {
-    padding: '12px 16px',
-    borderRadius: '10px',
-    background: 'rgba(15, 23, 42, 0.6)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    color: '#ffffff',
-    fontSize: '14px',
-    fontFamily: 'Outfit, sans-serif',
-    outline: 'none',
-  },
-  submitBtn: {
-    marginTop: '24px',
-    width: '100%',
-    padding: '14px',
-    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '10px',
-    fontSize: '14px',
-    fontWeight: 700,
-    cursor: 'pointer',
-    boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)',
-  },
-  resultContainer: {
-    minHeight: '400px',
-  },
-  errorBox: {
-    padding: '16px',
-    background: 'rgba(239, 68, 68, 0.1)',
-    color: '#f87171',
-    border: '1px solid rgba(239, 68, 68, 0.2)',
-    borderRadius: '12px',
-    marginBottom: '20px',
-  },
-  resultCard: {
-    background: 'rgba(17, 24, 39, 0.45)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '20px',
-    padding: '32px',
-    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.2)',
-  },
-  resultHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    marginBottom: '24px',
-    flexWrap: 'wrap',
-  },
-  resultTitle: {
-    fontSize: '18px',
-    fontWeight: 700,
-    color: '#ffffff',
-  },
-  riskBadge: {
-    marginLeft: 'auto',
-    fontSize: '11px',
-    fontWeight: 700,
-    padding: '4px 10px',
-    borderRadius: '20px',
-    border: '1px solid',
-  },
-  emiSummary: {
-    display: 'flex',
-    background: 'rgba(255, 255, 255, 0.02)',
-    borderRadius: '12px',
-    border: '1px solid rgba(255, 255, 255, 0.04)',
-    marginBottom: '24px',
-  },
-  emiBox: {
-    flex: 1,
-    padding: '16px',
-    textAlign: 'center',
-    borderRight: '1px solid rgba(255, 255, 255, 0.05)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-  },
-  emiLabel: {
-    fontSize: '11px',
-    color: '#94a3b8',
-  },
-  emiVal: {
-    fontSize: '22px',
-    fontWeight: 800,
-  },
-  emiNote: {
-    fontSize: '10px',
-    color: '#64748b',
-  },
-  limitsSection: {
-    marginBottom: '24px',
-  },
-  limitsHeading: {
-    fontSize: '14px',
-    fontWeight: 700,
-    color: '#ffffff',
-    marginBottom: '12px',
-  },
-  limitGrid: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
-  },
-  limitItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    background: 'rgba(255, 255, 255, 0.01)',
-    border: '1px solid rgba(255, 255, 255, 0.03)',
-    borderRadius: '8px',
-    padding: '12px 16px',
-    fontSize: '13px',
-  },
-  limitIconCol: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    color: '#cbd5e1',
-  },
-  colorDot: {
-    width: '8px',
-    height: '8px',
-    borderRadius: '50%',
-  },
-  advisoryAlert: {
-    display: 'flex',
-    gap: '10px',
-    background: 'rgba(59, 130, 246, 0.05)',
-    border: '1px solid rgba(59, 130, 246, 0.15)',
-    borderRadius: '12px',
-    padding: '16px',
-  },
-  advisoryText: {
-    fontSize: '12px',
-    color: '#93c5fd',
-    lineHeight: 1.5,
-  },
-  emptyState: {
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    textAlign: 'center',
-    padding: '60px 40px',
-    border: '2px dashed rgba(255, 255, 255, 0.06)',
-    borderRadius: '20px',
-  },
 };
 
 export default LoanAdvisor;

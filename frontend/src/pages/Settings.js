@@ -1,16 +1,9 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
-import { 
-  User as UserIcon, Wallet, Shield, Bell, Settings as SettingsIcon, 
-  Award, Landmark, Eye, FileText, Camera, Plus, Trash, RefreshCw, 
-  Download, Check, Loader, Lock, Mail, Phone, Calendar, MapPin, 
-  UserCheck, AlertTriangle, HelpCircle, EyeOff, ShieldCheck, Laptop, 
-  Smartphone, LogOut, CheckCircle2, ChevronRight, X
-} from 'lucide-react';
 
 const Settings = () => {
-  const { user, setUser, token, logout, togglePremium } = useContext(AuthContext);
+  const { user, setUser, token, logout, togglePremium, t } = useContext(AuthContext);
   
   // Navigation & Active Tab
   const [activeTab, setActiveTab] = useState('profile');
@@ -252,19 +245,15 @@ const Settings = () => {
 
   const handleFinancialSubmit = async (e) => {
     e.preventDefault();
-    if (financialData.monthlyIncome < 0 || financialData.monthlyExpenses < 0 || financialData.savings < 0) {
-      showToast('Financial figures cannot be negative.', 'error');
-      return;
-    }
     try {
       setSubmitLoading(true);
       const res = await axios.put('/financial-profile', financialData);
       if (res.data.status === 'success') {
         setUser(res.data.user);
-        showToast('Financial profile saved and recommendations updated.');
+        showToast('Financial parameters synced successfully!');
       }
     } catch (err) {
-      showToast('Error updating financial settings.', 'error');
+      showToast(err.response?.data?.message || 'Failed to sync financials.', 'error');
     } finally {
       setSubmitLoading(false);
     }
@@ -272,27 +261,54 @@ const Settings = () => {
 
   const handleSecuritySubmit = async (e) => {
     e.preventDefault();
-    const isGoogleUser = user && user.provider === 'google';
-    if ((!isGoogleUser && !securityData.oldPassword) || !securityData.newPassword) {
-      showToast(isGoogleUser ? 'Please enter a new password.' : 'Please enter both old and new passwords.', 'error');
-      return;
-    }
     if (securityData.newPassword !== securityData.confirmPassword) {
-      showToast('Passwords do not match.', 'error');
+      showToast('New passwords do not match!', 'error');
       return;
     }
     try {
       setSubmitLoading(true);
-      const res = await axios.put('/security/change-password', {
+      const res = await axios.put('/auth/password', {
         oldPassword: securityData.oldPassword,
         newPassword: securityData.newPassword
       });
       if (res.data.status === 'success') {
-        showToast('Password changed successfully.');
-        setSecurityData({ oldPassword: '', newPassword: '', confirmPassword: '', enable2FA: securityData.enable2FA });
+        showToast('Password credentials updated successfully!');
+        setSecurityData(prev => ({ ...prev, oldPassword: '', newPassword: '', confirmPassword: '' }));
       }
     } catch (err) {
-      showToast(err.response?.data?.message || 'Failed to change password.', 'error');
+      showToast(err.response?.data?.message || 'Failed to update credentials.', 'error');
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  const handleToggle2FA = async () => {
+    try {
+      setSubmitLoading(true);
+      const updatedStatus = !securityData.enable2FA;
+      const res = await axios.post('/auth/toggle-2fa', { enable2FA: updatedStatus });
+      if (res.data.status === 'success') {
+        setSecurityData(prev => ({ ...prev, enable2FA: updatedStatus }));
+        showToast(`Two-Factor Authentication ${updatedStatus ? 'activated' : 'deactivated'}.`);
+      }
+    } catch (err) {
+      showToast('Failed to change 2FA status.', 'error');
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  const handleNotificationsSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setSubmitLoading(true);
+      const res = await axios.put('/notifications/settings', { notifications: notificationsData });
+      if (res.data.status === 'success') {
+        setUser(res.data.user);
+        showToast('Alert preferences updated successfully!');
+      }
+    } catch (err) {
+      showToast('Failed to update alert parameters.', 'error');
     } finally {
       setSubmitLoading(false);
     }
@@ -305,143 +321,151 @@ const Settings = () => {
       const res = await axios.put('/preferences', preferencesData);
       if (res.data.status === 'success') {
         setUser(res.data.user);
-        showToast('Preferences updated successfully.');
+        showToast('Application preferences updated successfully!');
       }
     } catch (err) {
-      showToast('Failed to update preferences.', 'error');
+      showToast('Failed to update workspace preferences.', 'error');
     } finally {
       setSubmitLoading(false);
     }
   };
 
-  const handleNotificationsSubmit = async (e) => {
+  const handleLinkAccountSubmit = async (e) => {
     e.preventDefault();
-    try {
-      setSubmitLoading(true);
-      const res = await axios.put('/notifications', notificationsData);
-      if (res.data.status === 'success') {
-        setUser(res.data.user);
-        showToast('Notifications toggled successfully.');
-      }
-    } catch (err) {
-      showToast('Failed to save notification toggles.', 'error');
-    } finally {
-      setSubmitLoading(false);
-    }
-  };
-
-  // Add Account
-  const handleAddAccount = async (e) => {
-    e.preventDefault();
-    if (!newAccount.institutionName.trim() || !newAccount.accountNumber.trim() || newAccount.balance === '') {
-      showToast('Please fill out all fields.', 'error');
+    if (!newAccount.institutionName || !newAccount.accountNumber || !newAccount.balance) {
+      alert('Please fill in all details.');
       return;
     }
     try {
       setSubmitLoading(true);
-      const res = await axios.post('/linked-accounts', newAccount);
+      const res = await axios.post('/linked-accounts', {
+        ...newAccount,
+        balance: Number(newAccount.balance)
+      });
       if (res.data.status === 'success') {
-        setLinkedAccounts([...linkedAccounts, res.data.account]);
+        showToast('Financial ledger account linked successfully!');
         setShowAddAccountModal(false);
-        setNewAccount({ accountType: 'bank', institutionName: '', accountNumber: '', balance: '', currency: 'INR' });
-        showToast('Account connected successfully.');
+        setNewAccount({
+          accountType: 'bank',
+          institutionName: '',
+          accountNumber: '',
+          balance: '',
+          currency: 'INR',
+        });
+        fetchLinkedAccountsList();
       }
     } catch (err) {
-      showToast('Failed to connect financial account.', 'error');
+      showToast('Failed to link ledger account.', 'error');
     } finally {
       setSubmitLoading(false);
     }
   };
 
-  // Remove Account
-  const handleRemoveAccount = async (id) => {
+  const handleDeleteAccount = async (id) => {
     if (!window.confirm('Are you sure you want to unlink this account?')) return;
     try {
+      setSubmitLoading(true);
       const res = await axios.delete(`/linked-accounts/${id}`);
       if (res.data.status === 'success') {
-        setLinkedAccounts(linkedAccounts.filter(a => a._id !== id));
-        showToast('Account disconnected.');
+        showToast('Account unlinked successfully!');
+        fetchLinkedAccountsList();
       }
     } catch (err) {
-      showToast('Failed to disconnect account.', 'error');
-    }
-  };
-
-  // Refresh Linked Accounts
-  const handleRefreshAccounts = async () => {
-    try {
-      setAccountsLoading(true);
-      const res = await axios.post('/linked-accounts/refresh');
-      if (res.data.status === 'success') {
-        setLinkedAccounts(res.data.accounts);
-        showToast('Accounts refreshed successfully.');
-      }
-    } catch (err) {
-      showToast('Refresh failed.', 'error');
+      showToast('Failed to unlink account.', 'error');
     } finally {
-      setAccountsLoading(false);
+      setSubmitLoading(false);
     }
   };
 
-  // Privacy: Sharing consent toggle
-  const handleSharingConsent = async (val) => {
+  const handleGenerateReport = async () => {
     try {
-      setDataConsent(val);
-      const res = await axios.put('/privacy/sharing-consent', { consent: val });
+      setSubmitLoading(true);
+      const res = await axios.post('/settings/reports', { 
+        reportType, 
+        format: reportFormat 
+      }, {
+        responseType: 'blob'
+      });
+      
+      const file = new Blob([res.data], { type: reportFormat === 'PDF' ? 'application/pdf' : 'text/csv' });
+      const fileURL = URL.createObjectURL(file);
+      const link = document.createElement('a');
+      link.href = fileURL;
+      link.setAttribute('download', `Finmate_${reportType}_Report.${reportFormat.toLowerCase()}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      showToast('Report generated and downloaded successfully!');
+    } catch (err) {
+      showToast('Failed to generate file download.', 'error');
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  const handleToggleConsent = async () => {
+    try {
+      setSubmitLoading(true);
+      const nextConsent = !dataConsent;
+      const res = await axios.put('/privacy/sharing-consent', { consent: nextConsent });
       if (res.data.status === 'success') {
-        showToast(`Data sharing ${val ? 'enabled' : 'disabled'}.`);
+        setDataConsent(nextConsent);
+        showToast('Data sharing parameters updated.');
       }
     } catch (err) {
-      showToast('Failed to change consent settings.', 'error');
+      showToast('Failed to update consent policies.', 'error');
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
-  // Download personal JSON
-  const handleDownloadPersonalData = async () => {
+  const handleDownloadData = async () => {
     try {
+      setSubmitLoading(true);
       const res = await axios.post('/privacy/download-data', {}, { responseType: 'blob' });
-      const blob = new Blob([res.data], { type: 'application/json' });
+      
+      const file = new Blob([res.data], { type: 'application/json' });
+      const fileURL = URL.createObjectURL(file);
       const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = `FinPilot_UserData_${user._id}.json`;
+      link.href = fileURL;
+      link.setAttribute('download', `Finmate_PersonalData_Ledger.json`);
+      document.body.appendChild(link);
       link.click();
-      showToast('Personal data exported.');
+      link.remove();
+      showToast('Personal data ledger exported successfully!');
     } catch (err) {
-      showToast('Export failed.', 'error');
+      showToast('Failed to export personal data.', 'error');
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
-  // Clear statements
-  const handleDeleteStatements = async () => {
-    if (!window.confirm('CRITICAL: This will permanently delete all your uploaded statements and normalized transaction ledger records. This cannot be undone. Proceed?')) return;
+  const handleClearStatements = async () => {
+    if (!window.confirm("Are you sure you want to permanently clear all normalized transaction records? This action is irreversible.")) {
+      return;
+    }
     try {
       setSubmitLoading(true);
       const res = await axios.post('/privacy/delete-statements');
       if (res.data.status === 'success') {
-        showToast('Statement databases cleared.');
+        showToast('All transaction ledger history cleared.');
       }
     } catch (err) {
-      showToast('Failed to clear statements.', 'error');
+      showToast('Failed to clear transaction records.', 'error');
     } finally {
       setSubmitLoading(false);
     }
   };
 
-  // Delete user account
-  const handleDeleteAccount = async () => {
-    const confirmed = window.confirm('DANGER: This will permanently delete your account and all associated personal and financial records. This cannot be undone. Are you absolutely sure?');
-    if (!confirmed) return;
-    const doubleConfirmed = window.prompt('Type DELETE to permanently erase your profile and records:');
-    if (doubleConfirmed !== 'DELETE') {
-      showToast('Account deletion cancelled.', 'error');
+  const handleDeleteUserAccount = async () => {
+    if (!window.confirm("CRITICAL WARNING: Are you sure you want to permanently delete your account and all associated financial records? This action is irreversible.")) {
       return;
     }
-
     try {
       setSubmitLoading(true);
       const res = await axios.delete('/account');
       if (res.data.status === 'success') {
-        alert('Your account has been deleted successfully.');
+        showToast('Your account was successfully deleted.');
         logout();
       }
     } catch (err) {
@@ -451,1426 +475,869 @@ const Settings = () => {
     }
   };
 
-  // Upgrade Plan
-  const handleUpgradeToPremium = async () => {
-    try {
-      setSubmitLoading(true);
-      const isPremiumNow = await togglePremium();
-      showToast(isPremiumNow ? 'Welcome to Premium Membership!' : 'Membership status altered.');
-      fetchSettingsProfile();
-    } catch (err) {
-      showToast('Upgrade failed.', 'error');
-    } finally {
-      setSubmitLoading(false);
-    }
-  };
-
-  // Settings report download
-  const handleReportDownload = async (e) => {
-    e.preventDefault();
-    try {
-      setSubmitLoading(true);
-      const res = await axios.post('/settings/reports', {
-        reportType,
-        format: reportFormat
-      }, { responseType: 'blob' });
-
-      const typeMap = {
-        PDF: 'application/pdf',
-        CSV: 'text/csv'
-      };
-
-      const blob = new Blob([res.data], { type: typeMap[reportFormat] });
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = `FinPilot_${reportType}_Report_${new Date().toISOString().split('T')[0]}.${reportFormat.toLowerCase()}`;
-      link.click();
-      showToast(`${reportType} report download started.`);
-    } catch (err) {
-      console.error(err);
-      showToast('Failed to compile report.', 'error');
-    } finally {
-      setSubmitLoading(false);
-    }
-  };
-
   if (profileLoading) {
     return (
-      <div style={styles.loaderContainer}>
-        <Loader className="animate-spin" size={40} color="#6366f1" />
-        <span style={{ marginTop: '16px', color: '#94a3b8' }}>Loading settings...</span>
+      <div className="flex flex-col items-center justify-center min-h-[80vh] md:pl-20 mt-16 text-on-surface font-sans">
+        <span className="material-symbols-outlined text-4xl animate-spin text-primary-container mb-4">refresh</span>
+        <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">Decrypting telemetry cockpit...</h2>
       </div>
     );
   }
 
   return (
-    <div style={styles.page}>
+    <div className="md:pl-20 mt-16 px-6 md:px-8 pt-10 md:pt-14 pb-6 md:pb-8 min-h-screen bg-background text-on-background font-sans max-w-6xl mx-auto">
+      
+      {/* Toast Alert */}
       {toast && (
-        <div style={{
-          ...styles.toast,
-          background: toast.type === 'success' ? 'rgba(16, 185, 129, 0.95)' : 'rgba(239, 68, 68, 0.95)',
-          border: toast.type === 'success' ? '1px solid #10b981' : '1px solid #ef4444'
-        }}>
-          {toast.type === 'success' ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
+        <div className={`fixed top-20 right-6 z-50 p-4 rounded-xl border shadow-xl flex items-center gap-3 animate-fade-in font-serif text-sm ${
+          toast.type === 'error' ? 'bg-error-container/20 border-error/30 text-error' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+        }`}>
+          <span className="material-symbols-outlined">{toast.type === 'error' ? 'report_problem' : 'check_circle'}</span>
           <span>{toast.message}</span>
         </div>
       )}
 
-      <div style={styles.header}>
-        <h1 style={styles.title}>Account Settings</h1>
-        <p style={styles.subtitle}>Configure preferences, linked banking databases, privacy consents, and profile indicators.</p>
+      {/* Page Header */}
+      <div className="mb-8 border-b border-outline-variant pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="font-display-hero text-3xl font-bold tracking-tight text-on-surface">Account Settings</h1>
+          <p className="text-sm text-on-surface-variant mt-1">Manage your boutique financial credentials and preferences.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <span className="text-xs text-on-surface-variant block">Profile Health</span>
+            <strong className="text-sm font-serif text-primary-container">{profileCompletion}% Complete</strong>
+          </div>
+          <div className="w-24 bg-surface-container rounded-full h-2 overflow-hidden border border-outline-variant/30">
+            <div className="bg-primary h-full rounded-full transition-all" style={{ width: `${profileCompletion}%` }}></div>
+          </div>
+        </div>
       </div>
 
-      <div style={styles.container}>
-        {/* Sidebar */}
-        <aside style={styles.sidebar}>
-          <div style={styles.completionCard}>
-            <div style={styles.completionRow}>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#94a3b8' }}>Profile Completion</span>
-              <span style={{ fontSize: '14px', fontWeight: 700, color: '#6366f1' }}>{profileCompletion}%</span>
-            </div>
-            <div style={styles.progressBarBg}>
-              <div style={{ ...styles.progressBarFill, width: `${profileCompletion}%` }}></div>
-            </div>
-          </div>
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
+        {/* Inner Sidebar Navigation */}
+        <nav className="w-full lg:w-64 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 shrink-0 border-b lg:border-b-0 border-outline-variant/40">
+          <button 
+            onClick={() => setActiveTab('profile')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer font-semibold text-xs whitespace-nowrap lg:w-full ${
+              activeTab === 'profile' 
+                ? 'bg-surface-container-high text-on-surface border-l-4 border-primary shadow-sm' 
+                : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg">person</span> Profile
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab('financial')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer font-semibold text-xs whitespace-nowrap lg:w-full ${
+              activeTab === 'financial' 
+                ? 'bg-surface-container-high text-on-surface border-l-4 border-primary shadow-sm' 
+                : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg">account_balance</span> Financial Profile
+          </button>
 
-          <nav style={styles.navMenu}>
-            {[
-              { id: 'profile', label: 'Profile', icon: UserIcon },
-              { id: 'financial', label: 'Financial Profile', icon: Wallet },
-              { id: 'security', label: 'Security', icon: Shield },
-              { id: 'notifications', label: 'Notifications', icon: Bell },
-              { id: 'premium', label: 'Premium Membership', icon: Award },
-              { id: 'linked', label: 'Linked Accounts', icon: Landmark },
-              { id: 'privacy', label: 'Privacy', icon: Lock },
-              { id: 'reports', label: 'Data & Reports', icon: FileText }
-            ].map((tab) => {
-              const Icon = tab.icon;
-              const isSelected = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  style={{
-                    ...styles.navBtn,
-                    background: isSelected ? 'rgba(99, 102, 241, 0.08)' : 'transparent',
-                    borderLeft: isSelected ? '3px solid #6366f1' : '3px solid transparent',
-                    color: isSelected ? '#ffffff' : '#94a3b8',
-                    fontWeight: isSelected ? 700 : 500
-                  }}
-                >
-                  <Icon size={18} style={{ opacity: isSelected ? 1 : 0.7 }} />
-                  <span>{tab.label}</span>
-                  {isSelected && <ChevronRight size={14} style={styles.chevron} />}
-                </button>
-              );
-            })}
-          </nav>
-        </aside>
+          <button 
+            onClick={() => setActiveTab('security')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer font-semibold text-xs whitespace-nowrap lg:w-full ${
+              activeTab === 'security' 
+                ? 'bg-surface-container-high text-on-surface border-l-4 border-primary shadow-sm' 
+                : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg">verified_user</span> Security
+          </button>
 
-        {/* Content Pane */}
-        <main className="glass-card animate-fade-in" style={styles.contentPane}>
-          {/* PROFILE TAB */}
+          <button 
+            onClick={() => setActiveTab('notifications')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer font-semibold text-xs whitespace-nowrap lg:w-full ${
+              activeTab === 'notifications' 
+                ? 'bg-surface-container-high text-on-surface border-l-4 border-primary shadow-sm' 
+                : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg">notifications_active</span> Notifications
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('accounts')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer font-semibold text-xs whitespace-nowrap lg:w-full ${
+              activeTab === 'accounts' 
+                ? 'bg-surface-container-high text-on-surface border-l-4 border-primary shadow-sm' 
+                : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg">credit_card</span> Linked Accounts
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('preferences')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer font-semibold text-xs whitespace-nowrap lg:w-full ${
+              activeTab === 'preferences' 
+                ? 'bg-surface-container-high text-on-surface border-l-4 border-primary shadow-sm' 
+                : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg">language</span> Preferences
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('reports')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer font-semibold text-xs whitespace-nowrap lg:w-full ${
+              activeTab === 'reports' 
+                ? 'bg-surface-container-high text-on-surface border-l-4 border-primary shadow-sm' 
+                : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg">file_download</span> Reports & Data
+          </button>
+        </nav>
+
+        {/* Content Area */}
+        <div className="flex-1 w-full bg-surface-container-low rounded-2xl p-6 md:p-8 border border-outline-variant shadow-xl">
+          
+          {/* TAB 1: PROFILE INFO */}
           {activeTab === 'profile' && (
-            <form onSubmit={handleProfileSubmit}>
-              <h2 style={styles.sectionHeader}>Profile Details</h2>
-              <p style={styles.sectionSubtitle}>View, update, and manage your personal biological and occupational parameters.</p>
-              
-              <div style={styles.profileImageSection}>
-                <div style={styles.avatarWrapper}>
-                  {user?.profileImage ? (
-                    <img 
-                      src={user.profileImage.startsWith('http') ? user.profileImage : axios.defaults.baseURL + user.profileImage} 
-                      alt={user.name} 
-                      style={styles.avatarImg} 
+            <div className="space-y-8 animate-fade-in font-serif">
+              {/* Avatar upload */}
+              <div>
+                <h3 className="font-headline-sm text-headline-sm mb-6 text-on-surface">Profile Picture</h3>
+                <div className="flex flex-col sm:flex-row items-center gap-6">
+                  <div className="relative group">
+                    {user.profileImage ? (
+                      <img 
+                        className="w-24 h-24 rounded-full object-cover border-4 border-surface-container-high shadow-xl" 
+                        src={user.profileImage.startsWith('http') ? user.profileImage : axios.defaults.baseURL + user.profileImage} 
+                        alt={user.name} 
+                      />
+                    ) : (
+                      <div className="w-24 h-24 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-4xl border-4 border-surface-container-high shadow-xl">
+                        {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                      </div>
+                    )}
+                    <button 
+                      onClick={handleImageUploadClick} 
+                      className="absolute bottom-0 right-0 p-2 bg-primary text-on-primary rounded-full border border-surface-container shadow hover:scale-105 transition-all cursor-pointer"
+                      disabled={submitLoading}
+                    >
+                      <span className="material-symbols-outlined text-sm font-bold">edit</span>
+                    </button>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      onChange={handleImageChange} 
+                      className="hidden" 
+                      accept="image/*"
                     />
-                  ) : (
-                    <div style={styles.avatarFallback}>
-                      {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                  <div className="text-left font-sans">
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={handleImageUploadClick} 
+                        className="px-5 py-2 bg-primary-container text-on-primary-container rounded-full text-xs font-bold hover:bg-primary transition-colors cursor-pointer"
+                        disabled={submitLoading}
+                      >
+                        Upload Photo
+                      </button>
                     </div>
-                  )}
-                  <button type="button" onClick={handleImageUploadClick} style={styles.cameraBtn} title="Upload Profile Picture">
-                    <Camera size={14} />
-                  </button>
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    onChange={handleImageChange} 
-                    style={{ display: 'none' }} 
-                    accept="image/*" 
-                  />
-                </div>
-                <div>
-                  <h4 style={{ fontSize: '15px', color: '#ffffff' }}>Profile Picture</h4>
-                  <p style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>PNG, JPG or GIF. Max 2MB.</p>
+                    <p className="text-on-surface-variant text-[11px] mt-2">Recommended: JPG or PNG, size under 2MB.</p>
+                  </div>
                 </div>
               </div>
 
-              <div style={styles.grid}>
-                <div className="form-group">
-                  <label className="form-label">Full Name</label>
-                  <div style={styles.inputWrapper}>
-                    <UserIcon size={16} style={styles.inputIcon} />
+              {/* Personal Form */}
+              <form onSubmit={handleProfileSubmit} className="border-t border-outline-variant/60 pt-8 space-y-6">
+                <h3 className="font-headline-sm text-headline-sm mb-6 text-on-surface">Personal Information</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-1.5 font-sans">
+                    <label className="text-xs font-semibold text-on-surface-variant block ml-1">Full Name</label>
                     <input 
                       type="text" 
-                      className="form-input" 
-                      style={styles.inputWithIcon}
-                      value={profileData.name} 
-                      onChange={(e) => setProfileData({ ...profileData, name: e.target.value })} 
-                      placeholder="Dhruv Patel"
+                      value={profileData.name}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
+                      className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
+                      required
                     />
                   </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Email Address</label>
-                  <div style={styles.inputWrapper}>
-                    <Mail size={16} style={styles.inputIcon} />
+                  
+                  <div className="space-y-1.5 font-sans">
+                    <label className="text-xs font-semibold text-on-surface-variant block ml-1">Email Address</label>
                     <input 
                       type="email" 
-                      className="form-input" 
-                      style={{ ...styles.inputWithIcon, opacity: 0.6, cursor: 'not-allowed' }}
-                      value={profileData.email} 
+                      value={profileData.email}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
+                      className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all opacity-85" 
                       disabled
                     />
                   </div>
-                </div>
 
-                <div className="form-group">
-                  <label className="form-label">Mobile Number</label>
-                  <div style={styles.inputWrapper}>
-                    <Phone size={16} style={styles.inputIcon} />
+                  <div className="space-y-1.5 font-sans">
+                    <label className="text-xs font-semibold text-on-surface-variant block ml-1">Phone Number</label>
                     <input 
                       type="tel" 
-                      className="form-input" 
-                      style={styles.inputWithIcon}
-                      value={profileData.phone} 
-                      onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })} 
-                      placeholder="+91 9988776655"
+                      value={profileData.phone}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="e.g. +91 9876543210"
+                      className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
                     />
                   </div>
-                </div>
 
-                <div className="form-group">
-                  <label className="form-label">Date of Birth</label>
-                  <div style={styles.inputWrapper}>
-                    <Calendar size={16} style={styles.inputIcon} />
+                  <div className="space-y-1.5 font-sans">
+                    <label className="text-xs font-semibold text-on-surface-variant block ml-1">Date of Birth</label>
                     <input 
                       type="date" 
-                      className="form-input" 
-                      style={styles.inputWithIcon}
-                      value={profileData.dob} 
-                      onChange={(e) => setProfileData({ ...profileData, dob: e.target.value })} 
+                      value={profileData.dob}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, dob: e.target.value }))}
+                      className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
                     />
                   </div>
-                </div>
 
-                <div className="form-group">
-                  <label className="form-label">Gender</label>
-                  <select 
-                    className="form-select"
-                    value={profileData.gender} 
-                    onChange={(e) => setProfileData({ ...profileData, gender: e.target.value })}
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                    <option value="Prefer Not to Say">Prefer Not to Say</option>
-                  </select>
-                </div>
+                  <div className="space-y-1.5 font-sans">
+                    <label className="text-xs font-semibold text-on-surface-variant block ml-1">Gender</label>
+                    <div className="relative">
+                      <select 
+                        value={profileData.gender}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, gender: e.target.value }))}
+                        className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface appearance-none focus:outline-none focus:border-primary transition-all"
+                      >
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      <span className="material-symbols-outlined absolute right-3 top-3.5 text-on-surface-variant pointer-events-none text-lg">expand_more</span>
+                    </div>
+                  </div>
 
-                <div className="form-group">
-                  <label className="form-label">Occupation</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={profileData.occupation} 
-                    onChange={(e) => setProfileData({ ...profileData, occupation: e.target.value })} 
-                    placeholder="Software Engineer"
-                  />
-                </div>
-              </div>
-
-              <div className="form-group" style={{ marginTop: '12px' }}>
-                <label className="form-label">Street Address</label>
-                <div style={styles.inputWrapper}>
-                  <MapPin size={16} style={styles.inputIcon} />
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    style={styles.inputWithIcon}
-                    value={profileData.address} 
-                    onChange={(e) => setProfileData({ ...profileData, address: e.target.value })} 
-                    placeholder="123 Financial Hub, Tech Park"
-                  />
-                </div>
-              </div>
-
-              <div style={styles.grid}>
-                <div className="form-group">
-                  <label className="form-label">City</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={profileData.city} 
-                    onChange={(e) => setProfileData({ ...profileData, city: e.target.value })} 
-                    placeholder="Mumbai"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">State</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={profileData.state} 
-                    onChange={(e) => setProfileData({ ...profileData, state: e.target.value })} 
-                    placeholder="Maharashtra"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Country</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={profileData.country} 
-                    onChange={(e) => setProfileData({ ...profileData, country: e.target.value })} 
-                    placeholder="India"
-                  />
-                </div>
-              </div>
-
-              <button type="submit" disabled={submitLoading} className="btn btn-primary" style={styles.submitBtn}>
-                {submitLoading ? <Loader className="animate-spin" size={16} /> : <Check size={16} />}
-                <span>Save Profile Changes</span>
-              </button>
-            </form>
-          )}
-
-          {/* FINANCIAL PROFILE TAB */}
-          {activeTab === 'financial' && (
-            <form onSubmit={handleFinancialSubmit}>
-              <h2 style={styles.sectionHeader}>Financial Configuration</h2>
-              <p style={styles.sectionSubtitle}>Define income, expenses, risk parameters, and objectives. AI suggestions dynamically recalibrate.</p>
-              
-              <div style={styles.grid}>
-                <div className="form-group">
-                  <label className="form-label">Monthly Income (₹)</label>
-                  <input 
-                    type="number" 
-                    className="form-input" 
-                    value={financialData.monthlyIncome} 
-                    onChange={(e) => setFinancialData({ ...financialData, monthlyIncome: e.target.value })} 
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Monthly Expenses (₹)</label>
-                  <input 
-                    type="number" 
-                    className="form-input" 
-                    value={financialData.monthlyExpenses} 
-                    onChange={(e) => setFinancialData({ ...financialData, monthlyExpenses: e.target.value })} 
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Savings Valuation (₹)</label>
-                  <input 
-                    type="number" 
-                    className="form-input" 
-                    value={financialData.savings} 
-                    onChange={(e) => setFinancialData({ ...financialData, savings: e.target.value })} 
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Emergency Fund Buffer (₹)</label>
-                  <input 
-                    type="number" 
-                    className="form-input" 
-                    value={financialData.emergencyFund} 
-                    onChange={(e) => setFinancialData({ ...financialData, emergencyFund: e.target.value })} 
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Risk Profile Index</label>
-                  <select 
-                    className="form-select"
-                    value={financialData.riskProfile}
-                    onChange={(e) => setFinancialData({ ...financialData, riskProfile: e.target.value })}
-                  >
-                    <option value="Conservative">Conservative (Low Volatility)</option>
-                    <option value="Moderate">Moderate (Balanced)</option>
-                    <option value="Aggressive">Aggressive (High Yield / Stock intensive)</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Investment Experience</label>
-                  <select 
-                    className="form-select"
-                    value={financialData.investmentExperience}
-                    onChange={(e) => setFinancialData({ ...financialData, investmentExperience: e.target.value })}
-                  >
-                    <option value="Beginner">Beginner / Novice</option>
-                    <option value="Intermediate">Intermediate / Confident</option>
-                    <option value="Expert">Expert / Asset Manager</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Retirement Target Age</label>
-                  <input 
-                    type="number" 
-                    className="form-input" 
-                    value={financialData.retirementAge} 
-                    onChange={(e) => setFinancialData({ ...financialData, retirementAge: e.target.value })} 
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Family Dependents Count</label>
-                  <input 
-                    type="number" 
-                    className="form-input" 
-                    value={financialData.dependents} 
-                    onChange={(e) => setFinancialData({ ...financialData, dependents: e.target.value })} 
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Primary Financial Objective</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={financialData.investmentGoal} 
-                  onChange={(e) => setFinancialData({ ...financialData, investmentGoal: e.target.value })} 
-                  placeholder="Buy a home in 5 years, Retirement corpus of 5 Crore"
-                />
-              </div>
-
-              <button type="submit" disabled={submitLoading} className="btn btn-primary" style={styles.submitBtn}>
-                {submitLoading ? <Loader className="animate-spin" size={16} /> : <Check size={16} />}
-                <span>Recalculate AI Portfolio & Save</span>
-              </button>
-            </form>
-          )}
-
-          {/* SECURITY TAB */}
-          {activeTab === 'security' && (
-            <div>
-              <h2 style={styles.sectionHeader}>Security Settings</h2>
-              <p style={styles.sectionSubtitle}>Manage account passwords, toggle two-factor authentication, and monitor login activity.</p>
-              
-              <form onSubmit={handleSecuritySubmit} style={{ marginBottom: '32px' }}>
-                <h3 style={styles.subHeading}>Change Account Password</h3>
-                
-                <div style={styles.grid}>
-                  <div className="form-group">
-                    <label className="form-label">Current Password</label>
+                  <div className="space-y-1.5 font-sans">
+                    <label className="text-xs font-semibold text-on-surface-variant block ml-1">Occupation</label>
                     <input 
-                      type="password" 
-                      className="form-input" 
-                      value={securityData.oldPassword} 
-                      onChange={(e) => setSecurityData({ ...securityData, oldPassword: e.target.value })} 
-                      placeholder="••••••••"
+                      type="text" 
+                      value={profileData.occupation}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, occupation: e.target.value }))}
+                      placeholder="e.g. Engineer, Business Analyst"
+                      className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">New Password</label>
+                  <div className="space-y-1.5 font-sans md:col-span-2">
+                    <label className="text-xs font-semibold text-on-surface-variant block ml-1">Permanent Address</label>
                     <input 
-                      type="password" 
-                      className="form-input" 
-                      value={securityData.newPassword} 
-                      onChange={(e) => setSecurityData({ ...securityData, newPassword: e.target.value })} 
-                      placeholder="••••••••"
+                      type="text" 
+                      value={profileData.address}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, address: e.target.value }))}
+                      className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Confirm New Password</label>
+                  <div className="space-y-1.5 font-sans">
+                    <label className="text-xs font-semibold text-on-surface-variant block ml-1">City</label>
                     <input 
-                      type="password" 
-                      className="form-input" 
-                      value={securityData.confirmPassword} 
-                      onChange={(e) => setSecurityData({ ...securityData, confirmPassword: e.target.value })} 
-                      placeholder="••••••••"
+                      type="text" 
+                      value={profileData.city}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, city: e.target.value }))}
+                      className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
+                    />
+                  </div>
+
+                  <div className="space-y-1.5 font-sans">
+                    <label className="text-xs font-semibold text-on-surface-variant block ml-1">Country</label>
+                    <input 
+                      type="text" 
+                      value={profileData.country}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, country: e.target.value }))}
+                      className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
                     />
                   </div>
                 </div>
 
-                <button type="submit" disabled={submitLoading} className="btn btn-primary" style={styles.submitBtn}>
-                  {submitLoading ? <Loader className="animate-spin" size={16} /> : <Check size={16} />}
-                  <span>Change Password</span>
-                </button>
-              </form>
-
-              <hr style={styles.divider} />
-
-              <div style={{ marginBottom: '32px' }}>
-                <h3 style={styles.subHeading}>Simulated Security Enhancements</h3>
-                <div style={styles.securityRow}>
-                  <div>
-                    <h4 style={{ fontSize: '14px', color: '#ffffff' }}>Two-Factor Authentication (2FA)</h4>
-                    <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>Secure logins with one-time verification codes sent to mobile.</p>
-                  </div>
+                <div className="flex justify-end pt-4 border-t border-outline-variant/40 mt-8">
                   <button 
-                    onClick={() => {
-                      setSecurityData({ ...securityData, enable2FA: !securityData.enable2FA });
-                      showToast(`Two-Factor Authentication ${!securityData.enable2FA ? 'enabled' : 'disabled'}!`);
-                    }}
-                    style={{
-                      ...styles.toggleBtn,
-                      background: securityData.enable2FA ? '#10b981' : '#475569'
-                    }}
+                    type="submit" 
+                    className="px-8 py-3 bg-primary-container text-on-primary-container hover:bg-primary font-sans font-bold text-xs rounded-full shadow transition-all cursor-pointer"
+                    disabled={submitLoading}
                   >
-                    <div style={{
-                      ...styles.toggleDot,
-                      transform: securityData.enable2FA ? 'translateX(18px)' : 'translateX(0px)'
-                    }} />
+                    {submitLoading ? 'Saving...' : 'Save Profile Changes'}
                   </button>
                 </div>
-              </div>
+              </form>
+            </div>
+          )}
 
-              <hr style={styles.divider} />
+          {/* TAB 2: FINANCIAL PROFILE */}
+          {activeTab === 'financial' && (
+            <form onSubmit={handleFinancialSubmit} className="space-y-6 animate-fade-in font-serif">
+              <h3 className="font-headline-sm text-headline-sm mb-6 text-on-surface">Financial Parameters</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1.5 font-sans">
+                  <label className="text-xs font-semibold text-on-surface-variant block ml-1">Monthly Income (₹)</label>
+                  <input 
+                    type="number" 
+                    value={financialData.monthlyIncome}
+                    onChange={(e) => setFinancialData(prev => ({ ...prev, monthlyIncome: Number(e.target.value) }))}
+                    className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
+                    required
+                  />
+                </div>
 
-              <div>
-                <h3 style={styles.subHeading}>Active Login Sessions & Devices</h3>
-                <p style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '16px' }}>Manage current device sessions linked to your financial context.</p>
-                
-                <div style={styles.deviceList}>
-                  <div style={styles.deviceItem}>
-                    <Laptop size={20} color="#6366f1" />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#ffffff' }}>Vite React Browser Client (Current)</div>
-                      <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>IP: 192.168.1.100 • Mumbai, India</div>
-                    </div>
-                    <span style={styles.activeBadge}>Active</span>
-                  </div>
+                <div className="space-y-1.5 font-sans">
+                  <label className="text-xs font-semibold text-on-surface-variant block ml-1">Monthly Expenses (₹)</label>
+                  <input 
+                    type="number" 
+                    value={financialData.monthlyExpenses}
+                    onChange={(e) => setFinancialData(prev => ({ ...prev, monthlyExpenses: Number(e.target.value) }))}
+                    className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
+                    required
+                  />
+                </div>
 
-                  <div style={styles.deviceItem}>
-                    <Smartphone size={20} color="#cbd5e1" />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#ffffff' }}>iPhone 15 Mobile Coach App</div>
-                      <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>IP: 103.220.44.15 • Mumbai, India</div>
-                    </div>
-                    <span style={{ fontSize: '11px', color: '#94a3b8' }}>2 hours ago</span>
+                <div className="space-y-1.5 font-sans">
+                  <label className="text-xs font-semibold text-on-surface-variant block ml-1">Savings Buffer (₹)</label>
+                  <input 
+                    type="number" 
+                    value={financialData.savings}
+                    onChange={(e) => setFinancialData(prev => ({ ...prev, savings: Number(e.target.value) }))}
+                    className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1.5 font-sans">
+                  <label className="text-xs font-semibold text-on-surface-variant block ml-1">Emergency Fund Pool (₹)</label>
+                  <input 
+                    type="number" 
+                    value={financialData.emergencyFund}
+                    onChange={(e) => setFinancialData(prev => ({ ...prev, emergencyFund: Number(e.target.value) }))}
+                    className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
+                  />
+                </div>
+
+                <div className="space-y-1.5 font-sans">
+                  <label className="text-xs font-semibold text-on-surface-variant block ml-1">Risk Profile Appetite</label>
+                  <div className="relative">
+                    <select 
+                      value={financialData.riskProfile}
+                      onChange={(e) => setFinancialData(prev => ({ ...prev, riskProfile: e.target.value }))}
+                      className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface appearance-none focus:outline-none focus:border-primary transition-all"
+                    >
+                      <option value="Conservative">Conservative</option>
+                      <option value="Moderate">Moderate</option>
+                      <option value="Aggressive">Aggressive</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-3 top-3.5 text-on-surface-variant pointer-events-none text-lg">expand_more</span>
                   </div>
                 </div>
 
+                <div className="space-y-1.5 font-sans">
+                  <label className="text-xs font-semibold text-on-surface-variant block ml-1">Investment Experience</label>
+                  <div className="relative">
+                    <select 
+                      value={financialData.investmentExperience}
+                      onChange={(e) => setFinancialData(prev => ({ ...prev, investmentExperience: e.target.value }))}
+                      className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface appearance-none focus:outline-none focus:border-primary transition-all"
+                    >
+                      <option value="Beginner">Beginner</option>
+                      <option value="Intermediate">Intermediate</option>
+                      <option value="Advanced">Advanced</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-3 top-3.5 text-on-surface-variant pointer-events-none text-lg">expand_more</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 font-sans">
+                  <label className="text-xs font-semibold text-on-surface-variant block ml-1">Target Retirement Age</label>
+                  <input 
+                    type="number" 
+                    value={financialData.retirementAge}
+                    onChange={(e) => setFinancialData(prev => ({ ...prev, retirementAge: Number(e.target.value) }))}
+                    className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
+                  />
+                </div>
+
+                <div className="space-y-1.5 font-sans">
+                  <label className="text-xs font-semibold text-on-surface-variant block ml-1">Dependents Count</label>
+                  <input 
+                    type="number" 
+                    value={financialData.dependents}
+                    onChange={(e) => setFinancialData(prev => ({ ...prev, dependents: Number(e.target.value) }))}
+                    className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
+                  />
+                </div>
+
+                <div className="space-y-1.5 font-sans md:col-span-2">
+                  <label className="text-xs font-semibold text-on-surface-variant block ml-1">Primary Wealth Goal Description</label>
+                  <input 
+                    type="text" 
+                    value={financialData.investmentGoal}
+                    onChange={(e) => setFinancialData(prev => ({ ...prev, investmentGoal: e.target.value }))}
+                    placeholder="e.g. Build retirement corpus, finance high education, generate dividend income"
+                    className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4 border-t border-outline-variant/40 mt-8">
                 <button 
-                  onClick={() => showToast('Logged out from all alternate devices.')} 
-                  className="btn btn-outline" 
-                  style={{ marginTop: '16px', gap: '8px', fontSize: '13px', padding: '8px 16px' }}
+                  type="submit" 
+                  className="px-8 py-3 bg-primary-container text-on-primary-container hover:bg-primary font-sans font-bold text-xs rounded-full shadow transition-all cursor-pointer"
+                  disabled={submitLoading}
                 >
-                  <LogOut size={14} />
-                  <span>Logout From All Devices</span>
+                  {submitLoading ? 'Saving...' : 'Sync Financial Telemetry'}
                 </button>
+              </div>
+            </form>
+          )}
+
+          {/* TAB 3: SECURITY */}
+          {activeTab === 'security' && (
+            <div className="space-y-8 animate-fade-in font-serif">
+              <form onSubmit={handleSecuritySubmit} className="space-y-6">
+                <h3 className="font-headline-sm text-headline-sm mb-4 text-on-surface">Change Password</h3>
+                
+                <div className="space-y-4">
+                  <div className="space-y-1.5 font-sans">
+                    <label className="text-xs font-semibold text-on-surface-variant block ml-1">Current Password</label>
+                    <input 
+                      type="password" 
+                      value={securityData.oldPassword}
+                      onChange={(e) => setSecurityData(prev => ({ ...prev, oldPassword: e.target.value }))}
+                      placeholder="••••••••"
+                      className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5 font-sans">
+                      <label className="text-xs font-semibold text-on-surface-variant block ml-1">New Password</label>
+                      <input 
+                        type="password" 
+                        value={securityData.newPassword}
+                        onChange={(e) => setSecurityData(prev => ({ ...prev, newPassword: e.target.value }))}
+                        placeholder="Min. 6 characters"
+                        className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1.5 font-sans">
+                      <label className="text-xs font-semibold text-on-surface-variant block ml-1">Confirm Password</label>
+                      <input 
+                        type="password" 
+                        value={securityData.confirmPassword}
+                        onChange={(e) => setSecurityData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                        placeholder="••••••••"
+                        className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface focus:outline-none focus:border-primary transition-all" 
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-4 border-t border-outline-variant/40 mt-8">
+                  <button 
+                    type="submit" 
+                    className="px-8 py-3 bg-primary-container text-on-primary-container hover:bg-primary font-sans font-bold text-xs rounded-full shadow transition-all cursor-pointer"
+                    disabled={submitLoading}
+                  >
+                    {submitLoading ? 'Updating...' : 'Update Password'}
+                  </button>
+                </div>
+              </form>
+
+              {/* 2FA Section */}
+              <div className="border-t border-outline-variant/60 pt-8 space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h4 className="text-sm font-bold text-on-surface mb-1">Two-Factor Authentication (2FA)</h4>
+                    <p className="text-xs text-on-surface-variant font-sans max-w-md">Secure your boutique assets by adding an additional verification layer.</p>
+                  </div>
+                  <button 
+                    onClick={handleToggle2FA}
+                    className={`px-6 py-2 rounded-full font-sans font-bold text-xs transition-all cursor-pointer ${
+                      securityData.enable2FA 
+                        ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' 
+                        : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    }`}
+                  >
+                    {securityData.enable2FA ? 'Deactivate 2FA' : 'Activate 2FA'}
+                  </button>
+                </div>
               </div>
             </div>
           )}
 
-          {/* NOTIFICATIONS TAB */}
+          {/* TAB 4: NOTIFICATIONS */}
           {activeTab === 'notifications' && (
-            <form onSubmit={handleNotificationsSubmit}>
-              <h2 style={styles.sectionHeader}>Notification Toggles</h2>
-              <p style={styles.sectionSubtitle}>Turn on or off notifications across advisory and analysis modules.</p>
+            <form onSubmit={handleNotificationsSubmit} className="space-y-6 animate-fade-in font-serif">
+              <h3 className="font-headline-sm text-headline-sm mb-4 text-on-surface">Alert Rules & Delivery Channels</h3>
               
-              <div style={styles.settingsList}>
-                {[
-                  { key: 'investmentAlerts', title: 'Investment Alerts', desc: 'Market rebalancing alerts and index entry notifications.' },
-                  { key: 'billReminders', title: 'Bill Reminders', desc: 'Monthly subscription scans and scheduled bill reminder logs.' },
-                  { key: 'subscriptionRenewal', title: 'Subscription Renewal Alerts', desc: 'Advance warnings regarding recurring auto-debit payments.' },
-                  { key: 'goalAchievement', title: 'Goal Achievement Notifications', desc: 'Progress milestones reached within savings target timelines.' },
-                  { key: 'marketNews', title: 'Market News & Indices', desc: 'Bi-weekly SEBI updates and market trend insights.' },
-                  { key: 'aiRecommendation', title: 'AI Recommendation Alerts', desc: 'Diagnosis checks prompting profile updates or advisory insights.' }
-                ].map((item) => (
-                  <div key={item.key} style={styles.settingToggleItem}>
-                    <div style={{ flex: 1, paddingRight: '16px' }}>
-                      <h4 style={{ fontSize: '14px', color: '#ffffff', fontWeight: 600 }}>{item.title}</h4>
-                      <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px', lineHeight: 1.4 }}>{item.desc}</p>
-                    </div>
-                    <button 
-                      type="button"
-                      onClick={() => setNotificationsData({ ...notificationsData, [item.key]: !notificationsData[item.key] })}
-                      style={{
-                        ...styles.toggleBtn,
-                        background: notificationsData[item.key] ? '#6366f1' : '#475569'
-                      }}
-                    >
-                      <div style={{
-                        ...styles.toggleDot,
-                        transform: notificationsData[item.key] ? 'translateX(18px)' : 'translateX(0px)'
-                      }} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              <button type="submit" disabled={submitLoading} className="btn btn-primary" style={styles.submitBtn}>
-                {submitLoading ? <Loader className="animate-spin" size={16} /> : <Check size={16} />}
-                <span>Save Notification Preferences</span>
-              </button>
-            </form>
-          )}
-
-          {/* PREFERENCES TAB */}
-          {activeTab === 'preferences' && (
-            <form onSubmit={handlePreferencesSubmit}>
-              <h2 style={styles.sectionHeader}>Preferences</h2>
-              <p style={styles.sectionSubtitle}>Customize localization parameters, default dashboard layouts, and system appearance.</p>
-              
-              <div style={styles.grid}>
-                <div className="form-group">
-                  <label className="form-label">Preferred Theme</label>
-                  <select 
-                    className="form-select"
-                    value={preferencesData.theme}
-                    onChange={(e) => setPreferencesData({ ...preferencesData, theme: e.target.value })}
-                  >
-                    <option value="dark">Dark Theme (Neon / Glassmorphism)</option>
-                    <option value="light">Light Theme (Minimalist Clean)</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Base Currency</label>
-                  <select 
-                    className="form-select"
-                    value={preferencesData.currency}
-                    onChange={(e) => setPreferencesData({ ...preferencesData, currency: e.target.value })}
-                  >
-                    <option value="INR">INR (₹) - Indian Rupee</option>
-                    <option value="USD">USD ($) - US Dollar</option>
-                    <option value="EUR">EUR (€) - Euro</option>
-                    <option value="GBP">GBP (£) - British Pound</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Primary Language</label>
-                  <select 
-                    className="form-select"
-                    value={preferencesData.language}
-                    onChange={(e) => setPreferencesData({ ...preferencesData, language: e.target.value })}
-                  >
-                    <option value="en">English</option>
-                    <option value="hi">Hindi</option>
-                    <option value="es">Spanish</option>
-                    <option value="fr">French</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Dashboard View Layout</label>
-                  <select 
-                    className="form-select"
-                    value={preferencesData.dashboardLayout}
-                    onChange={(e) => setPreferencesData({ ...preferencesData, dashboardLayout: e.target.value })}
-                  >
-                    <option value="grid">Grid (Compact Widgets)</option>
-                    <option value="list">List (Linear Rows)</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Default Landing Page</label>
-                  <select 
-                    className="form-select"
-                    value={preferencesData.defaultLandingPage}
-                    onChange={(e) => setPreferencesData({ ...preferencesData, defaultLandingPage: e.target.value })}
-                  >
-                    <option value="dashboard">Financial Dashboard</option>
-                    <option value="premium-hub">Premium Advisory Hub</option>
-                    <option value="statements">Statement Upload Hub</option>
-                    <option value="assistant">AI Conversational Coach</option>
-                  </select>
-                </div>
-              </div>
-
-              <button type="submit" disabled={submitLoading} className="btn btn-primary" style={styles.submitBtn}>
-                {submitLoading ? <Loader className="animate-spin" size={16} /> : <Check size={16} />}
-                <span>Save Localization Settings</span>
-              </button>
-            </form>
-          )}
-
-          {/* PREMIUM MEMBERSHIP TAB */}
-          {activeTab === 'premium' && (
-            <div>
-              <h2 style={styles.sectionHeader}>Premium Membership</h2>
-              <p style={styles.sectionSubtitle}>View subscription tiers, manage renewal cycles, and toggle feature packages.</p>
-              
-              <div style={{
-                ...styles.premiumStatusCard,
-                background: user?.isPremium 
-                  ? 'linear-gradient(135deg, rgba(234, 179, 8, 0.15) 0%, rgba(202, 138, 4, 0.05) 100%)'
-                  : 'linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.6) 100%)',
-                border: user?.isPremium ? '1px solid rgba(234, 179, 8, 0.3)' : '1px solid rgba(255, 255, 255, 0.08)'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div className="space-y-4 divide-y divide-outline-variant/20">
+                <div className="flex items-center justify-between py-3">
                   <div>
-                    <span style={{
-                      ...styles.badge,
-                      background: user?.isPremium ? 'rgba(234, 179, 8, 0.2)' : 'rgba(148, 163, 184, 0.15)',
-                      color: user?.isPremium ? '#fef08a' : '#94a3b8'
-                    }}>
-                      {user?.isPremium ? 'PRO MEMBER' : 'FREE TIER'}
-                    </span>
-                    <h3 style={{ fontSize: '22px', fontWeight: 800, color: '#ffffff', marginTop: '12px' }}>
-                      {user?.isPremium ? 'FinPilot Premium Suite' : 'FinPilot Basic'}
-                    </h3>
+                    <label className="text-sm font-bold text-on-surface block">Email Alerts</label>
+                    <span className="text-xs text-on-surface-variant font-sans block mt-1">Receive daily audit summaries and health reports in your inbox.</span>
                   </div>
-                  <Award size={40} color={user?.isPremium ? '#eab308' : '#94a3b8'} />
-                </div>
-                
-                <div style={{ marginTop: '24px' }}>
-                  <div style={{ fontSize: '13px', color: '#94a3b8' }}>Status</div>
-                  <div style={{ fontSize: '15px', fontWeight: 600, color: '#ffffff', marginTop: '2px' }}>
-                    {user?.isPremium ? 'Active (Rolling Monthly Renewal)' : 'Free tier (Upgradable anytime)'}
-                  </div>
+                  <input 
+                    type="checkbox" 
+                    checked={notificationsData.email}
+                    onChange={(e) => setNotificationsData(prev => ({ ...prev, email: e.target.checked }))}
+                    className="w-4 h-4 rounded text-primary-container focus:ring-primary-container bg-surface-container"
+                  />
                 </div>
 
-                <div style={{ marginTop: '16px' }}>
-                  <div style={{ fontSize: '13px', color: '#94a3b8' }}>Renewal Date</div>
-                  <div style={{ fontSize: '15px', fontWeight: 600, color: '#ffffff', marginTop: '2px' }}>
-                    {user?.isPremium 
-                      ? new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toLocaleDateString() 
-                      : 'N/A'}
+                <div className="flex items-center justify-between py-3">
+                  <div>
+                    <label className="text-sm font-bold text-on-surface block">SMS Digests</label>
+                    <span className="text-xs text-on-surface-variant font-sans block mt-1">Receive rapid text indicators on volatile balances.</span>
                   </div>
+                  <input 
+                    type="checkbox" 
+                    checked={notificationsData.sms}
+                    onChange={(e) => setNotificationsData(prev => ({ ...prev, sms: e.target.checked }))}
+                    className="w-4 h-4 rounded text-primary-container focus:ring-primary-container bg-surface-container"
+                  />
                 </div>
 
+                <div className="flex items-center justify-between py-3">
+                  <div>
+                    <label className="text-sm font-bold text-on-surface block">AI Diagnostics Recommendations</label>
+                    <span className="text-xs text-on-surface-variant font-sans block mt-1">Receive alerts on budget corrections.</span>
+                  </div>
+                  <input 
+                    type="checkbox" 
+                    checked={notificationsData.aiRecommendation}
+                    onChange={(e) => setNotificationsData(prev => ({ ...prev, aiRecommendation: e.target.checked }))}
+                    className="w-4 h-4 rounded text-primary-container focus:ring-primary-container bg-surface-container"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4 border-t border-outline-variant/40 mt-8">
                 <button 
-                  onClick={handleUpgradeToPremium} 
+                  type="submit" 
+                  className="px-8 py-3 bg-primary-container text-on-primary-container hover:bg-primary font-sans font-bold text-xs rounded-full shadow transition-all cursor-pointer"
                   disabled={submitLoading}
-                  style={{
-                    ...styles.upgradeButton,
-                    background: user?.isPremium ? 'transparent' : 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
-                    border: user?.isPremium ? '1px solid rgba(255, 255, 255, 0.15)' : 'none',
-                    color: user?.isPremium ? '#cbd5e1' : '#000000'
-                  }}
                 >
-                  {user?.isPremium ? 'Downgrade to Free (Testing)' : 'Upgrade to Premium (Instant Access)'}
+                  {submitLoading ? 'Saving...' : 'Save Notification Rules'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* TAB 5: LINKED ACCOUNTS */}
+          {activeTab === 'accounts' && (
+            <div className="space-y-8 animate-fade-in font-serif">
+              <div className="flex justify-between items-center border-b border-outline-variant/40 pb-4 mb-6">
+                <h3 className="font-headline-sm text-headline-sm text-on-surface">Linked Banking ledgers</h3>
+                <button 
+                  onClick={() => setShowAddAccountModal(true)} 
+                  className="px-5 py-2.5 rounded-full bg-primary-container hover:bg-primary text-on-primary-container font-sans font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow"
+                >
+                  <span className="material-symbols-outlined text-sm font-bold">add</span> Add Account
                 </button>
               </div>
 
-              <div style={{ marginTop: '28px' }}>
-                <h4 style={{ fontSize: '15px', color: '#ffffff', fontWeight: 700, marginBottom: '16px' }}>Premium Benefits Checklist:</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-                  {[
-                    'Tax Regime Optimization Advisor',
-                    'Annuity Loan borrowing limits',
-                    'Insurance Deficit Gap Index',
-                    'What-If Milestone simulator',
-                    'Interactive Portfolio Risk Rebalancing',
-                    'Full PDF/CSV Ledger report downloads',
-                    'Real-time SEBI Market suggestions',
-                    'Interactive AI Coach chatbot'
-                  ].map((benefit, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#cbd5e1' }}>
-                      <CheckCircle2 size={16} color="#10b981" />
-                      <span>{benefit}</span>
+              {/* Accounts list */}
+              {accountsLoading ? (
+                <p className="text-on-surface-variant text-sm font-serif">Verifying synced accounts...</p>
+              ) : linkedAccounts.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-serif">
+                  {linkedAccounts.map((acc) => (
+                    <div key={acc._id} className="bg-surface-container/40 border border-outline-variant rounded-xl p-5 flex justify-between items-start hover:border-primary/20 transition-all">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-primary text-base">account_balance</span>
+                          <h4 className="text-sm font-bold text-on-surface">{acc.institutionName}</h4>
+                        </div>
+                        <p className="text-xs text-on-surface-variant font-sans mt-2">Account: •••• {acc.accountNumber.substring(acc.accountNumber.length - 4)}</p>
+                        <p className="text-base font-bold text-on-surface mt-1">₹{acc.balance.toLocaleString()}</p>
+                      </div>
+                      <button 
+                        onClick={() => handleDeleteAccount(acc._id)} 
+                        className="p-2 text-error hover:bg-error-container/20 rounded-xl transition-all cursor-pointer flex items-center justify-center"
+                      >
+                        <span className="material-symbols-outlined text-base">delete</span>
+                      </button>
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* LINKED ACCOUNTS TAB */}
-          {activeTab === 'linked' && (
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <div>
-                  <h2 style={styles.sectionHeader}>Linked Accounts</h2>
-                  <p style={styles.sectionSubtitle}>View connected banking ledgers and investment profiles.</p>
-                </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <button onClick={handleRefreshAccounts} disabled={accountsLoading} style={styles.refreshBtn} title="Refresh Feeds">
-                    <RefreshCw size={14} className={accountsLoading ? 'animate-spin' : ''} />
-                    <span>Sync</span>
-                  </button>
-                  <button onClick={() => setShowAddAccountModal(true)} style={styles.addAccountBtn}>
-                    <Plus size={14} />
-                    <span>Link</span>
-                  </button>
-                </div>
-              </div>
-
-              {accountsLoading && linkedAccounts.length === 0 ? (
-                <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
-                  <Loader className="animate-spin" size={24} color="#6366f1" />
-                  <p style={{ marginTop: '12px' }}>Syncing connected ledgers...</p>
-                </div>
-              ) : linkedAccounts.length === 0 ? (
-                <div style={styles.emptyAccountsCard}>
-                  <Landmark size={48} color="#64748b" />
-                  <h3 style={{ fontSize: '16px', color: '#ffffff', marginTop: '16px' }}>No Linked Accounts</h3>
-                  <p style={{ fontSize: '13px', color: '#94a3b8', marginTop: '8px', maxWidth: '300px' }}>
-                    Connect bank, investment or insurance accounts to import balances dynamically.
-                  </p>
-                  <button onClick={() => setShowAddAccountModal(true)} className="btn btn-primary" style={{ marginTop: '16px', fontSize: '13px', padding: '8px 16px' }}>
-                    <Plus size={14} />
-                    <span>Link Your First Account</span>
-                  </button>
-                </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  {['bank', 'investment', 'insurance'].map((type) => {
-                    const typeAccounts = linkedAccounts.filter(a => a.accountType === type);
-                    if (typeAccounts.length === 0) return null;
-                    return (
-                      <div key={type}>
-                        <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#94a3b8', fontWeight: 700, marginBottom: '8px', letterSpacing: '0.05em' }}>
-                          {type === 'bank' ? 'Bank Accounts' : type === 'investment' ? 'Investments / Portfolios' : 'Insurance Policies'}
-                        </h4>
-                        <div style={styles.accountsGrid}>
-                          {typeAccounts.map((account) => (
-                            <div key={account._id} style={styles.accountCard}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                <div>
-                                  <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#ffffff' }}>{account.institutionName}</h5>
-                                  <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>Num: {account.accountNumber}</p>
-                                </div>
-                                <button onClick={() => handleRemoveAccount(account._id)} style={styles.unlinkBtn} title="Unlink Account">
-                                  <Trash size={14} />
-                                </button>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
-                                <span style={{ fontSize: '16px', fontWeight: 800, color: '#10b981' }}>
-                                  {account.currency === 'INR' ? '₹' : '$'}{account.balance.toLocaleString()}
-                                </span>
-                                <span style={{ fontSize: '10px', color: '#64748b' }}>
-                                  Refreshed: {new Date(account.lastRefreshed).toLocaleTimeString()}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
+                <div className="py-12 text-center text-sm text-on-surface-variant font-serif">
+                  No linked bank or brokerage ledgers detected. Link accounts above to start synchronizations.
+                </div>
+              )}
+
+              {/* Add Account Modal */}
+              {showAddAccountModal && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-sans">
+                  <div className="w-full max-w-md bg-surface-container border border-outline-variant p-6 rounded-2xl shadow-2xl relative animate-fade-in">
+                    <button 
+                      onClick={() => setShowAddAccountModal(false)}
+                      className="absolute right-4 top-4 hover:bg-surface-container-high w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined">close</span>
+                    </button>
+                    
+                    <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface mb-6 font-serif">Link Banking Ledger</h3>
+                    
+                    <form onSubmit={handleLinkAccountSubmit} className="space-y-4 font-sans">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-on-surface-variant block">Institution Name</label>
+                        <input 
+                          type="text" 
+                          placeholder="e.g. HDFC Bank, ICICI, Zerodha"
+                          value={newAccount.institutionName}
+                          onChange={(e) => setNewAccount(prev => ({ ...prev, institutionName: e.target.value }))}
+                          className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary transition-all"
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-on-surface-variant block">Account / Folio Number</label>
+                        <input 
+                          type="text" 
+                          placeholder="e.g. 501002345678"
+                          value={newAccount.accountNumber}
+                          onChange={(e) => setNewAccount(prev => ({ ...prev, accountNumber: e.target.value }))}
+                          className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary transition-all"
+                          required
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-on-surface-variant block">Account Type</label>
+                          <div className="relative">
+                            <select 
+                              value={newAccount.accountType}
+                              onChange={(e) => setNewAccount(prev => ({ ...prev, accountType: e.target.value }))}
+                              className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-xs text-on-surface appearance-none focus:outline-none focus:border-primary transition-all"
+                            >
+                              <option value="bank">Bank</option>
+                              <option value="credit">Credit Card</option>
+                              <option value="investment">Brokerage / MF</option>
+                            </select>
+                            <span className="material-symbols-outlined absolute right-3 top-3 text-on-surface-variant pointer-events-none text-base">expand_more</span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-on-surface-variant block">Available Balance (₹)</label>
+                          <input 
+                            type="number" 
+                            placeholder="e.g. 25000"
+                            value={newAccount.balance}
+                            onChange={(e) => setNewAccount(prev => ({ ...prev, balance: e.target.value }))}
+                            className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary transition-all"
+                            required
+                          />
                         </div>
                       </div>
-                    );
-                  })}
+
+                      <button 
+                        type="submit" 
+                        className="w-full py-3 mt-6 bg-primary-container hover:bg-primary text-on-primary-container rounded-full font-bold text-xs shadow cursor-pointer transition-colors"
+                        disabled={submitLoading}
+                      >
+                        {submitLoading ? 'Linking...' : 'Confirm Ledger Link'}
+                      </button>
+                    </form>
+                  </div>
                 </div>
               )}
             </div>
           )}
 
-          {/* PRIVACY TAB */}
-          {activeTab === 'privacy' && (
-            <div>
-              <h2 style={styles.sectionHeader}>Privacy & Consent Settings</h2>
-              <p style={styles.sectionSubtitle}>Manage data sharing consents, download a personal ledger dump, or delete statements.</p>
+          {/* TAB 6: PREFERENCES */}
+          {activeTab === 'preferences' && (
+            <form onSubmit={handlePreferencesSubmit} className="space-y-6 animate-fade-in font-serif">
+              <h3 className="font-headline-sm text-headline-sm mb-4 text-on-surface">Application Workspace settings</h3>
               
-              <div style={{ marginBottom: '32px' }}>
-                <h3 style={styles.subHeading}>Consent Preferences</h3>
-                <div style={styles.settingToggleItem}>
-                  <div style={{ flex: 1, paddingRight: '16px' }}>
-                    <h4 style={{ fontSize: '14px', color: '#ffffff', fontWeight: 600 }}>Enable AI Data Analysis Sharing</h4>
-                    <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px', lineHeight: 1.4 }}>
-                      Allow FinPilot to process uploaded transaction statements anonymously to improve classification.
-                    </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1.5 font-sans">
+                  <label className="text-xs font-semibold text-on-surface-variant block ml-1">Workspace Theme</label>
+                  <div className="relative">
+                    <select 
+                      value={preferencesData.theme}
+                      onChange={(e) => setPreferencesData(prev => ({ ...prev, theme: e.target.value }))}
+                      className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface appearance-none focus:outline-none focus:border-primary transition-all"
+                    >
+                      <option value="dark">Boutique Dark Theme</option>
+                      <option value="light">Classic Light Theme</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-3 top-3.5 text-on-surface-variant pointer-events-none text-lg">expand_more</span>
                   </div>
+                </div>
+
+                <div className="space-y-1.5 font-sans">
+                  <label className="text-xs font-semibold text-on-surface-variant block ml-1">Preferred Language</label>
+                  <div className="relative">
+                    <select 
+                      value={preferencesData.language}
+                      onChange={(e) => setPreferencesData(prev => ({ ...prev, language: e.target.value }))}
+                      className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface appearance-none focus:outline-none focus:border-primary transition-all"
+                    >
+                      <option value="en">English (Boutique US)</option>
+                      <option value="hi">हिन्दी (Hindi)</option>
+                      <option value="es">Español (Spanish)</option>
+                      <option value="fr">Français (French)</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-3 top-3.5 text-on-surface-variant pointer-events-none text-lg">expand_more</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4 border-t border-outline-variant/40 mt-8">
+                <button 
+                  type="submit" 
+                  className="px-8 py-3 bg-primary-container text-on-primary-container hover:bg-primary font-sans font-bold text-xs rounded-full shadow transition-all cursor-pointer"
+                  disabled={submitLoading}
+                >
+                  {submitLoading ? 'Saving...' : 'Save Preferences'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* TAB 7: REPORTS */}
+          {activeTab === 'reports' && (
+            <div className="space-y-8 animate-fade-in font-serif">
+              <div className="space-y-4">
+                <h3 className="font-headline-sm text-headline-sm text-on-surface">Generate Financial Report</h3>
+                <p className="text-xs text-on-surface-variant font-sans max-w-md">Compile statement analysis, tax brackets, and portfolio recommendations into a clean file export.</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                  <div className="space-y-1.5 font-sans">
+                    <label className="text-xs font-semibold text-on-surface-variant block ml-1">Report Target Area</label>
+                    <div className="relative">
+                      <select 
+                        value={reportType}
+                        onChange={(e) => setReportType(e.target.value)}
+                        className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface appearance-none focus:outline-none focus:border-primary transition-all"
+                      >
+                        <option value="Expense">Expense & Budgeting Breakdown</option>
+                        <option value="Tax">Tax Exemption Estimations</option>
+                        <option value="Investment">Investment advisory portfolios</option>
+                        <option value="Full">Full Telemetry Audit Report</option>
+                      </select>
+                      <span className="material-symbols-outlined absolute right-3 top-3.5 text-on-surface-variant pointer-events-none text-lg">expand_more</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 font-sans">
+                    <label className="text-xs font-semibold text-on-surface-variant block ml-1">Export Format</label>
+                    <div className="relative">
+                      <select 
+                        value={reportFormat}
+                        onChange={(e) => setReportFormat(e.target.value)}
+                        className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 font-serif text-sm text-on-surface appearance-none focus:outline-none focus:border-primary transition-all"
+                      >
+                        <option value="PDF">Adobe PDF (.pdf)</option>
+                        <option value="CSV">Spreadsheet CSV (.csv)</option>
+                      </select>
+                      <span className="material-symbols-outlined absolute right-3 top-3.5 text-on-surface-variant pointer-events-none text-lg">expand_more</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 flex justify-end">
                   <button 
-                    onClick={() => handleSharingConsent(!dataConsent)}
-                    style={{
-                      ...styles.toggleBtn,
-                      background: dataConsent ? '#6366f1' : '#475569'
-                    }}
+                    onClick={handleGenerateReport}
+                    className="px-6 py-2.5 rounded-full bg-primary-container hover:bg-primary text-on-primary-container font-sans font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow transition-all"
+                    disabled={submitLoading}
                   >
-                    <div style={{
-                      ...styles.toggleDot,
-                      transform: dataConsent ? 'translateX(18px)' : 'translateX(0px)'
-                    }} />
+                    <span className="material-symbols-outlined text-sm font-bold">file_download</span>
+                    {submitLoading ? 'Generating file...' : 'Download Report'}
                   </button>
                 </div>
               </div>
 
-              <hr style={styles.divider} />
+              {/* Privacy & Data Control Desk */}
+              <div className="border-t border-outline-variant/60 pt-8 space-y-6">
+                <div>
+                  <h4 className="font-headline-sm text-headline-sm text-on-surface font-serif mb-2">Privacy & Data Control Desk</h4>
+                  <p className="text-xs text-on-surface-variant font-sans max-w-md">Manage your active ledger consent preferences, download complete profile telemetry, or purge active accounts.</p>
+                </div>
 
-              <div style={{ marginBottom: '32px' }}>
-                <h3 style={styles.subHeading}>Download Personal Data</h3>
-                <p style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '12px' }}>
-                  In compliance with privacy policies, export a full JSON dump of your profile details, portfolios, goals, and transaction ledgers.
-                </p>
-                <button onClick={handleDownloadPersonalData} className="btn btn-outline" style={{ gap: '8px', fontSize: '13px', padding: '8px 16px' }}>
-                  <Download size={14} />
-                  <span>Download Personal Data (JSON)</span>
-                </button>
-              </div>
+                <div className="space-y-4">
+                  {/* Consent policy */}
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-surface-container/40 border border-outline-variant/40 rounded-xl p-5">
+                    <div>
+                      <h5 className="text-sm font-bold text-on-surface mb-1">Data Anonymization Policy</h5>
+                      <p className="text-xs text-on-surface-variant font-sans max-w-sm">Anonymize financial parameters before forwarding inputs to remote ML modeling nodes.</p>
+                    </div>
+                    <button 
+                      onClick={handleToggleConsent}
+                      className={`px-5 py-2 rounded-full font-sans font-bold text-xs transition-all cursor-pointer ${
+                        dataConsent 
+                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20' 
+                          : 'bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20'
+                      }`}
+                    >
+                      {dataConsent ? 'Consent Active' : 'Consent Deactivated'}
+                    </button>
+                  </div>
 
-              <hr style={styles.divider} />
+                  {/* Personal Data Download */}
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-surface-container/40 border border-outline-variant/40 rounded-xl p-5">
+                    <div>
+                      <h5 className="text-sm font-bold text-on-surface mb-1">Download Personal Data Ledger</h5>
+                      <p className="text-xs text-on-surface-variant font-sans max-w-sm">Download your compiled financial profiles, risk evaluations, and transaction entries as a clean JSON ledger.</p>
+                    </div>
+                    <button 
+                      onClick={handleDownloadData}
+                      className="px-5 py-2 rounded-full font-sans font-bold text-xs bg-primary-container text-on-primary-container border border-outline-variant/40 hover:bg-primary hover:text-on-primary transition-all cursor-pointer flex items-center gap-1.5"
+                      disabled={submitLoading}
+                    >
+                      <span className="material-symbols-outlined text-sm font-bold">download</span>
+                      Download JSON
+                    </button>
+                  </div>
 
-              <div style={{ marginBottom: '32px' }}>
-                <h3 style={styles.subHeading}>Reset Upload Data</h3>
-                <p style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '12px' }}>
-                  Wipe out all uploaded bank statements, transaction databases, and EMI schedules. Profile parameters remain.
-                </p>
-                <button onClick={handleDeleteStatements} disabled={submitLoading} className="btn btn-danger" style={{ gap: '8px', fontSize: '13px', padding: '8px 16px' }}>
-                  <Trash size={14} />
-                  <span>Clear Uploaded Statements</span>
-                </button>
-              </div>
+                  {/* Clear Data / Account Purge */}
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-surface-container/40 border border-outline-variant/40 rounded-xl p-5">
+                    <div>
+                      <h5 className="text-sm font-bold text-on-surface mb-1">Clear Ledger Transactions</h5>
+                      <p className="text-xs text-on-surface-variant font-sans max-w-sm">Purge all imported bank CSV entries and normalized cash flow histories from our database.</p>
+                    </div>
+                    <button 
+                      onClick={handleClearStatements}
+                      className="px-5 py-2 rounded-full font-sans font-bold text-xs text-error hover:bg-error-container/20 border border-error/30 transition-all cursor-pointer flex items-center gap-1.5"
+                      disabled={submitLoading}
+                    >
+                      <span className="material-symbols-outlined text-sm font-bold">delete_sweep</span>
+                      Clear Statements
+                    </button>
+                  </div>
 
-              <hr style={styles.divider} />
-
-              <div>
-                <h3 style={{ ...styles.subHeading, color: '#f87171' }}>Permanently Delete Account</h3>
-                <p style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '12px' }}>
-                  Permanently erase your login credentials and all data from our servers. This cannot be undone.
-                </p>
-                <button onClick={handleDeleteAccount} className="btn btn-danger" style={{ gap: '8px', fontSize: '13px', padding: '8px 16px', background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' }}>
-                  <AlertTriangle size={14} />
-                  <span>Delete My Account</span>
-                </button>
+                  {/* Purge Account */}
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-error-container/5 border border-error/20 rounded-xl p-5">
+                    <div>
+                      <h5 className="text-sm font-bold text-error mb-1">Purge Personal Account</h5>
+                      <p className="text-xs text-on-surface-variant font-sans max-w-sm">Permanently delete your profile ledger, active sub-advisors, and security credentials.</p>
+                    </div>
+                    <button 
+                      onClick={handleDeleteUserAccount}
+                      className="px-5 py-2 rounded-full font-sans font-bold text-xs bg-error text-on-error hover:bg-red-700 transition-all cursor-pointer flex items-center gap-1.5"
+                      disabled={submitLoading}
+                    >
+                      <span className="material-symbols-outlined text-sm font-bold">delete_forever</span>
+                      Purge Account
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
-
-          {/* REPORTS TAB */}
-          {activeTab === 'reports' && (
-            <form onSubmit={handleReportDownload}>
-              <h2 style={styles.sectionHeader}>Compile Advisory Reports</h2>
-              <p style={styles.sectionSubtitle}>Download structured CSV files or PDF brochures covering your assets, risk metrics, and tax regimes.</p>
-              
-              <div style={styles.grid}>
-                <div className="form-group">
-                  <label className="form-label">Report Category</label>
-                  <select 
-                    className="form-select"
-                    value={reportType}
-                    onChange={(e) => setReportType(e.target.value)}
-                  >
-                    <option value="Expense">Expense & Category Outflows</option>
-                    <option value="Investment">Investment Portfolio Allocation</option>
-                    <option value="Insurance">Insurance Coverage Gap Audit</option>
-                    <option value="Tax">Tax Optimization (Old vs New Regime)</option>
-                    <option value="Health">Financial Health Index Diagnostic</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Format Style</label>
-                  <select 
-                    className="form-select"
-                    value={reportFormat}
-                    onChange={(e) => setReportFormat(e.target.value)}
-                  >
-                    <option value="PDF">PDF Brochure Document</option>
-                    <option value="CSV">CSV Spreadsheet File</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style={styles.reportIncludesCard}>
-                <h4 style={{ fontSize: '14px', color: '#ffffff', fontWeight: 700, marginBottom: '10px' }}>What this report compiles:</h4>
-                <p style={{ fontSize: '12px', color: '#cbd5e1', lineHeight: '1.5' }}>
-                  {reportType === 'Expense' && 'A categorization index mapping transactions, detailing total inflow/outflow metrics, and calculating savings rates.'}
-                  {reportType === 'Investment' && 'Portfolio holdings breakdown, asset allocations ratios, and risk-indexed suggestions for rebalancing.'}
-                  {reportType === 'Insurance' && 'Coverage gaps calculations, recommended policies list, and dependents-based protection buffer diagnostics.'}
-                  {reportType === 'Tax' && 'Gross annual tax liabilities comparisons, deductions (80C, 80D) utilization audits, and optimal regime switch advice.'}
-                  {reportType === 'Health' && 'Financial health scores diagnostics, safety margins analysis, and priority budgets action items checklist.'}
-                </p>
-              </div>
-
-              <button type="submit" disabled={submitLoading} className="btn btn-primary" style={styles.submitBtn}>
-                {submitLoading ? <Loader className="animate-spin" size={16} /> : <Download size={16} />}
-                <span>Generate & Download Report</span>
-              </button>
-            </form>
-          )}
-        </main>
-      </div>
-
-      {/* Linked Account Modal */}
-      {showAddAccountModal && (
-        <div style={styles.modalOverlay}>
-          <div className="glass-card animate-fade-in" style={styles.modal}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#ffffff' }}>Link Financial Account</h3>
-              <button onClick={() => setShowAddAccountModal(false)} style={styles.closeBtn}>
-                <X size={18} />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddAccount}>
-              <div className="form-group">
-                <label className="form-label">Account Category</label>
-                <select 
-                  className="form-select"
-                  value={newAccount.accountType}
-                  onChange={(e) => setNewAccount({ ...newAccount, accountType: e.target.value })}
-                >
-                  <option value="bank">Bank / Checking Account</option>
-                  <option value="investment">Investments (Stocks / Mutual Funds / FD)</option>
-                  <option value="insurance">Insurance Policy</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Institution / Provider Name</label>
-                <input 
-                  type="text" 
-                  className="form-input"
-                  placeholder="e.g. SBI, HDFC, LIC, Zerodha"
-                  value={newAccount.institutionName}
-                  onChange={(e) => setNewAccount({ ...newAccount, institutionName: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Account / Policy Number</label>
-                <input 
-                  type="text" 
-                  className="form-input"
-                  placeholder="e.g. 100022998877"
-                  value={newAccount.accountNumber}
-                  onChange={(e) => setNewAccount({ ...newAccount, accountNumber: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Current Balance / Valuation</label>
-                <input 
-                  type="number" 
-                  className="form-input"
-                  placeholder="e.g. 50000"
-                  value={newAccount.balance}
-                  onChange={(e) => setNewAccount({ ...newAccount, balance: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Base Currency</label>
-                <select 
-                  className="form-select"
-                  value={newAccount.currency}
-                  onChange={(e) => setNewAccount({ ...newAccount, currency: e.target.value })}
-                >
-                  <option value="INR">INR (₹)</option>
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
-                </select>
-              </div>
-
-              <button type="submit" disabled={submitLoading} className="btn btn-primary" style={{ width: '100%', marginTop: '16px' }}>
-                {submitLoading ? <Loader className="animate-spin" size={16} /> : <Check size={16} />}
-                <span>Link Financial Feed</span>
-              </button>
-            </form>
-          </div>
         </div>
-      )}
+      </div>
     </div>
   );
-};
-
-const styles = {
-  page: {
-    minHeight: '100vh',
-    marginTop: '64px',
-    backgroundColor: '#030712',
-    color: '#f8fafc',
-    fontFamily: 'Outfit, sans-serif',
-    padding: '40px 24px',
-    position: 'relative'
-  },
-  loaderContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    backgroundColor: '#030712'
-  },
-  toast: {
-    position: 'fixed',
-    bottom: '24px',
-    right: '24px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    padding: '16px 20px',
-    borderRadius: '12px',
-    color: '#ffffff',
-    fontSize: '14px',
-    fontWeight: 600,
-    zIndex: 9999,
-    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
-    animation: 'fadeIn 0.3s ease forwards'
-  },
-  header: {
-    maxWidth: '1200px',
-    margin: '0 auto 32px auto'
-  },
-  title: {
-    fontSize: '28px',
-    fontWeight: 800,
-    color: '#ffffff'
-  },
-  subtitle: {
-    color: '#cbd5e1',
-    fontSize: '14px',
-    marginTop: '6px'
-  },
-  container: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    display: 'grid',
-    gridTemplateColumns: '280px 1fr',
-    gap: '32px',
-    alignItems: 'start'
-  },
-  sidebar: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px'
-  },
-  completionCard: {
-    background: 'rgba(17, 24, 39, 0.45)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '16px',
-    padding: '20px'
-  },
-  completionRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '10px'
-  },
-  progressBarBg: {
-    width: '100%',
-    height: '6px',
-    background: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: '3px',
-    overflow: 'hidden'
-  },
-  progressBarFill: {
-    height: '100%',
-    background: 'linear-gradient(90deg, #6366f1 0%, #a855f7 100%)',
-    borderRadius: '3px',
-    transition: 'width 0.4s ease'
-  },
-  navMenu: {
-    background: 'rgba(17, 24, 39, 0.45)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '16px',
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column'
-  },
-  navBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    padding: '14px 20px',
-    border: 'none',
-    outline: 'none',
-    cursor: 'pointer',
-    textAlign: 'left',
-    fontSize: '14px',
-    transition: 'all 0.2s ease',
-    position: 'relative'
-  },
-  chevron: {
-    position: 'absolute',
-    right: '20px'
-  },
-  contentPane: {
-    padding: '36px',
-    minHeight: '500px',
-    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.2)'
-  },
-  sectionHeader: {
-    fontSize: '20px',
-    fontWeight: 700,
-    color: '#ffffff'
-  },
-  sectionSubtitle: {
-    fontSize: '13px',
-    color: '#94a3b8',
-    marginTop: '6px',
-    marginBottom: '28px'
-  },
-  profileImageSection: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '20px',
-    marginBottom: '28px'
-  },
-  avatarWrapper: {
-    position: 'relative',
-    width: '72px',
-    height: '72px'
-  },
-  avatarImg: {
-    width: '100%',
-    height: '100%',
-    borderRadius: '50%',
-    objectFit: 'cover',
-    border: '2px solid rgba(99, 102, 241, 0.5)'
-  },
-  avatarFallback: {
-    width: '100%',
-    height: '100%',
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-    color: '#ffffff',
-    fontSize: '24px',
-    fontWeight: 700,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    border: '2px solid rgba(255, 255, 255, 0.1)'
-  },
-  cameraBtn: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    background: '#6366f1',
-    border: 'none',
-    borderRadius: '50%',
-    width: '24px',
-    height: '24px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: '#ffffff',
-    cursor: 'pointer',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
-    transition: 'background-color 0.2s'
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '20px'
-  },
-  inputWrapper: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center'
-  },
-  inputIcon: {
-    position: 'absolute',
-    left: '14px',
-    color: '#64748b',
-    pointerEvents: 'none'
-  },
-  inputWithIcon: {
-    paddingLeft: '44px',
-    width: '100%'
-  },
-  submitBtn: {
-    marginTop: '24px',
-    width: 'fit-content',
-    gap: '8px',
-    fontSize: '14px',
-    padding: '12px 24px'
-  },
-  divider: {
-    border: 'none',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-    margin: '24px 0'
-  },
-  subHeading: {
-    fontSize: '15px',
-    fontWeight: 700,
-    color: '#ffffff',
-    marginBottom: '16px'
-  },
-  securityRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    background: 'rgba(255, 255, 255, 0.02)',
-    border: '1px solid rgba(255, 255, 255, 0.05)',
-    borderRadius: '12px',
-    padding: '16px 20px'
-  },
-  toggleBtn: {
-    width: '42px',
-    height: '24px',
-    borderRadius: '12px',
-    border: 'none',
-    cursor: 'pointer',
-    padding: '3px',
-    display: 'flex',
-    alignItems: 'center',
-    transition: 'background-color 0.2s ease'
-  },
-  toggleDot: {
-    width: '18px',
-    height: '18px',
-    background: '#ffffff',
-    borderRadius: '50%',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
-    transition: 'transform 0.2s ease'
-  },
-  deviceList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px'
-  },
-  deviceItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-    background: 'rgba(255, 255, 255, 0.02)',
-    border: '1px solid rgba(255, 255, 255, 0.05)',
-    borderRadius: '12px',
-    padding: '14px 20px'
-  },
-  activeBadge: {
-    background: 'rgba(16, 185, 129, 0.15)',
-    color: '#10b981',
-    border: '1px solid rgba(16, 185, 129, 0.3)',
-    fontSize: '10px',
-    fontWeight: 700,
-    padding: '2px 8px',
-    borderRadius: '6px'
-  },
-  settingsList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px'
-  },
-  settingToggleItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    background: 'rgba(255, 255, 255, 0.02)',
-    border: '1px solid rgba(255, 255, 255, 0.05)',
-    borderRadius: '12px',
-    padding: '16px 20px'
-  },
-  premiumStatusCard: {
-    borderRadius: '16px',
-    padding: '28px',
-    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)'
-  },
-  badge: {
-    fontSize: '11px',
-    fontWeight: 700,
-    letterSpacing: '0.05em',
-    padding: '4px 8px',
-    borderRadius: '6px'
-  },
-  upgradeButton: {
-    marginTop: '28px',
-    width: '100%',
-    padding: '12px',
-    borderRadius: '10px',
-    fontSize: '14px',
-    fontWeight: 700,
-    cursor: 'pointer',
-    transition: 'all 0.2s ease'
-  },
-  refreshBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    background: 'transparent',
-    border: '1px solid rgba(255, 255, 255, 0.15)',
-    color: '#cbd5e1',
-    padding: '8px 14px',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: 600
-  },
-  addAccountBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-    border: 'none',
-    color: '#ffffff',
-    padding: '8px 16px',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: 700
-  },
-  emptyAccountsCard: {
-    background: 'rgba(17, 24, 39, 0.3)',
-    border: '1px dashed rgba(255, 255, 255, 0.15)',
-    borderRadius: '16px',
-    padding: '48px 24px',
-    textAlign: 'center',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  accountsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '16px',
-    marginBottom: '20px'
-  },
-  accountCard: {
-    background: 'rgba(255, 255, 255, 0.02)',
-    border: '1px solid rgba(255, 255, 255, 0.05)',
-    borderRadius: '12px',
-    padding: '20px'
-  },
-  unlinkBtn: {
-    background: 'transparent',
-    border: 'none',
-    color: '#ef4444',
-    cursor: 'pointer',
-    opacity: 0.6,
-    transition: 'opacity 0.2s',
-    padding: '4px'
-  },
-  refreshAccountBtn: {
-    background: 'transparent',
-    border: 'none',
-    color: '#3b82f6',
-    cursor: 'pointer',
-    padding: '4px'
-  },
-  modalOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'rgba(3, 7, 18, 0.85)',
-    backdropFilter: 'blur(10px)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 99999,
-    padding: '24px'
-  },
-  modal: {
-    width: '100%',
-    maxWidth: '440px',
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
-    border: '1px solid rgba(255, 255, 255, 0.08)'
-  },
-  closeBtn: {
-    background: 'transparent',
-    border: 'none',
-    color: '#64748b',
-    cursor: 'pointer'
-  },
-  reportIncludesCard: {
-    background: 'rgba(99, 102, 241, 0.04)',
-    border: '1px solid rgba(99, 102, 241, 0.15)',
-    borderRadius: '12px',
-    padding: '16px',
-    margin: '16px 0 24px 0'
-  }
 };
 
 export default Settings;

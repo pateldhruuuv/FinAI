@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { TrendingUp, ArrowLeft, RefreshCw, AlertCircle, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const WhatIfSimulator = () => {
@@ -50,120 +49,138 @@ const WhatIfSimulator = () => {
   };
 
   return (
-    <div style={styles.page}>
-      <header style={styles.header}>
-        <Link to="/premium-dashboard" style={styles.backLink}>
-          <ArrowLeft size={16} />
+    <div className="md:pl-20 mt-16 px-6 md:px-8 pt-10 md:pt-14 pb-6 md:pb-8 min-h-screen bg-background text-on-background font-sans max-w-[1600px] mx-auto animate-fade-in">
+
+      {/* Header */}
+      <header className="mb-8 border-b border-outline-variant pb-6">
+        <Link to="/premium-dashboard" className="inline-flex items-center gap-2 text-xs text-on-surface-variant hover:text-on-surface font-semibold mb-4 transition-colors">
+          <span className="material-symbols-outlined text-sm">arrow_back</span>
           Back to Hub
         </Link>
-        <div style={styles.titleRow}>
-          <TrendingUp size={28} color="#ec4899" />
-          <h1 style={styles.title}>What-If Financial Simulator</h1>
+        <div className="flex items-center gap-3">
+          <span className="material-symbols-outlined text-3xl text-primary-container font-bold">query_stats</span>
+          <h1 className="font-display-hero text-3xl font-bold tracking-tight text-on-surface">What-If Financial Simulator</h1>
         </div>
-        <p style={styles.subtitle}>Simulate major life milestones or financial emergencies to forecast impact on your savings and goals.</p>
+        <p className="text-sm text-on-surface-variant mt-1 m-2">Simulate major life milestones or financial emergencies to forecast impact on your savings and goals.</p>
       </header>
 
-      <div style={styles.container}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+
         {/* Simulation Settings Card */}
-        <form onSubmit={handleSubmit} style={styles.formCard}>
-          <h3 style={styles.sectionTitle}>Configure Scenario</h3>
-          
-          <div style={styles.formGrid}>
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Select Milestone / Event</label>
-              <select 
-                value={scenario} 
-                onChange={(e) => { setScenario(e.target.value); setValue(''); setResult(null); }} 
-                style={styles.select}
-              >
-                <option value="salary_increase">Salary Hike / Increase</option>
-                <option value="job_loss">Sudden Job Loss</option>
-                <option value="medical_emergency">Medical Emergency Expense</option>
-                <option value="marriage">Marriage Expenses</option>
-                <option value="child_education">Child Higher Education Fund</option>
-                <option value="buying_house">Buying a House (80% financed)</option>
-                <option value="buying_car">Buying a Car (80% financed)</option>
-              </select>
+        <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-6 md:p-8 border border-outline-variant/40 shadow-sm space-y-5">
+          <h3 className="font-headline-sm text-headline-sm font-bold font-serif text-on-surface border-b border-outline-variant/40 pb-3">Configure Scenario</h3>
+
+          <div className="space-y-4 font-sans">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-on-surface-variant block ml-1">Select Milestone / Event</label>
+              <div className="relative">
+                <select
+                  value={scenario}
+                  onChange={(e) => { setScenario(e.target.value); setValue(''); setResult(null); }}
+                  className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface appearance-none focus:outline-none focus:border-primary-container"
+                >
+                  <option value="salary_increase">Salary Hike / Increase</option>
+                  <option value="job_loss">Sudden Job Loss</option>
+                  <option value="medical_emergency">Medical Emergency Expense</option>
+                  <option value="marriage">Marriage Expenses</option>
+                  <option value="child_education">Child Higher Education Fund</option>
+                  <option value="buying_house">Buying a House (80% financed)</option>
+                  <option value="buying_car">Buying a Car (80% financed)</option>
+                </select>
+                <span className="material-symbols-outlined absolute right-3 top-3 text-on-surface-variant pointer-events-none text-base">expand_more</span>
+              </div>
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>{getScenarioConfig().label} *</label>
-              <input 
-                type="number" 
-                required 
-                value={value} 
-                onChange={(e) => setValue(e.target.value)} 
-                placeholder={getScenarioConfig().placeholder} 
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-on-surface-variant block ml-1">{getScenarioConfig().label} *</label>
+              <input
+                type="number"
+                required
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                placeholder={getScenarioConfig().placeholder}
                 min={getScenarioConfig().min}
                 max={getScenarioConfig().max}
-                style={styles.input} 
+                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
               />
             </div>
           </div>
 
-          <button type="submit" disabled={loading} style={styles.submitBtn}>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-primary-container hover:bg-primary text-on-primary-container font-semibold py-3 rounded-full transition-all flex items-center justify-center gap-2 cursor-pointer text-sm mt-6 shadow-md"
+          >
             {loading ? 'Running Simulation...' : 'Simulate Future Impact'}
           </button>
         </form>
 
         {/* Forecast Card */}
-        <div style={styles.resultContainer}>
-          {error && <div style={styles.errorBox}>{error}</div>}
-          
+        <div className="min-h-[400px]">
+          {error && (
+            <div className="bg-error-container/20 border-l-4 border-error text-error p-4 rounded-xl text-sm mb-6 flex items-center gap-2">
+              <span className="material-symbols-outlined text-lg">report_problem</span>
+              <span>{error}</span>
+            </div>
+          )}
+
           {result ? (
-            <div style={styles.resultCard}>
-              <div style={styles.resultHeader}>
-                <TrendingUp size={20} color="#ec4899" />
-                <h3 style={styles.resultTitle}>Forecasted Financial Impact</h3>
-                <button 
-                  type="button" 
-                  onClick={() => { setValue(''); setResult(null); }} 
-                  style={styles.resetBtn}
+            <div className="glass-card rounded-2xl p-6 md:p-8 border border-outline-variant/40 shadow-sm space-y-6 animate-fade-in font-serif">
+              <div className="flex justify-between items-center border-b border-outline-variant/40 pb-4 mb-4 flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary-container text-xl">query_stats</span>
+                  <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Forecasted Impact</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setValue(''); setResult(null); }}
+                  className="px-3 py-1.5 border border-outline-variant rounded-full text-xs font-sans text-on-surface-variant hover:text-on-surface hover:bg-surface-container/50 transition-all flex items-center gap-1 cursor-pointer"
                 >
-                  <RefreshCw size={14} />
+                  <span className="material-symbols-outlined text-xs">refresh</span>
                   Reset
                 </button>
               </div>
 
-              <div style={styles.impactGrid}>
+              <div className="grid grid-cols-2 gap-4">
                 {/* Metric 1 */}
-                <div style={styles.impactCard}>
-                  <span style={styles.impactLabel}>Projected Savings (3 Yrs)</span>
-                  <div style={styles.impactVal}>₹{result.futureSavings.toLocaleString()}</div>
-                  <span style={styles.impactSub}>Liquid reserves forecast</span>
+                <div className="bg-surface-container/30 border border-outline-variant/20 rounded-xl p-4 flex flex-col gap-1 text-left">
+                  <span className="text-[10px] text-on-surface-variant uppercase tracking-widest block font-sans">Projected Savings (3 Yrs)</span>
+                  <div className="text-lg font-bold text-on-surface">₹{result.futureSavings.toLocaleString()}</div>
+                  <span className="text-[9px] text-on-surface-variant/40 font-sans block mt-1">Liquid reserves forecast</span>
                 </div>
 
                 {/* Metric 2 */}
-                <div style={styles.impactCard}>
-                  <span style={styles.impactLabel}>Liability / Debt Level</span>
-                  <div style={{ ...styles.impactVal, color: result.debt > 0 ? '#ef4444' : '#10b981' }}>
+                <div className="bg-surface-container/30 border border-outline-variant/20 rounded-xl p-4 flex flex-col gap-1 text-left">
+                  <span className="text-[10px] text-on-surface-variant uppercase tracking-widest block font-sans">Liability / Debt Level</span>
+                  <div className={`text-lg font-bold ${result.debt > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
                     ₹{result.debt.toLocaleString()}
                   </div>
-                  <span style={styles.impactSub}>Outstanding loans/debt</span>
+                  <span className="text-[9px] text-on-surface-variant/40 font-sans block mt-1">Outstanding loans/debt</span>
                 </div>
 
                 {/* Metric 3 */}
-                <div style={styles.impactCard}>
-                  <span style={styles.impactLabel}>Goal Delay Timeline</span>
-                  <div style={{ ...styles.impactVal, color: result.goalDelayMonths > 0 ? '#f59e0b' : '#10b981' }}>
+                <div className="bg-surface-container/30 border border-outline-variant/20 rounded-xl p-4 flex flex-col gap-1 text-left">
+                  <span className="text-[10px] text-on-surface-variant uppercase tracking-widest block font-sans">Goal Delay Timeline</span>
+                  <div className={`text-lg font-bold ${result.goalDelayMonths > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
                     {result.goalDelayMonths === 0 ? 'No Delay' : `${result.goalDelayMonths} Months`}
                   </div>
-                  <span style={styles.impactSub}>Delay on target planners</span>
+                  <span className="text-[9px] text-on-surface-variant/40 font-sans block mt-1">Delay on target planners</span>
                 </div>
 
                 {/* Metric 4 */}
-                <div style={styles.impactCard}>
-                  <span style={styles.impactLabel}>Added Annual Investment</span>
-                  <div style={{ ...styles.impactVal, color: '#6366f1' }}>
+                <div className="bg-surface-container/30 border border-outline-variant/20 rounded-xl p-4 flex flex-col gap-1 text-left">
+                  <span className="text-[10px] text-on-surface-variant uppercase tracking-widest block font-sans">Added Annual Investment</span>
+                  <div className="text-lg font-bold text-primary">
                     ₹{result.investmentImpact.toLocaleString()}
                   </div>
-                  <span style={styles.impactSub}>Added market allocation</span>
+                  <span className="text-[9px] text-on-surface-variant/40 font-sans block mt-1">Added market allocation</span>
                 </div>
               </div>
 
-              <div style={styles.simulationExplanation}>
-                <AlertCircle size={16} color="#ec4899" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <p style={styles.explanationText}>
+              {/* Explanation note */}
+              <div className="bg-primary-container/5 border border-primary-container/15 rounded-xl p-4 flex gap-3 items-start">
+                <span className="material-symbols-outlined text-primary-container text-xl mt-0.5">info</span>
+                <p className="text-xs text-on-surface-variant leading-relaxed">
                   {scenario === 'salary_increase' && "Congratulations! A higher salary accelerates your net worth growth and reduces goal times, allowing you to invest 60% of your raise."}
                   {scenario === 'job_loss' && "Job loss drains your emergency buffer. We recommend cutting discretionary spending immediately and extending your emergency pool to 6+ months."}
                   {scenario === 'medical_emergency' && "Emergency costs reduce your liquid savings. If the cost exceeds your savings, it translates into high-interest debt."}
@@ -173,223 +190,18 @@ const WhatIfSimulator = () => {
               </div>
             </div>
           ) : (
-            <div style={styles.emptyState}>
-              <TrendingUp size={44} color="rgba(255, 255, 255, 0.1)" />
-              <h3>Awaiting Simulation Config</h3>
-              <p>Configure a scenario and click simulate to project future savings, liabilities, and delays.</p>
+            <div className="glass-card rounded-2xl p-12 border border-outline-variant/40 shadow-sm text-center flex flex-col items-center justify-center min-h-[300px] border-dashed">
+              <span className="material-symbols-outlined text-5xl text-on-surface-variant/40 mb-4 animate-pulse">query_stats</span>
+              <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface font-serif">Awaiting Simulation Config</h3>
+              <p className="text-sm text-on-surface-variant max-w-sm mt-2 font-serif leading-relaxed">
+                Configure a scenario and click simulate to project future savings, liabilities, and delays.
+              </p>
             </div>
           )}
         </div>
       </div>
     </div>
   );
-};
-
-const styles = {
-  page: {
-    minHeight: '100vh',
-    marginTop: '64px',
-    backgroundColor: '#030712',
-    color: '#f8fafc',
-    fontFamily: 'Outfit, sans-serif',
-    padding: '40px 24px',
-  },
-  header: {
-    maxWidth: '1200px',
-    margin: '0 auto 32px auto',
-  },
-  backLink: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    color: '#94a3b8',
-    textDecoration: 'none',
-    fontSize: '13px',
-    fontWeight: 500,
-    marginBottom: '16px',
-    width: 'fit-content',
-  },
-  titleRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    marginBottom: '8px',
-  },
-  title: {
-    fontSize: '28px',
-    fontWeight: 800,
-    color: '#ffffff',
-  },
-  subtitle: {
-    color: '#cbd5e1',
-    fontSize: '14px',
-  },
-  container: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    display: 'grid',
-    gridTemplateColumns: '1fr 1.2fr',
-    gap: '32px',
-    alignItems: 'start',
-  },
-  formCard: {
-    background: 'rgba(17, 24, 39, 0.45)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '20px',
-    padding: '32px',
-    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.2)',
-  },
-  sectionTitle: {
-    fontSize: '18px',
-    fontWeight: 700,
-    marginBottom: '20px',
-    color: '#ffffff',
-  },
-  formGrid: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-  },
-  label: {
-    fontSize: '12px',
-    fontWeight: 600,
-    color: '#94a3b8',
-  },
-  select: {
-    padding: '12px 16px',
-    borderRadius: '10px',
-    background: 'rgba(15, 23, 42, 0.6)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    color: '#ffffff',
-    fontSize: '14px',
-    fontFamily: 'Outfit, sans-serif',
-    outline: 'none',
-    cursor: 'pointer',
-  },
-  input: {
-    padding: '12px 16px',
-    borderRadius: '10px',
-    background: 'rgba(15, 23, 42, 0.6)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    color: '#ffffff',
-    fontSize: '14px',
-    fontFamily: 'Outfit, sans-serif',
-    outline: 'none',
-  },
-  submitBtn: {
-    marginTop: '24px',
-    width: '100%',
-    padding: '14px',
-    background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '10px',
-    fontSize: '14px',
-    fontWeight: 700,
-    cursor: 'pointer',
-    boxShadow: '0 4px 15px rgba(236, 72, 153, 0.3)',
-  },
-  resultContainer: {
-    minHeight: '400px',
-  },
-  errorBox: {
-    padding: '16px',
-    background: 'rgba(239, 68, 68, 0.1)',
-    color: '#f87171',
-    border: '1px solid rgba(239, 68, 68, 0.2)',
-    borderRadius: '12px',
-    marginBottom: '20px',
-  },
-  resultCard: {
-    background: 'rgba(17, 24, 39, 0.45)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '20px',
-    padding: '32px',
-    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.2)',
-  },
-  resultHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    marginBottom: '24px',
-  },
-  resultTitle: {
-    fontSize: '18px',
-    fontWeight: 700,
-    color: '#ffffff',
-  },
-  resetBtn: {
-    marginLeft: 'auto',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    background: 'transparent',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    color: '#cbd5e1',
-    padding: '6px 12px',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '12px',
-    fontWeight: 500,
-  },
-  impactGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '16px',
-    marginBottom: '24px',
-  },
-  impactCard: {
-    background: 'rgba(255, 255, 255, 0.015)',
-    border: '1px solid rgba(255, 255, 255, 0.03)',
-    borderRadius: '12px',
-    padding: '16px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-  },
-  impactLabel: {
-    fontSize: '11px',
-    color: '#94a3b8',
-    textTransform: 'uppercase',
-  },
-  impactVal: {
-    fontSize: '20px',
-    fontWeight: 800,
-    color: '#ffffff',
-  },
-  impactSub: {
-    fontSize: '10px',
-    color: '#64748b',
-  },
-  simulationExplanation: {
-    display: 'flex',
-    gap: '10px',
-    background: 'rgba(236, 72, 153, 0.05)',
-    border: '1px solid rgba(236, 72, 153, 0.15)',
-    borderRadius: '12px',
-    padding: '16px',
-  },
-  explanationText: {
-    fontSize: '12px',
-    color: '#f9a8d4',
-    lineHeight: 1.5,
-  },
-  emptyState: {
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    textAlign: 'center',
-    padding: '60px 40px',
-    border: '2px dashed rgba(255, 255, 255, 0.06)',
-    borderRadius: '20px',
-  },
 };
 
 export default WhatIfSimulator;

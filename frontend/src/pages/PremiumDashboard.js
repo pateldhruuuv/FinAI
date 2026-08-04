@@ -2,23 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { 
-  DollarSign, 
-  TrendingUp, 
-  Percent, 
-  ShieldAlert, 
-  ShieldCheck, 
-  HelpCircle, 
-  UserCheck, 
-  Scale, 
-  LineChart, 
-  PieChart, 
-  FileText, 
-  MessageSquare,
-  Award,
-  ChevronRight,
-  TrendingDown
-} from 'lucide-react';
 
 const PremiumDashboard = () => {
   const { user } = useContext(AuthContext);
@@ -43,19 +26,21 @@ const PremiumDashboard = () => {
 
   if (loading) {
     return (
-      <div style={styles.loadingContainer}>
-        <h2>Compiling Premium Advisors...</h2>
-        <p style={{ color: '#94a3b8', marginTop: '6px' }}>Reading Digital Twin and rendering portfolio weights...</p>
+      <div className="flex flex-col items-center justify-center min-h-[80vh] md:pl-20 mt-16 text-on-surface font-sans">
+        <span className="material-symbols-outlined text-4xl animate-spin text-primary-container mb-4">refresh</span>
+        <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">Compiling Premium Advisors...</h2>
+        <p className="text-xs text-on-surface-variant mt-2 font-serif">Reading Digital Twin and rendering portfolio weights...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={styles.errorContainer}>
-        <h3>Advisory Compilation Error</h3>
-        <p style={{ color: '#fca5a5', marginTop: '8px' }}>{error}</p>
-        <button onClick={() => window.location.reload()} style={styles.retryBtn}>Retry</button>
+      <div className="flex flex-col items-center justify-center min-h-[80vh] md:pl-20 mt-16 text-error font-sans p-6">
+        <span className="material-symbols-outlined text-4xl text-error mb-4">report_problem</span>
+        <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Advisory Compilation Error</h3>
+        <p className="text-xs text-on-surface-variant mt-2 font-serif">{error}</p>
+        <button onClick={() => window.location.reload()} className="mt-4 px-5 py-2 border border-outline-variant hover:bg-surface-container rounded-full text-xs font-semibold cursor-pointer">Retry</button>
       </div>
     );
   }
@@ -72,242 +57,227 @@ const PremiumDashboard = () => {
   } = data;
 
   return (
-    <div style={styles.page}>
-      {/* Premium Hub Header */}
-      <header style={styles.header}>
+    <div className="md:pl-20 mt-16 px-6 md:px-8 pt-10 md:pt-14 pb-6 md:pb-8 min-h-screen bg-background text-on-background font-sans max-w-[1600px] mx-auto animate-fade-in">
+
+      {/* Header */}
+      <header className="mb-8 border-b border-outline-variant pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <div style={styles.badgeRow}>
-            <span style={styles.premiumPill}>PREMIUM ADVISORY PANEL</span>
+          <div className="mb-2">
+            <span className="bg-primary/10 border border-primary/20 text-primary-container text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-wider m-2">Premium Advisory Hub</span>
           </div>
-          <h1 style={styles.title}>FinPilot Digital Twin & Hub</h1>
-          <p style={styles.subtitle}>Institutional robo-wealth insights tailored for {user.name}.</p>
+          <h1 className="font-display-hero text-3xl font-bold tracking-tight text-on-surface m-2">FinPilot Digital Twin & Hub</h1>
+          <p className="text-sm text-on-surface-variant mt-1 m-2">Institutional robo-wealth insights tailored for {user.name}.</p>
         </div>
-        <div style={styles.twinHeaderCard}>
-          <Award size={24} color="#eab308" />
-          <div>
-            <div style={styles.twinMetaTitle}>Digital Twin Stability Score</div>
-            <div style={styles.twinMetaVal}>{digitalTwin?.stabilityScore || 70} / 100</div>
+
+        <div className="flex items-center gap-3 bg-surface-container/40 border border-outline-variant/40 p-4 rounded-xl font-serif">
+          <span className="material-symbols-outlined text-amber-400 text-3xl">workspace_premium</span>
+          <div className="text-left">
+            <div className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans font-bold">Stability Index</div>
+            <div className="text-base font-bold text-on-surface font-serif mt-0.5">{digitalTwin?.stabilityScore || 70} / 100</div>
           </div>
         </div>
       </header>
 
-      <div style={styles.layout}>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
         {/* Sidebar Nav */}
-        <aside style={styles.sidebar}>
-          <div style={styles.sidebarTitle}>PREMIUM TOOLS</div>
-          <nav style={styles.sideNav}>
-            <Link to="/tax-optimizer" style={styles.navLink}>
-              <Percent size={18} color="#6366f1" />
-              <span>Tax Optimizer</span>
-              <ChevronRight size={14} style={styles.navArrow} />
-            </Link>
-            <Link to="/loan-advisor" style={styles.navLink}>
-              <Scale size={18} color="#3b82f6" />
-              <span>Loan Advisor</span>
-              <ChevronRight size={14} style={styles.navArrow} />
-            </Link>
-            <Link to="/insurance-gap" style={styles.navLink}>
-              <ShieldCheck size={18} color="#10b981" />
-              <span>Insurance Gap</span>
-              <ChevronRight size={14} style={styles.navArrow} />
-            </Link>
-            <Link to="/purchase-advisor" style={styles.navLink}>
-              <DollarSign size={18} color="#eab308" />
-              <span>Purchase Advisor</span>
-              <ChevronRight size={14} style={styles.navArrow} />
-            </Link>
-            <Link to="/what-if" style={styles.navLink}>
-              <TrendingUp size={18} color="#ec4899" />
-              <span>What-If Simulator</span>
-              <ChevronRight size={14} style={styles.navArrow} />
-            </Link>
-            <Link to="/portfolio-risk" style={styles.navLink}>
-              <PieChart size={18} color="#f97316" />
-              <span>Portfolio Risk</span>
-              <ChevronRight size={14} style={styles.navArrow} />
-            </Link>
-            <Link to="/stock-advisor" style={styles.navLink}>
-              <TrendingUp size={18} color="#10b981" />
-              <span>Stock Advisor</span>
-              <ChevronRight size={14} style={styles.navArrow} />
-            </Link>
-            <Link to="/financial-coach" style={styles.navLink}>
-              <MessageSquare size={18} color="#a855f7" />
-              <span>AI Financial Coach</span>
-              <ChevronRight size={14} style={styles.navArrow} />
-            </Link>
-            <Link to="/digital-twin" style={styles.navLink}>
-              <UserCheck size={18} color="#06b6d4" />
-              <span>Digital Twin Profile</span>
-              <ChevronRight size={14} style={styles.navArrow} />
-            </Link>
-            <Link to="/reports" style={styles.navLink}>
-              <FileText size={18} color="#94a3b8" />
-              <span>Financial Reports</span>
-              <ChevronRight size={14} style={styles.navArrow} />
-            </Link>
+        <aside className="lg:col-span-1 bg-surface border border-outline-variant rounded-2xl p-4 space-y-4">
+          <div className="text-[10px] font-bold text-primary uppercase tracking-widest pl-2">Premium Tools</div>
+          <nav className="flex flex-col gap-1">
+            {[
+              { to: '/tax-optimizer', icon: 'percent', label: 'Tax Optimizer', color: 'text-indigo-400' },
+              { to: '/loan-advisor', icon: 'scale', label: 'Loan Advisor', color: 'text-blue-400' },
+              { to: '/insurance-gap', icon: 'shield', label: 'Insurance Gap', color: 'text-emerald-400' },
+              { to: '/purchase-advisor', icon: 'payments', label: 'Purchase Advisor', color: 'text-amber-400' },
+              { to: '/what-if', icon: 'query_stats', label: 'What-If Simulator', color: 'text-pink-400' },
+              { to: '/portfolio-risk', icon: 'pie_chart', label: 'Portfolio Risk', color: 'text-orange-400' },
+              { to: '/stock-advisor', icon: 'trending_up', label: 'Stock Advisor', color: 'text-emerald-400' },
+              { to: '/financial-coach', icon: 'forum', label: 'AI Financial Coach', color: 'text-purple-400' },
+              { to: '/digital-twin', icon: 'person_search', label: 'Digital Twin Profile', color: 'text-cyan-400' },
+              { to: '/reports', icon: 'file_download', label: 'Financial Reports', color: 'text-slate-400' }
+            ].map(link => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className={`material-symbols-outlined text-lg ${link.color}`}>{link.icon}</span>
+                  <span>{link.label}</span>
+                </div>
+                <span className="material-symbols-outlined text-sm font-bold opacity-40">chevron_right</span>
+              </Link>
+            ))}
           </nav>
         </aside>
 
         {/* Widgets Grid */}
-        <main style={styles.grid}>
+        <main className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+
           {/* Card 1: Net Worth overview */}
-          <div style={{ ...styles.card, gridColumn: 'span 2' }}>
-            <div style={styles.cardHeader}>
-              <div style={styles.cardIconTitle}>
-                <DollarSign size={20} color="#10b981" />
-                <h3 style={styles.cardTitle}>Net Worth Overview</h3>
+          <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm md:col-span-2 space-y-4">
+            <div className="flex justify-between items-center border-b border-outline-variant/20 pb-3 font-serif">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-emerald-400 text-lg">monetization_on</span>
+                <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Net Worth Overview</h3>
               </div>
-              <span style={styles.cardStatusPositive}>Calculated Live</span>
+              <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 font-sans font-bold">Calculated Live</span>
             </div>
-            <div style={styles.nwAmount}>₹{netWorth ? netWorth.toLocaleString() : '---'}</div>
-            <p style={styles.cardDesc}>
+
+            <div className="text-3xl font-bold text-on-surface font-serif">₹{netWorth ? netWorth.toLocaleString() : '---'}</div>
+            <p className="text-xs text-on-surface-variant font-serif">
               Total Assets (accumulated savings and portfolio) minus total liabilities.
             </p>
             {plots?.net_worth_trend && (
-              <div style={styles.plotBox}>
-                <img src={`data:image/png;base64,${plots.net_worth_trend}`} alt="Net Worth Trend" style={styles.plotImg} />
+              <div className="bg-surface-container/20 border border-outline-variant/20 rounded-xl p-4 flex justify-center max-h-72 overflow-hidden">
+                <img src={`data:image/png;base64,${plots.net_worth_trend}`} alt="Net Worth Trend" className="w-full h-auto object-contain max-h-64" />
               </div>
             )}
           </div>
 
           {/* Card 2: Digital Twin Traits */}
-          <div style={styles.card}>
-            <div style={styles.cardHeader}>
-              <div style={styles.cardIconTitle}>
-                <UserCheck size={20} color="#06b6d4" />
-                <h3 style={styles.cardTitle}>Digital Twin</h3>
+          <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm space-y-4 flex flex-col justify-between">
+            <div className="flex justify-between items-center border-b border-outline-variant/20 pb-3 font-serif">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-cyan-400 text-lg">person_search</span>
+                <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Digital Twin</h3>
               </div>
-              <Link to="/digital-twin" style={styles.cardActionLink}>View Twin</Link>
+              <Link to="/digital-twin" className="text-xs font-sans text-primary hover:underline">View Details</Link>
             </div>
-            <div style={styles.twinStats}>
-              <div style={styles.twinStatItem}>
-                <span style={styles.twinLabel}>Financial Age:</span>
-                <span style={styles.twinVal}>{digitalTwin?.financialAge || user.age} yrs</span>
+
+            <div className="space-y-2.5 font-serif text-xs">
+              <div className="flex justify-between border-b border-outline-variant/25 pb-1">
+                <span className="text-on-surface-variant">Financial Age:</span>
+                <span className="text-on-surface font-bold font-sans">{digitalTwin?.financialAge || user.age} Years</span>
               </div>
-              <div style={styles.twinStatItem}>
-                <span style={styles.twinLabel}>Risk Profile:</span>
-                <span style={styles.twinVal}>{digitalTwin?.riskLevel || 'Moderate'}</span>
+              <div className="flex justify-between border-b border-outline-variant/25 pb-1">
+                <span className="text-on-surface-variant">Risk Appetite:</span>
+                <span className="text-on-surface font-bold font-sans">{digitalTwin?.riskLevel || 'Moderate'}</span>
               </div>
-              <div style={styles.twinStatItem}>
-                <span style={styles.twinLabel}>Savings Trait:</span>
-                <span style={styles.twinValDetail}>{digitalTwin?.savingsPersonality || 'Balanced'}</span>
+              <div className="flex justify-between border-b border-outline-variant/25 pb-1">
+                <span className="text-on-surface-variant">Savings Trait:</span>
+                <span className="text-on-surface font-bold">{digitalTwin?.savingsPersonality || 'Balanced'}</span>
               </div>
-              <div style={styles.twinStatItem}>
-                <span style={styles.twinLabel}>Investment:</span>
-                <span style={styles.twinValDetail}>{digitalTwin?.investmentPersonality || 'Rebalancer'}</span>
+              <div className="flex justify-between pb-1">
+                <span className="text-on-surface-variant">Investment Type:</span>
+                <span className="text-on-surface font-bold">{digitalTwin?.investmentPersonality || 'Rebalancer'}</span>
               </div>
             </div>
           </div>
 
           {/* Card 3: Portfolio Allocation */}
-          <div style={styles.card}>
-            <div style={styles.cardHeader}>
-              <div style={styles.cardIconTitle}>
-                <PieChart size={20} color="#f97316" />
-                <h3 style={styles.cardTitle}>Portfolio Weights</h3>
+          <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm space-y-4 flex flex-col justify-between">
+            <div className="flex justify-between items-center border-b border-outline-variant/20 pb-3 font-serif">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-orange-400 text-lg">pie_chart</span>
+                <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Portfolio Allocation</h3>
               </div>
-              <Link to="/portfolio-risk" style={styles.cardActionLink}>Analyze</Link>
+              <Link to="/portfolio-risk" className="text-xs font-sans text-primary hover:underline">Analyze</Link>
             </div>
+
             {plots?.portfolio_pie ? (
-              <div style={styles.plotBoxCompact}>
-                <img src={`data:image/png;base64,${plots.portfolio_pie}`} alt="Portfolio Pie" style={styles.plotImg} />
+              <div className="bg-surface-container/20 border border-outline-variant/20 rounded-xl p-2 flex justify-center max-h-48 overflow-hidden">
+                <img src={`data:image/png;base64,${plots.portfolio_pie}`} alt="Portfolio Pie" className="w-full h-auto object-contain max-h-40" />
               </div>
             ) : (
-              <div style={styles.emptyState}>
+              <div className="text-center py-6 text-xs text-on-surface-variant/50 flex flex-col items-center justify-center space-y-3 font-serif">
                 <p>No asset portfolio registered.</p>
-                <Link to="/portfolio-risk" style={styles.setupBtn}>Set up Portfolio</Link>
+                <Link to="/portfolio-risk" className="px-4 py-1.5 bg-primary-container text-on-primary-container font-sans font-bold text-[10px] rounded-full uppercase cursor-pointer">Set up Portfolio</Link>
               </div>
             )}
           </div>
 
           {/* Card 4: Tax Optimization */}
-          <div style={styles.card}>
-            <div style={styles.cardHeader}>
-              <div style={styles.cardIconTitle}>
-                <Percent size={20} color="#6366f1" />
-                <h3 style={styles.cardTitle}>Tax Optimization</h3>
+          <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm space-y-4 flex flex-col justify-between">
+            <div className="flex justify-between items-center border-b border-outline-variant/20 pb-3 font-serif">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-indigo-400 text-lg">percent</span>
+                <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Tax Optimization</h3>
               </div>
-              <Link to="/tax-optimizer" style={styles.cardActionLink}>Optimize</Link>
+              <Link to="/tax-optimizer" className="text-xs font-sans text-primary hover:underline">Optimize</Link>
             </div>
+
             {taxSavings ? (
-              <div style={styles.taxWidget}>
-                <div style={styles.taxSavingsAmount}>₹{taxSavings.potentialSavings.toLocaleString()}</div>
-                <div style={styles.taxSavingsLabel}>Possible Annual Tax Savings</div>
+              <div className="space-y-3 font-serif text-center">
+                <div className="text-2xl font-bold text-emerald-400">₹{taxSavings.potentialSavings.toLocaleString()}</div>
+                <div className="text-[10px] text-on-surface-variant uppercase tracking-wider font-sans font-semibold">Possible Annual Tax Savings</div>
                 {plots?.tax_breakdown && (
-                  <div style={styles.plotBoxCompact}>
-                    <img src={`data:image/png;base64,${plots.tax_breakdown}`} alt="Tax Breakdown" style={styles.plotImg} />
+                  <div className="bg-surface-container/20 border border-outline-variant/20 rounded-xl p-2 flex justify-center max-h-44 overflow-hidden mt-1">
+                    <img src={`data:image/png;base64,${plots.tax_breakdown}`} alt="Tax Breakdown" className="w-full h-auto object-contain max-h-36" />
                   </div>
                 )}
               </div>
             ) : (
-              <div style={styles.emptyState}>
+              <div className="text-center py-6 text-xs text-on-surface-variant/50 flex flex-col items-center justify-center space-y-3 font-serif">
                 <p>Tax optimizer profile not created yet.</p>
-                <Link to="/tax-optimizer" style={styles.setupBtn}>Run Estimator</Link>
+                <Link to="/tax-optimizer" className="px-4 py-1.5 bg-primary-container text-on-primary-container font-sans font-bold text-[10px] rounded-full uppercase cursor-pointer">Run Estimator</Link>
               </div>
             )}
           </div>
 
           {/* Card 5: Loan Advisor */}
-          <div style={styles.card}>
-            <div style={styles.cardHeader}>
-              <div style={styles.cardIconTitle}>
-                <Scale size={20} color="#3b82f6" />
-                <h3 style={styles.cardTitle}>Loan Advisor</h3>
+          <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm space-y-4 flex flex-col justify-between">
+            <div className="flex justify-between items-center border-b border-outline-variant/20 pb-3 font-serif">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-blue-400 text-lg">scale</span>
+                <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Loan Advisor</h3>
               </div>
-              <Link to="/loan-advisor" style={styles.cardActionLink}>Limits</Link>
+              <Link to="/loan-advisor" className="text-xs font-sans text-primary hover:underline">Limits</Link>
             </div>
+
             {loanEligibility ? (
-              <div style={styles.loanWidget}>
-                <div style={styles.loanEligAmount}>₹{loanEligibility.eligibleAmount.toLocaleString()}</div>
-                <div style={styles.loanEligLabel}>Maximum Safe Home Loan</div>
-                <div style={styles.loanRates}>
-                  <div style={styles.loanRateItem}>
-                    <span>Safe Monthly EMI Limit:</span>
-                    <strong>₹{loanEligibility.safeEmi.toLocaleString()}</strong>
+              <div className="space-y-4 font-serif text-xs">
+                <div className="text-center mb-1">
+                  <div className="text-xl font-bold text-on-surface">₹{loanEligibility.eligibleAmount.toLocaleString()}</div>
+                  <span className="text-[9px] text-on-surface-variant uppercase tracking-wider font-sans font-semibold block mt-0.5">Maximum Safe Home Loan</span>
+                </div>
+                <div className="space-y-2 border-t border-outline-variant/20 pt-3">
+                  <div className="flex justify-between font-sans">
+                    <span className="text-on-surface-variant">Safe Monthly EMI Limit:</span>
+                    <strong className="text-on-surface">₹{loanEligibility.safeEmi.toLocaleString()}</strong>
                   </div>
-                  <div style={styles.loanRateItem}>
-                    <span>Absolute Max EMI Limit:</span>
-                    <strong>₹{loanEligibility.maxEmi.toLocaleString()}</strong>
+                  <div className="flex justify-between font-sans">
+                    <span className="text-on-surface-variant">Absolute Max EMI Limit:</span>
+                    <strong className="text-rose-400">₹{loanEligibility.maxEmi.toLocaleString()}</strong>
                   </div>
                 </div>
               </div>
             ) : (
-              <div style={styles.emptyState}>
+              <div className="text-center py-6 text-xs text-on-surface-variant/50 flex flex-col items-center justify-center space-y-3 font-serif">
                 <p>No loan eligibility check recorded.</p>
-                <Link to="/loan-advisor" style={styles.setupBtn}>Evaluate Limits</Link>
+                <Link to="/loan-advisor" className="px-4 py-1.5 bg-primary-container text-on-primary-container font-sans font-bold text-[10px] rounded-full uppercase cursor-pointer">Evaluate Limits</Link>
               </div>
             )}
           </div>
 
           {/* Card 6: Goal Progress Summary */}
-          <div style={{ ...styles.card, gridColumn: 'span 2' }}>
-            <div style={styles.cardHeader}>
-              <div style={styles.cardIconTitle}>
-                <TrendingUp size={20} color="#8b5cf6" />
-                <h3 style={styles.cardTitle}>Active Goals Status</h3>
+          <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm md:col-span-2 space-y-4">
+            <div className="flex justify-between items-center border-b border-outline-variant/20 pb-3 font-serif">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-purple-400 text-lg">trending_up</span>
+                <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Active Goals Status</h3>
               </div>
-              <Link to="/dashboard" style={styles.cardActionLink}>Planners</Link>
+              <Link to="/dashboard" className="text-xs font-sans text-primary hover:underline">Planners</Link>
             </div>
+
             {goalsProgress && goalsProgress.length > 0 ? (
-              <div style={styles.goalsWidget}>
-                <p style={styles.goalsWidgetText}>
+              <div className="space-y-4">
+                <p className="text-xs text-on-surface-variant font-serif">
                   Your primary financial goals are on track. Maintain monthly allocations to meet target timelines.
                 </p>
                 {plots?.goal_progress ? (
-                  <div style={styles.plotBoxCompact}>
-                    <img src={`data:image/png;base64,${plots.goal_progress}`} alt="Goals Progress" style={styles.plotImg} />
+                  <div className="bg-surface-container/20 border border-outline-variant/20 rounded-xl p-2 flex justify-center max-h-48 overflow-hidden">
+                    <img src={`data:image/png;base64,${plots.goal_progress}`} alt="Goals Progress" className="w-full h-auto object-contain max-h-40" />
                   </div>
                 ) : (
-                  <div style={styles.progressBars}>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {goalsProgress.slice(0, 3).map((g, idx) => (
-                      <div key={idx} style={styles.progressBarItem}>
-                        <div style={styles.progressBarHeader}>
-                          <span>{g.name}</span>
-                          <strong>{g.progress}%</strong>
+                      <div key={idx} className="bg-surface-container/20 border border-outline-variant/20 rounded-xl p-3.5 space-y-2">
+                        <div className="flex justify-between text-xs font-semibold font-serif">
+                          <span className="text-on-surface-variant truncate max-w-[120px]">{g.name}</span>
+                          <strong className="text-primary font-sans">{g.progress}%</strong>
                         </div>
-                        <div style={styles.progressBg}>
-                          <div style={{ ...styles.progressFill, width: `${g.progress}%` }}></div>
+                        <div className="bg-surface-container-high rounded-full h-1.5 overflow-hidden">
+                          <div className="bg-primary h-full transition-all" style={{ width: `${g.progress}%` }}></div>
                         </div>
                       </div>
                     ))}
@@ -315,9 +285,9 @@ const PremiumDashboard = () => {
                 )}
               </div>
             ) : (
-              <div style={styles.emptyState}>
+              <div className="text-center py-10 text-xs text-on-surface-variant/50 flex flex-col items-center justify-center space-y-2 font-serif">
                 <p>No active goals found in the planners.</p>
-                <span style={{ color: '#94a3b8', fontSize: '12px' }}>Create goals on the core dashboard.</span>
+                <span className="text-[10px] text-on-surface-variant/40 font-sans">Create goals on the core dashboard.</span>
               </div>
             )}
           </div>
@@ -325,356 +295,6 @@ const PremiumDashboard = () => {
       </div>
     </div>
   );
-};
-
-const styles = {
-  page: {
-    minHeight: '100vh',
-    marginTop: '64px',
-    backgroundColor: '#030712',
-    color: '#f8fafc',
-    fontFamily: 'Outfit, sans-serif',
-    padding: '40px 24px',
-  },
-  loadingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    backgroundColor: '#030712',
-    color: '#f8fafc',
-    fontFamily: 'Outfit, sans-serif',
-  },
-  errorContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    backgroundColor: '#030712',
-    color: '#fca5a5',
-    fontFamily: 'Outfit, sans-serif',
-    padding: '24px',
-  },
-  retryBtn: {
-    marginTop: '16px',
-    padding: '8px 16px',
-    background: 'rgba(255, 255, 255, 0.1)',
-    color: '#ffffff',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    borderRadius: '8px',
-    cursor: 'pointer',
-  },
-  header: {
-    maxWidth: '1200px',
-    margin: '0 auto 32px auto',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '20px',
-  },
-  badgeRow: {
-    marginBottom: '8px',
-  },
-  premiumPill: {
-    background: 'rgba(234, 179, 8, 0.15)',
-    color: '#fef08a',
-    border: '1px solid rgba(234, 179, 8, 0.3)',
-    fontSize: '11px',
-    fontWeight: 700,
-    padding: '4px 10px',
-    borderRadius: '20px',
-    letterSpacing: '0.05em',
-  },
-  title: {
-    fontSize: '32px',
-    fontWeight: 800,
-    letterSpacing: '-0.03em',
-    color: '#ffffff',
-  },
-  subtitle: {
-    color: '#cbd5e1',
-    marginTop: '6px',
-    fontSize: '15px',
-  },
-  twinHeaderCard: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    background: 'rgba(17, 24, 39, 0.5)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '16px',
-    padding: '16px 20px',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
-  },
-  twinMetaTitle: {
-    fontSize: '11px',
-    color: '#94a3b8',
-    textTransform: 'uppercase',
-    fontWeight: 600,
-  },
-  twinMetaVal: {
-    fontSize: '20px',
-    fontWeight: 800,
-    color: '#ffffff',
-    marginTop: '2px',
-  },
-  layout: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    display: 'grid',
-    gridTemplateColumns: '260px 1fr',
-    gap: '32px',
-  },
-  sidebar: {
-    background: 'rgba(17, 24, 39, 0.45)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '20px',
-    padding: '24px 16px',
-    height: 'fit-content',
-  },
-  sidebarTitle: {
-    fontSize: '11px',
-    fontWeight: 700,
-    color: '#94a3b8',
-    letterSpacing: '0.05em',
-    marginBottom: '16px',
-    paddingLeft: '12px',
-  },
-  sideNav: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
-  navLink: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    color: '#cbd5e1',
-    textDecoration: 'none',
-    fontSize: '14px',
-    fontWeight: 500,
-    padding: '10px 12px',
-    borderRadius: '8px',
-    transition: 'all 0.2s ease',
-  },
-  navArrow: {
-    marginLeft: 'auto',
-    opacity: 0.5,
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '24px',
-  },
-  card: {
-    background: 'rgba(17, 24, 39, 0.45)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '20px',
-    padding: '24px',
-    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.2)',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  cardHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '16px',
-  },
-  cardIconTitle: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-  },
-  cardTitle: {
-    fontSize: '16px',
-    fontWeight: 700,
-    color: '#ffffff',
-  },
-  cardStatusPositive: {
-    fontSize: '11px',
-    color: '#10b981',
-    fontWeight: 600,
-    background: 'rgba(16, 185, 129, 0.1)',
-    padding: '2px 8px',
-    borderRadius: '12px',
-  },
-  cardActionLink: {
-    fontSize: '12px',
-    color: '#6366f1',
-    textDecoration: 'none',
-    fontWeight: 600,
-  },
-  nwAmount: {
-    fontSize: '36px',
-    fontWeight: 800,
-    color: '#ffffff',
-    letterSpacing: '-0.02em',
-    marginBottom: '8px',
-  },
-  cardDesc: {
-    color: '#94a3b8',
-    fontSize: '13px',
-    lineHeight: 1.5,
-    marginBottom: '16px',
-  },
-  plotBox: {
-    width: '100%',
-    height: '240px',
-    borderRadius: '12px',
-    overflow: 'hidden',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    background: '#1f2937',
-  },
-  plotBoxCompact: {
-    width: '100%',
-    height: '180px',
-    borderRadius: '12px',
-    overflow: 'hidden',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    background: '#1f2937',
-    marginTop: 'auto',
-  },
-  plotImg: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'contain',
-  },
-  twinStats: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
-  twinStatItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    fontSize: '13px',
-    paddingBottom: '8px',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-  },
-  twinLabel: {
-    color: '#94a3b8',
-  },
-  twinVal: {
-    fontWeight: 700,
-    color: '#06b6d4',
-  },
-  twinValDetail: {
-    fontWeight: 600,
-    color: '#ffffff',
-    fontSize: '12px',
-    maxWidth: '140px',
-    textAlign: 'right',
-  },
-  emptyState: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '24px 0',
-    textAlign: 'center',
-    flexGrow: 1,
-  },
-  setupBtn: {
-    marginTop: '12px',
-    padding: '8px 16px',
-    background: 'rgba(99, 102, 241, 0.1)',
-    color: '#818cf8',
-    border: '1px solid rgba(99, 102, 241, 0.3)',
-    borderRadius: '8px',
-    fontSize: '12px',
-    fontWeight: 600,
-    textDecoration: 'none',
-  },
-  taxWidget: {
-    display: 'flex',
-    flexDirection: 'column',
-    flexGrow: 1,
-  },
-  taxSavingsAmount: {
-    fontSize: '28px',
-    fontWeight: 800,
-    color: '#a5b4fc',
-    marginBottom: '2px',
-  },
-  taxSavingsLabel: {
-    fontSize: '11px',
-    color: '#94a3b8',
-    marginBottom: '16px',
-  },
-  loanWidget: {
-    display: 'flex',
-    flexDirection: 'column',
-    flexGrow: 1,
-  },
-  loanEligAmount: {
-    fontSize: '28px',
-    fontWeight: 800,
-    color: '#93c5fd',
-    marginBottom: '2px',
-  },
-  loanEligLabel: {
-    fontSize: '11px',
-    color: '#94a3b8',
-    marginBottom: '16px',
-  },
-  loanRates: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-    marginTop: 'auto',
-  },
-  loanRateItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: '12px',
-  },
-  goalsWidget: {
-    display: 'flex',
-    flexDirection: 'column',
-    flexGrow: 1,
-  },
-  goalsWidgetText: {
-    color: '#cbd5e1',
-    fontSize: '13px',
-    lineHeight: 1.5,
-    marginBottom: '16px',
-  },
-  progressBars: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
-  progressBarItem: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-  },
-  progressBarHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: '12px',
-    color: '#e2e8f0',
-  },
-  progressBg: {
-    height: '6px',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: '4px',
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#8b5cf6',
-    borderRadius: '4px',
-  },
 };
 
 export default PremiumDashboard;

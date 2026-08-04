@@ -1,17 +1,19 @@
 import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Lock, Zap, CheckCircle2 } from 'lucide-react';
 
 const PremiumProtectedRoute = ({ children }) => {
   const { token, user, loading, togglePremium } = useContext(AuthContext);
 
   if (loading) {
     return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.loadingBox}>
-          <h2>Loading Premium Advisory...</h2>
-          <p style={{ color: '#94a3b8', marginTop: '8px' }}>Verifying subscription status...</p>
+      <div className="flex items-center justify-center min-h-screen bg-background text-on-background font-serif">
+        <div className="p-8 border border-outline-variant rounded-2xl glass-card text-center max-w-xs w-full shadow-2xl animate-pulse">
+          <div className="w-12 h-12 bg-primary-container/20 border-2 border-primary rounded-xl flex items-center justify-center text-primary mx-auto mb-6 animate-spin">
+            <span className="material-symbols-outlined text-2xl font-bold">verified</span>
+          </div>
+          <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface mb-2">Verifying Level</h2>
+          <p className="font-label-sm text-label-sm text-on-surface-variant font-sans">Reading credentials from the ledger...</p>
         </div>
       </div>
     );
@@ -23,43 +25,62 @@ const PremiumProtectedRoute = ({ children }) => {
 
   if (!user || !user.isPremium) {
     return (
-      <div style={styles.lockedContainer}>
-        <div style={styles.lockedBox}>
-          <div style={styles.iconGlowContainer}>
-            <div style={styles.iconGlow}></div>
-            <Lock size={44} color="#eab308" style={styles.lockIcon} />
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] md:pl-20 mt-16 bg-background text-on-background p-6 font-sans">
+        <div className="max-w-lg w-full p-8 md:p-10 border border-outline-variant rounded-2xl glass-card text-center shadow-2xl relative overflow-hidden animate-fade-in">
+          {/* Subtle glow */}
+          <div className="absolute -top-12 -right-12 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          {/* Lock Icon */}
+          <div className="w-16 h-16 rounded-full bg-primary-container/10 border border-primary/20 flex items-center justify-center text-primary mx-auto mb-6 relative">
+            <span className="absolute inset-0 rounded-full bg-primary/5 blur-md pointer-events-none"></span>
+            <span className="material-symbols-outlined text-3xl font-semibold">lock</span>
           </div>
-          
-          <h1 style={styles.title}>Unlock Premium Advisory</h1>
-          <p style={styles.description}>
-            This premium AI-powered advisor tool is locked. Upgrade your plan to get institutional-grade financial guidance.
+
+          <h2 className="font-headline-lg text-headline-lg text-on-surface mb-3 font-serif">Unlock Premium Advisory</h2>
+          <p className="text-on-surface-variant text-sm mb-6 leading-relaxed">
+            This professional-tier AI advisor panel is locked. Upgrade your account to enable institutional robo-wealth algorithms, advanced simulations, and customized deductions trackers.
           </p>
 
-          <div style={styles.featuresList}>
-            <div style={styles.featureItem}>
-              <CheckCircle2 size={16} color="#10b981" />
-              <span><strong>Tax Optimization:</strong> Maximize 80C/80D HRA deductions</span>
+          {/* Feature List */}
+          <div className="text-left bg-surface-container/60 border border-outline-variant/50 rounded-xl p-5 flex flex-col gap-3 mb-8">
+            <div className="flex items-start gap-3">
+              <span className="material-symbols-outlined text-primary text-lg mt-0.5">check_circle</span>
+              <span className="text-sm text-on-surface-variant">
+                <strong className="text-on-surface font-semibold font-serif">Tax Optimization:</strong> Maximize Section 80C, 80D, and HRA exemptions.
+              </span>
             </div>
-            <div style={styles.featureItem}>
-              <CheckCircle2 size={16} color="#10b981" />
-              <span><strong>Loan Advisor:</strong> Calculate safe multi-loan eligibility</span>
+            <div className="flex items-start gap-3">
+              <span className="material-symbols-outlined text-primary text-lg mt-0.5">check_circle</span>
+              <span className="text-sm text-on-surface-variant">
+                <strong className="text-on-surface font-semibold font-serif">Loan Advisor:</strong> Evaluate safe multi-borrowing capacities and debt schedules.
+              </span>
             </div>
-            <div style={styles.featureItem}>
-              <CheckCircle2 size={16} color="#10b981" />
-              <span><strong>What-If Simulator:</strong> Project salary hikes or emergencies</span>
+            <div className="flex items-start gap-3">
+              <span className="material-symbols-outlined text-primary text-lg mt-0.5">check_circle</span>
+              <span className="text-sm text-on-surface-variant">
+                <strong className="text-on-surface font-semibold font-serif">What-If Simulator:</strong> Project long-term effects of raises, job changes, or life emergencies.
+              </span>
             </div>
-            <div style={styles.featureItem}>
-              <CheckCircle2 size={16} color="#10b981" />
-              <span><strong>Digital Twin:</strong> Access financial age & risk personalities</span>
+            <div className="flex items-start gap-3">
+              <span className="material-symbols-outlined text-primary text-lg mt-0.5">check_circle</span>
+              <span className="text-sm text-on-surface-variant">
+                <strong className="text-on-surface font-semibold font-serif">Digital Twin:</strong> Run stability index evaluations against simulated stress tests.
+              </span>
             </div>
-            <div style={styles.featureItem}>
-              <CheckCircle2 size={16} color="#10b981" />
-              <span><strong>AI Financial Coach:</strong> Contextual real-time chat helper</span>
+            <div className="flex items-start gap-3">
+              <span className="material-symbols-outlined text-primary text-lg mt-0.5">check_circle</span>
+              <span className="text-sm text-on-surface-variant">
+                <strong className="text-on-surface font-semibold font-serif">AI Financial Coach:</strong> Access context-aware advisor panels trained on your budget.
+              </span>
             </div>
           </div>
 
-          <button onClick={() => togglePremium()} style={styles.upgradeBtn}>
-            <Zap size={18} />
+          {/* Action Button */}
+          <button 
+            onClick={() => togglePremium()} 
+            className="w-full py-3.5 rounded-full bg-primary text-on-primary font-bold hover:bg-primary-fixed-dim transition-all flex items-center justify-center gap-2 cursor-pointer text-label-md"
+          >
+            <span className="material-symbols-outlined text-lg">zap</span>
             Unlock Premium Advisory (Trial Mode)
           </button>
         </div>
@@ -68,115 +89,6 @@ const PremiumProtectedRoute = ({ children }) => {
   }
 
   return children;
-};
-
-const styles = {
-  loadingContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    backgroundColor: '#030712',
-    color: '#f8fafc',
-    fontFamily: 'Outfit, sans-serif',
-  },
-  loadingBox: {
-    padding: '24px',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '16px',
-    background: 'rgba(17, 24, 39, 0.7)',
-    textAlign: 'center',
-  },
-  lockedContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: 'calc(100vh - 64px)',
-    marginTop: '64px',
-    backgroundColor: '#030712',
-    color: '#f8fafc',
-    fontFamily: 'Outfit, sans-serif',
-    padding: '24px',
-  },
-  lockedBox: {
-    maxWidth: '520px',
-    width: '100%',
-    padding: '40px',
-    border: '1px solid rgba(234, 179, 8, 0.25)',
-    borderRadius: '24px',
-    background: 'rgba(17, 24, 39, 0.45)',
-    backdropFilter: 'blur(24px)',
-    textAlign: 'center',
-    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(234, 179, 8, 0.03)',
-  },
-  iconGlowContainer: {
-    position: 'relative',
-    display: 'inline-block',
-    marginBottom: '20px',
-  },
-  iconGlow: {
-    position: 'absolute',
-    width: '60px',
-    height: '60px',
-    background: 'rgba(234, 179, 8, 0.3)',
-    borderRadius: '50%',
-    filter: 'blur(15px)',
-    left: '-8px',
-    top: '-8px',
-    zIndex: 0,
-  },
-  lockIcon: {
-    position: 'relative',
-    zIndex: 1,
-  },
-  title: {
-    fontSize: '26px',
-    fontWeight: 800,
-    letterSpacing: '-0.02em',
-    marginBottom: '12px',
-    color: '#ffffff',
-  },
-  description: {
-    color: '#94a3b8',
-    fontSize: '14px',
-    lineHeight: 1.6,
-    marginBottom: '28px',
-  },
-  featuresList: {
-    textAlign: 'left',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-    marginBottom: '32px',
-    padding: '20px',
-    background: 'rgba(255, 255, 255, 0.02)',
-    borderRadius: '12px',
-    border: '1px solid rgba(255, 255, 255, 0.04)',
-  },
-  featureItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    fontSize: '13px',
-    color: '#cbd5e1',
-  },
-  upgradeBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '8px',
-    width: '100%',
-    padding: '14px 20px',
-    borderRadius: '12px',
-    background: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
-    color: '#000000',
-    fontSize: '14px',
-    fontWeight: 700,
-    cursor: 'pointer',
-    border: 'none',
-    transition: 'all 0.2s ease',
-    boxShadow: '0 4px 15px rgba(234, 179, 8, 0.3)',
-  },
 };
 
 export default PremiumProtectedRoute;

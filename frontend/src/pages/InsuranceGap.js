@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { ShieldCheck, ArrowLeft, AlertTriangle, AlertOctagon, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const InsuranceGap = () => {
@@ -42,321 +41,153 @@ const InsuranceGap = () => {
     }
   };
 
-  const getPriorityDetails = (priority) => {
-    if (priority === 'Critical') return { color: '#ef4444', icon: <AlertOctagon size={16} /> };
-    if (priority === 'High') return { color: '#f97316', icon: <AlertTriangle size={16} /> };
-    if (priority === 'Medium') return { color: '#eab308', icon: <HelpCircle size={16} /> };
-    return { color: '#10b981', icon: <ShieldCheck size={16} /> };
+  const getPriorityColor = (priority) => {
+    if (priority === 'Critical') return '#ef4444';
+    if (priority === 'High') return '#ffb59d';
+    if (priority === 'Medium') return '#f59e0b';
+    return '#10b981';
   };
 
   return (
-    <div style={styles.page}>
-      <header style={styles.header}>
-        <Link to="/premium-dashboard" style={styles.backLink}>
-          <ArrowLeft size={16} />
+    <div className="md:pl-20 mt-16 px-6 md:px-8 pt-10 md:pt-14 pb-6 md:pb-8 min-h-screen bg-background text-on-background font-sans max-w-[1600px] mx-auto animate-fade-in">
+
+      {/* Header */}
+      <header className="mb-8 border-b border-outline-variant pb-6">
+        <Link to="/premium-dashboard" className="inline-flex items-center gap-2 text-xs text-on-surface-variant hover:text-on-surface font-semibold mb-4 transition-colors">
+          <span className="material-symbols-outlined text-sm">arrow_back</span>
           Back to Hub
         </Link>
-        <div style={styles.titleRow}>
-          <ShieldCheck size={28} color="#10b981" />
-          <h1 style={styles.title}>Insurance Gap Analysis</h1>
+        <div className="flex items-center gap-3">
+          <span className="material-symbols-outlined text-3xl text-primary-container font-bold">shield</span>
+          <h1 className="font-display-hero text-3xl font-bold tracking-tight text-on-surface">Insurance Gap Analysis</h1>
         </div>
-        <p style={styles.subtitle}>Calculate your protection deficits and identify the optimal life/health coverage policies needed.</p>
+        <p className="text-sm text-on-surface-variant mt-1 m-2">Calculate your protection deficits and identify the optimal life/health coverage policies needed.</p>
       </header>
 
-      <div style={styles.container}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         {/* Form Panel */}
-        <form onSubmit={handleSubmit} style={styles.formCard}>
-          <h3 style={styles.sectionTitle}>Coverage Profile</h3>
-          
-          <div style={styles.formGrid}>
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Annual Income (₹) *</label>
-              <input type="number" name="income" required value={formData.income} onChange={handleChange} placeholder="e.g. 1000000" style={styles.input} />
+        <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-6 md:p-8 border border-outline-variant/40 shadow-sm space-y-5">
+          <h3 className="font-headline-sm text-headline-sm font-bold font-serif text-on-surface border-b border-outline-variant/40 pb-3">Coverage Profile</h3>
+
+          <div className="space-y-4 font-sans text-xs">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-on-surface-variant block ml-1">Annual Income (₹) *</label>
+              <input
+                type="number"
+                name="income"
+                required
+                value={formData.income}
+                onChange={handleChange}
+                placeholder="e.g. 1000000"
+                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
+              />
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Total Active Insurance Coverage (₹)</label>
-              <input type="number" name="coverageAmount" value={formData.coverageAmount} onChange={handleChange} placeholder="Current life/health policies sum" style={styles.input} />
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-on-surface-variant block ml-1">Total Active Insurance Coverage (₹)</label>
+              <input
+                type="number"
+                name="coverageAmount"
+                value={formData.coverageAmount}
+                onChange={handleChange}
+                placeholder="Current life/health policies sum"
+                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
+              />
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Number of Dependents *</label>
-              <input type="number" name="dependents" required value={formData.dependents} onChange={handleChange} placeholder="e.g. 3" style={styles.input} />
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-on-surface-variant block ml-1">Number of Dependents *</label>
+              <input
+                type="number"
+                name="dependents"
+                required
+                value={formData.dependents}
+                onChange={handleChange}
+                placeholder="e.g. 3"
+                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
+              />
             </div>
           </div>
 
-          <button type="submit" disabled={loading} style={styles.submitBtn}>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-primary-container hover:bg-primary text-on-primary-container font-semibold py-3 rounded-full transition-all flex items-center justify-center gap-2 cursor-pointer text-sm mt-6 shadow-md"
+          >
             {loading ? 'Analyzing Gaps...' : 'Run Gap Analysis'}
           </button>
         </form>
 
         {/* Results Panel */}
-        <div style={styles.resultContainer}>
-          {error && <div style={styles.errorBox}>{error}</div>}
-          
+        <div className="min-h-[400px]">
+          {error && (
+            <div className="bg-error-container/20 border-l-4 border-error text-error p-4 rounded-xl text-sm mb-6 flex items-center gap-2">
+              <span className="material-symbols-outlined text-lg">report_problem</span>
+              <span>{error}</span>
+            </div>
+          )}
+
           {result ? (
-            <div style={styles.resultCard}>
-              <div style={styles.resultHeader}>
-                <ShieldCheck size={20} color="#10b981" />
-                <h3 style={styles.resultTitle}>Gap Summary</h3>
-                <span style={{ 
-                  ...styles.priorityBadge, 
-                  color: getPriorityDetails(result.priorityLevel).color, 
-                  borderColor: getPriorityDetails(result.priorityLevel).color,
-                  background: `${getPriorityDetails(result.priorityLevel).color}15`
-                }}>
-                  <div style={styles.badgeFlex}>
-                    {getPriorityDetails(result.priorityLevel).icon}
+            <div className="glass-card rounded-2xl p-6 md:p-8 border border-outline-variant/40 shadow-sm space-y-6 animate-fade-in font-serif">
+              <div className="flex justify-between items-center border-b border-outline-variant/40 pb-4 mb-4 flex-wrap gap-2">
+                <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Gap Summary</h3>
+                <span
+                  className="px-3 py-1 rounded-full text-xs font-bold tracking-wider border font-sans"
+                  style={{
+                    color: getPriorityColor(result.priorityLevel),
+                    borderColor: getPriorityColor(result.priorityLevel),
+                    background: `${getPriorityColor(result.priorityLevel)}15`
+                  }}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-xs">shield_alert</span>
                     <span>{result.priorityLevel} Priority</span>
                   </div>
                 </span>
               </div>
 
-              <div style={styles.gapSummary}>
-                <div style={styles.gapBox}>
-                  <span style={styles.gapLabel}>Required Protection</span>
-                  <strong style={{ ...styles.gapVal, color: '#ffffff' }}>₹{result.requiredCoverage.toLocaleString()}</strong>
+              <div className="grid grid-cols-2 bg-surface-container/30 border border-outline-variant/40 rounded-xl overflow-hidden divide-x divide-outline-variant/30">
+                <div className="p-4 text-center">
+                  <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Required Protection</span>
+                  <strong className="text-xl font-bold text-on-surface font-serif">₹{result.requiredCoverage.toLocaleString()}</strong>
                 </div>
-                <div style={{ ...styles.gapBox, borderRight: 'none' }}>
-                  <span style={styles.gapLabel}>Uncovered Deficit (Gap)</span>
-                  <strong style={{ ...styles.gapVal, color: '#f43f5e' }}>₹{result.coverageGap.toLocaleString()}</strong>
-                </div>
-              </div>
-
-              <div style={styles.recSection}>
-                <h4 style={styles.recHeading}>Recommendations Checklist</h4>
-                <div style={styles.recItem}>
-                  <span>Suggested Add-On Cover Amount:</span>
-                  <strong>₹{result.recommendedAdditionalCoverage.toLocaleString()}</strong>
-                </div>
-                <div style={styles.recItem}>
-                  <span>Recommended Product:</span>
-                  <strong style={{ color: '#10b981' }}>{result.bestInsuranceType}</strong>
+                <div className="p-4 text-center">
+                  <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Uncovered Deficit (Gap)</span>
+                  <strong className="text-xl font-bold text-rose-400 font-serif">₹{result.coverageGap.toLocaleString()}</strong>
                 </div>
               </div>
 
-              <p style={styles.footerNote}>
+              <div className="space-y-3 font-serif">
+                <h4 className="text-sm font-bold text-on-surface uppercase tracking-wider">Recommendations Checklist</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center bg-surface-container/30 border border-outline-variant/20 rounded-xl p-3.5 text-xs">
+                    <span className="text-on-surface-variant font-sans">Suggested Add-On Cover Amount:</span>
+                    <strong className="text-sm text-on-surface">₹{result.recommendedAdditionalCoverage.toLocaleString()}</strong>
+                  </div>
+                  <div className="flex justify-between items-center bg-surface-container/30 border border-outline-variant/20 rounded-xl p-3.5 text-xs">
+                    <span className="text-on-surface-variant font-sans">Recommended Product:</span>
+                    <strong className="text-sm text-emerald-400">{result.bestInsuranceType}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-on-surface-variant/60 leading-relaxed font-serif pt-4 border-t border-outline-variant/30">
                 Required protection is calculated using the 10x-15x income benchmark plus dependency multipliers to secure household liabilities.
               </p>
             </div>
           ) : (
-            <div style={styles.emptyState}>
-              <ShieldCheck size={44} color="rgba(255, 255, 255, 0.1)" />
-              <h3>Awaiting Insurance Parameters</h3>
-              <p>Fill out your active policies and dependents to compute your gap coverage index.</p>
+            <div className="glass-card rounded-2xl p-12 border border-outline-variant/40 shadow-sm text-center flex flex-col items-center justify-center min-h-[300px] border-dashed">
+              <span className="material-symbols-outlined text-5xl text-on-surface-variant/40 mb-4 animate-pulse">shield</span>
+              <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface font-serif">Awaiting Parameters</h3>
+              <p className="text-sm text-on-surface-variant max-w-sm mt-2 font-serif leading-relaxed">
+                Provide your active policies and dependents to compute your gap coverage index.
+              </p>
             </div>
           )}
         </div>
       </div>
     </div>
   );
-};
-
-const styles = {
-  page: {
-    minHeight: '100vh',
-    marginTop: '64px',
-    backgroundColor: '#030712',
-    color: '#f8fafc',
-    fontFamily: 'Outfit, sans-serif',
-    padding: '40px 24px',
-  },
-  header: {
-    maxWidth: '1200px',
-    margin: '0 auto 32px auto',
-  },
-  backLink: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    color: '#94a3b8',
-    textDecoration: 'none',
-    fontSize: '13px',
-    fontWeight: 500,
-    marginBottom: '16px',
-    width: 'fit-content',
-  },
-  titleRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    marginBottom: '8px',
-  },
-  title: {
-    fontSize: '28px',
-    fontWeight: 800,
-    color: '#ffffff',
-  },
-  subtitle: {
-    color: '#cbd5e1',
-    fontSize: '14px',
-  },
-  container: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    display: 'grid',
-    gridTemplateColumns: '1fr 1.2fr',
-    gap: '32px',
-    alignItems: 'start',
-  },
-  formCard: {
-    background: 'rgba(17, 24, 39, 0.45)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '20px',
-    padding: '32px',
-    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.2)',
-  },
-  sectionTitle: {
-    fontSize: '18px',
-    fontWeight: 700,
-    marginBottom: '20px',
-    color: '#ffffff',
-  },
-  formGrid: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-  },
-  label: {
-    fontSize: '12px',
-    fontWeight: 600,
-    color: '#94a3b8',
-  },
-  input: {
-    padding: '12px 16px',
-    borderRadius: '10px',
-    background: 'rgba(15, 23, 42, 0.6)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    color: '#ffffff',
-    fontSize: '14px',
-    fontFamily: 'Outfit, sans-serif',
-    outline: 'none',
-  },
-  submitBtn: {
-    marginTop: '24px',
-    width: '100%',
-    padding: '14px',
-    background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '10px',
-    fontSize: '14px',
-    fontWeight: 700,
-    cursor: 'pointer',
-    boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
-  },
-  resultContainer: {
-    minHeight: '400px',
-  },
-  errorBox: {
-    padding: '16px',
-    background: 'rgba(239, 68, 68, 0.1)',
-    color: '#f87171',
-    border: '1px solid rgba(239, 68, 68, 0.2)',
-    borderRadius: '12px',
-    marginBottom: '20px',
-  },
-  resultCard: {
-    background: 'rgba(17, 24, 39, 0.45)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '20px',
-    padding: '32px',
-    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.2)',
-  },
-  resultHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    marginBottom: '24px',
-    flexWrap: 'wrap',
-  },
-  resultTitle: {
-    fontSize: '18px',
-    fontWeight: 700,
-    color: '#ffffff',
-  },
-  priorityBadge: {
-    marginLeft: 'auto',
-    fontSize: '11px',
-    fontWeight: 700,
-    padding: '4px 10px',
-    borderRadius: '20px',
-    border: '1px solid',
-  },
-  badgeFlex: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-  },
-  gapSummary: {
-    display: 'flex',
-    background: 'rgba(255, 255, 255, 0.02)',
-    borderRadius: '12px',
-    border: '1px solid rgba(255, 255, 255, 0.04)',
-    marginBottom: '24px',
-  },
-  gapBox: {
-    flex: 1,
-    padding: '16px',
-    textAlign: 'center',
-    borderRight: '1px solid rgba(255, 255, 255, 0.05)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-  },
-  gapLabel: {
-    fontSize: '11px',
-    color: '#94a3b8',
-  },
-  gapVal: {
-    fontSize: '20px',
-    fontWeight: 800,
-  },
-  recSection: {
-    background: 'rgba(255, 255, 255, 0.01)',
-    border: '1px solid rgba(255, 255, 255, 0.03)',
-    borderRadius: '12px',
-    padding: '16px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-    marginBottom: '20px',
-  },
-  recHeading: {
-    fontSize: '13px',
-    fontWeight: 700,
-    color: '#ffffff',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-    paddingBottom: '8px',
-    marginBottom: '4px',
-  },
-  recItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: '13px',
-    color: '#cbd5e1',
-  },
-  footerNote: {
-    fontSize: '11px',
-    color: '#64748b',
-    lineHeight: 1.5,
-  },
-  emptyState: {
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    textAlign: 'center',
-    padding: '60px 40px',
-    border: '2px dashed rgba(255, 255, 255, 0.06)',
-    borderRadius: '20px',
-  },
 };
 
 export default InsuranceGap;

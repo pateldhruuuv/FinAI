@@ -1238,13 +1238,32 @@ def get_premium_dashboard_plots(data: DashboardPlotsRequest):
     # Helper to convert figure to base64
     def fig_to_base64(fig):
         buf = io.BytesIO()
-        fig.savefig(buf, format='png', dpi=100, facecolor='#1f2937')
+        fig.patch.set_facecolor('none')
+        for ax in fig.axes:
+            ax.set_facecolor('none')
+            # Color axes, spines and labels to match theme
+            for spine in ['bottom', 'left']:
+                if spine in ax.spines:
+                    ax.spines[spine].set_color('#594139') # outline-variant
+            for spine in ['top', 'right']:
+                if spine in ax.spines:
+                    ax.spines[spine].set_visible(False)
+            ax.tick_params(colors='#e3e2e2', labelsize=8) # on-surface
+            ax.xaxis.label.set_color('#e3e2e2')
+            ax.yaxis.label.set_color('#e3e2e2')
+            ax.title.set_color('white')
+            # Optional subtle grid
+            ax.grid(True, linestyle='--', alpha=0.1, color='#e3e2e2')
+        fig.savefig(buf, format='png', dpi=120, transparent=True)
         buf.seek(0)
         img_str = base64.b64encode(buf.read()).decode('utf-8')
         plt.close(fig)
         return img_str
 
     plt.style.use('dark_background')
+
+    # Theme colors definitions
+    colors_list = ['#ff6b35', '#918cff', '#ffb59d', '#10b981', '#c4c0ff', '#f43f5e']
 
     # 1. Portfolio Pie Chart
     try:
@@ -1253,10 +1272,19 @@ def get_premium_dashboard_plots(data: DashboardPlotsRequest):
         sizes = [v for k, v in portfolio.items() if v > 0]
         
         if sizes:
-            fig, ax = plt.subplots(figsize=(4, 3.5))
-            ax.pie(sizes, labels=labels, autopct='%1.0f%%', startangle=90, 
-                   colors=['#ef4444', '#3b82f6', '#eab308', '#10b981', '#a855f7', '#f97316'])
-            ax.set_title("Portfolio Breakdown", color='white', fontsize=10, pad=10)
+            fig, ax = plt.subplots(figsize=(4.2, 3.8))
+            patches, texts, autotexts = ax.pie(
+                sizes, labels=labels, autopct='%1.0f%%', startangle=90, 
+                colors=colors_list[:len(sizes)]
+            )
+            ax.set_title("Portfolio Breakdown", color='white', fontsize=11, pad=12)
+            for t in texts:
+                t.set_color('#cbd5e1')
+                t.set_fontsize(8)
+            for t in autotexts:
+                t.set_color('white')
+                t.set_fontsize(8)
+                t.set_weight('bold')
             fig.tight_layout()
             plots["portfolio_pie"] = fig_to_base64(fig)
         else:
@@ -1272,12 +1300,12 @@ def get_premium_dashboard_plots(data: DashboardPlotsRequest):
             months = [item["month"] for item in nw]
             net_worth = [item["assets"] - item["liabilities"] for item in nw]
             
-            fig, ax = plt.subplots(figsize=(4.5, 3.5))
-            ax.plot(months, net_worth, marker='o', linewidth=2, color='#10b981', label='Net Worth')
-            ax.fill_between(months, net_worth, color='#10b981', alpha=0.15)
-            ax.set_title("Net Worth Trend", color='white', fontsize=10)
+            fig, ax = plt.subplots(figsize=(4.8, 3.8))
+            ax.plot(months, net_worth, marker='o', linewidth=2.5, color='#ffb59d', label='Net Worth')
+            ax.fill_between(months, net_worth, color='#ffb59d', alpha=0.1)
+            ax.set_title("Net Worth Trend", color='white', fontsize=11, pad=12)
             ax.set_ylabel("Net Worth (₹)", color='#cbd5e1', fontsize=8)
-            plt.xticks(rotation=30, fontsize=8)
+            plt.xticks(rotation=20, fontsize=8)
             plt.yticks(fontsize=8)
             fig.tight_layout()
             plots["net_worth_trend"] = fig_to_base64(fig)
@@ -1291,17 +1319,21 @@ def get_premium_dashboard_plots(data: DashboardPlotsRequest):
     try:
         tax = data.tax
         if tax:
-            fig, ax = plt.subplots(figsize=(4, 3.5))
+            fig, ax = plt.subplots(figsize=(4.2, 3.8))
             labels = ['Old Tax', 'New Tax', 'Optimized']
             values = [tax.get("old_tax", 0), tax.get("new_tax", 0), tax.get("optimized_tax", 0)]
-            bars = ax.bar(labels, values, color=['#ef4444', '#3b82f6', '#10b981'], width=0.4)
-            ax.set_title("Tax Optimization Breakdown", color='white', fontsize=10)
+            bars = ax.bar(labels, values, color=['#f43f5e', '#918cff', '#10b981'], width=0.4)
+            ax.set_title("Tax Optimization Breakdown", color='white', fontsize=11, pad=12)
             ax.set_ylabel("Tax (₹)", color='#cbd5e1', fontsize=8)
             plt.yticks(fontsize=8)
             
             for bar in bars:
                 height = bar.get_height()
-                ax.text(bar.get_x() + bar.get_width()/2.0, height + 100, f"₹{height:,.0f}", ha='center', va='bottom', color='white', fontsize=7)
+                ax.text(
+                    bar.get_x() + bar.get_width()/2.0, height + 100, 
+                    f"₹{height:,.0f}", ha='center', va='bottom', 
+                    color='#e3e2e2', fontsize=7, weight='bold'
+                )
                 
             fig.tight_layout()
             plots["tax_breakdown"] = fig_to_base64(fig)
@@ -1318,17 +1350,20 @@ def get_premium_dashboard_plots(data: DashboardPlotsRequest):
             names = [g["name"][:12] for g in goals[:4]] # limit to 4 goals
             progresses = [g["progress"] for g in goals[:4]]
             
-            fig, ax = plt.subplots(figsize=(4.5, 3.5))
-            bars = ax.barh(names, progresses, color='#8b5cf6', edgecolor='white', height=0.4)
-            ax.set_title("Goal Progress Summary (%)", color='white', fontsize=10)
+            fig, ax = plt.subplots(figsize=(4.8, 3.8))
+            bars = ax.barh(names, progresses, color='#918cff', height=0.4)
+            ax.set_title("Goal Progress Summary (%)", color='white', fontsize=11, pad=12)
             ax.set_xlim(0, 100)
             plt.xticks(fontsize=8)
             plt.yticks(fontsize=8)
             
             for bar in bars:
                 width = bar.get_width()
-                ax.text(width + 2, bar.get_y() + bar.get_height()/2.0, f"{width}%", ha='left', va='center', color='white', fontsize=8)
-                
+                ax.text(
+                    width + 2, bar.get_y() + bar.get_height()/2.0, 
+                    f"{width}%", ha='left', va='center', 
+                    color='#cbd5e1', fontsize=8, weight='bold'
+                )
             fig.tight_layout()
             plots["goal_progress"] = fig_to_base64(fig)
         else:
@@ -1344,9 +1379,9 @@ def get_premium_dashboard_plots(data: DashboardPlotsRequest):
         values = [v for k, v in investments.items() if v > 0]
         
         if values:
-            fig, ax = plt.subplots(figsize=(4, 3.5))
-            ax.bar(labels, values, color='#ec4899', width=0.4)
-            ax.set_title("Investment Assets (₹)", color='white', fontsize=10)
+            fig, ax = plt.subplots(figsize=(4.2, 3.8))
+            ax.bar(labels, values, color='#ffb59d', width=0.4)
+            ax.set_title("Investment Assets (₹)", color='white', fontsize=11, pad=12)
             plt.xticks(rotation=15, fontsize=8)
             plt.yticks(fontsize=8)
             fig.tight_layout()
@@ -1361,11 +1396,11 @@ def get_premium_dashboard_plots(data: DashboardPlotsRequest):
     try:
         debt = data.debt
         if debt:
-            fig, ax = plt.subplots(figsize=(4, 3.5))
+            fig, ax = plt.subplots(figsize=(4.2, 3.8))
             categories = ['Income', 'Debt Payments']
             values = [debt.get("monthly_income", 0), debt.get("current_emi", 0) + debt.get("other_debts", 0)]
             ax.bar(categories, values, color=['#10b981', '#f43f5e'], width=0.4)
-            ax.set_title("Debt vs Monthly Income", color='white', fontsize=10)
+            ax.set_title("Debt vs Monthly Income", color='white', fontsize=11, pad=12)
             ax.set_ylabel("Amount (₹)", color='#cbd5e1', fontsize=8)
             plt.yticks(fontsize=8)
             fig.tight_layout()
@@ -1383,12 +1418,17 @@ def get_premium_dashboard_plots(data: DashboardPlotsRequest):
             hist_exp = forecast.get("historical_expenses", [])
             hist_sav = forecast.get("historical_savings", [])
             
-            fig, ax = plt.subplots(figsize=(4.5, 3.5))
+            fig, ax = plt.subplots(figsize=(4.8, 3.8))
             indices = list(range(len(hist_exp)))
-            ax.plot(indices, hist_exp, label='Expenses', marker='x', color='#ef4444', linestyle='--')
+            ax.plot(indices, hist_exp, label='Expenses', marker='x', color='#f43f5e', linestyle='--')
             ax.plot(indices, hist_sav, label='Savings', marker='o', color='#10b981')
-            ax.set_title("Historical Savings & Expenses", color='white', fontsize=10)
-            ax.legend(fontsize=8, loc='upper left')
+            ax.set_title("Historical Savings & Expenses", color='white', fontsize=11, pad=12)
+            leg = ax.legend(fontsize=8, loc='upper left')
+            if leg:
+                for text in leg.get_texts():
+                    text.set_color('#cbd5e1')
+                leg.get_frame().set_facecolor('none')
+                leg.get_frame().set_edgecolor('#594139')
             plt.xticks(fontsize=8)
             plt.yticks(fontsize=8)
             fig.tight_layout()

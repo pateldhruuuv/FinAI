@@ -8,24 +8,14 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        backgroundColor: '#030712',
-        color: '#f8fafc',
-        fontFamily: 'Outfit, sans-serif'
-      }}>
-        <div style={{
-          padding: '24px',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: '16px',
-          background: 'rgba(17, 24, 39, 0.7)',
-          textAlign: 'center'
-        }}>
-          <h2>Loading FinPilot AI...</h2>
-          <p style={{ color: '#94a3b8', marginTop: '8px' }}>Securing session...</p>
+      <div className="flex items-center justify-center min-h-screen bg-background text-on-background font-serif">
+        <div className="p-8 border border-outline-variant rounded-2xl glass-card text-center max-w-xs w-full shadow-2xl animate-pulse">
+          {/* Subtle logo spinner */}
+          <div className="w-12 h-12 bg-primary-container/20 border-2 border-primary rounded-xl flex items-center justify-center text-primary mx-auto mb-6 animate-spin">
+            <span className="material-symbols-outlined text-2xl font-bold">account_balance</span>
+          </div>
+          <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface mb-2">Securing Cockpit</h2>
+          <p className="font-label-sm text-label-sm text-on-surface-variant font-sans">Connecting to your financial twin...</p>
         </div>
       </div>
     );

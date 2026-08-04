@@ -15,6 +15,9 @@ import InvestmentAdvisor from './pages/InvestmentAdvisor';
 import InsuranceAdvisor from './pages/InsuranceAdvisor';
 import Chatbot from './pages/Chatbot';
 import Settings from './pages/Settings';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+import Contact from './pages/Contact';
 
 // Import Premium Pages
 import PremiumDashboard from './pages/PremiumDashboard';
@@ -40,6 +43,9 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/contact" element={<Contact />} />
 
             {/* Protected Routes */}
             <Route

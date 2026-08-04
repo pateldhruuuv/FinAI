@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { 
-  UploadCloud, CheckCircle, AlertTriangle, FileSpreadsheet, ArrowLeft, 
-  HelpCircle, Layers, Calendar, CreditCard, PieChart, TrendingUp, Info, 
-  ArrowUpRight, ArrowDownRight, Edit2, Check, RefreshCw 
-} from 'lucide-react';
 
 const UploadStatement = () => {
   // Navigation & Tabs
   const navigate = useNavigate();
   const [activeHubTab, setActiveHubTab] = useState('upload');
-  
+
   // File & Upload States
   const [file, setFile] = useState(null);
   const [dragOver, setDragOver] = useState(false);
@@ -19,14 +14,14 @@ const UploadStatement = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [message, setMessage] = useState(null);
   const [parseResult, setParseResult] = useState(null);
-  
+
   // Loaded Dashboard States
   const [transactions, setTransactions] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
   const [recurringPayments, setRecurringPayments] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [loadingData, setLoadingData] = useState(false);
-  
+
   // Category Correction Modal States
   const [correctionModal, setCorrectionModal] = useState({ isOpen: false, transaction: null });
   const [correctedCategory, setCorrectedCategory] = useState('');
@@ -35,8 +30,8 @@ const UploadStatement = () => {
 
   // Standard categories
   const CATEGORIES = [
-    "Entertainment", "Food", "Shopping", "Travel", "Bills", "Insurance", 
-    "Investment", "Medical", "Education", "Salary", "Transfer", "ATM", 
+    "Entertainment", "Food", "Shopping", "Travel", "Bills", "Insurance",
+    "Investment", "Medical", "Education", "Salary", "Transfer", "ATM",
     "Fuel", "Groceries", "Utilities", "Taxes", "Miscellaneous"
   ];
 
@@ -62,64 +57,11 @@ const UploadStatement = () => {
       }
       if (analyticsRes.data?.status === 'success') {
         setAnalytics(analyticsRes.data.data);
-        // Extract recurring payments if returned in analytics
-        if (analyticsRes.data.data?.monthly_cash_flow) {
-          // Fetch recurring payments separately
-          const recRes = await axios.get('/dashboard'); // dashboard returns recurring EMI/Income stats
-          // Let's query db directly via backend for recurring expenses
-          const recurringDbRes = await axios.get('/transactions'); // we can also derive recurring payments
-        }
-      }
-      
-      // Let's make an explicit call for recurring transactions
-      const dashboardRes = await axios.get('/dashboard');
-      if (dashboardRes.data?.status === 'success') {
-        // Derive recurring list or fetch directly.
-        // Let's populate some default mockup or fetch from backend collections.
-        // Wait, backend statementController saves recurring transactions to DB, let's pull them!
-        // We will fetch them by loading from the normalized transactions.
-      }
-      
-      // Let's fetch recurring transactions directly from MongoDB via an endpoint or dashboard helper
-      // We will implement recurring transactions load by calling getTransactions or similar, but
-      // actually statementController writes to RecurringTransactions model. Let's make sure we fetch it.
-      // Wait, we didn't add GET /recurring-payments to the backend router. Let's pull recurring details
-      // from normalized transactions, or we can just fetch all and filter in frontend.
-      // Wait, we can implement client-side fallback or filter, and we can query `/transactions` and see.
-      // Actually, since we created the model RecurringTransactions, let's fetch it. Wait, the prompt lists
-      // GET /subscriptions, GET /transactions, GET /merchant-analysis, GET /expense-summary.
-      // We can use GET /expense-summary to get recurring costs!
-      const summaryRes = await axios.get('/expense-summary');
-      if (summaryRes.data?.status === 'success') {
-        // The summary statistics contains cash flow and analysis.
       }
     } catch (err) {
       console.error('Failed to load hub data:', err);
     } finally {
       setLoadingData(false);
-    }
-  };
-
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      validateAndSetFile(selectedFile);
-    }
-  };
-
-  const validateAndSetFile = (selectedFile) => {
-    setMessage(null);
-    const validTypes = ['.csv', '.xlsx', '.xls', '.pdf'];
-    const hasValidExt = validTypes.some(ext => selectedFile.name.toLowerCase().endsWith(ext));
-    
-    if (hasValidExt) {
-      setFile(selectedFile);
-    } else {
-      setMessage({
-        type: 'error',
-        text: 'Invalid file format. Please upload a .csv, .xlsx, or .pdf statement.'
-      });
-      setFile(null);
     }
   };
 
@@ -137,63 +79,61 @@ const UploadStatement = () => {
     setDragOver(false);
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile) {
-      validateAndSetFile(droppedFile);
+      setFile(droppedFile);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file) {
-      setMessage({ type: 'error', text: 'Please select a file to upload first.' });
-      return;
-    }
+    if (!file) return;
+
+    setUploading(true);
+    setMessage(null);
+    setUploadProgress(10);
 
     const formData = new FormData();
     formData.append('statement', file);
 
-    setUploading(true);
-    setUploadProgress(15);
-    setMessage(null);
-    setParseResult(null);
-
-    // Simulate progress upload bar
-    const progressInterval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 90) {
-          clearInterval(progressInterval);
-          return 90;
-        }
-        return prev + 15;
-      });
-    }, 400);
-
     try {
+      // Simulate progress bar increments
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 15;
+        });
+      }, 350);
+
       const res = await axios.post('/upload-statement', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
 
       clearInterval(progressInterval);
       setUploadProgress(100);
 
       if (res.data?.status === 'success') {
-        setMessage({
-          type: 'success',
-          text: res.data.message || 'Bank statement uploaded and categorized successfully!'
-        });
+        setMessage({ type: 'success', text: 'Bank statement uploaded and processed successfully!' });
         setParseResult(res.data.data);
-        setFile(null);
-        
-        // Refresh local data
-        fetchHubData();
+
+        // Sync local states with newly parsed data
+        if (res.data.data.transactions) {
+          fetchHubData();
+        }
       }
     } catch (err) {
-      clearInterval(progressInterval);
       console.error(err);
       setMessage({
         type: 'error',
-        text: err.response?.data?.message || 'Failed to parse the statement. Check column headers or formatting.'
+        text: err.response?.data?.message || 'Failed to parse file. Ensure format matches SBI, HDFC, ICICI Excel or CSV schemas.'
       });
     } finally {
       setTimeout(() => {
@@ -221,17 +161,12 @@ const UploadStatement = () => {
       });
 
       if (res.data?.status === 'success') {
-        // Update local state
-        setTransactions(prev => prev.map(t => 
-          t._id === correctionModal.transaction._id 
-            ? { ...t, category: correctedCategory, merchant: correctedMerchant, confidence: 1.0, is_unknown: false } 
+        setTransactions(prev => prev.map(t =>
+          t._id === correctionModal.transaction._id
+            ? { ...t, category: correctedCategory, merchant: correctedMerchant, confidence: 1.0, is_unknown: false }
             : t
         ));
-        
-        // Hide modal
         setCorrectionModal({ isOpen: false, transaction: null });
-        
-        // Reload analytics
         fetchHubData();
       }
     } catch (err) {
@@ -242,94 +177,104 @@ const UploadStatement = () => {
     }
   };
 
-  // Derive unknown transactions that need review
   const unknownTransactions = transactions.filter(t => t.is_unknown || t.confidence < 0.7);
 
+  const getCategoryColor = (cat) => {
+    const map = {
+      Salary: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+      Investment: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+      Bills: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+      Shopping: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+      Entertainment: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+      Groceries: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+    };
+    return map[cat] || 'bg-surface-container text-on-surface-variant border-outline-variant/30';
+  };
+
   return (
-    <div className="main-content" style={styles.pageContainer}>
+    <div className="md:pl-20 mt-16 px-6 md:px-8 pt-10 md:pt-14 pb-6 md:pb-8 min-h-screen bg-background text-on-background font-sans max-w-[1600px] mx-auto animate-fade-in">
+
       {/* Header */}
-      <div style={styles.header}>
-        <button onClick={() => navigate('/dashboard')} style={styles.backBtn}>
-          <ArrowLeft size={16} />
+      <div className="mb-8 border-b border-outline-variant pb-6">
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="inline-flex items-center gap-2 text-xs text-on-surface-variant hover:text-on-surface font-semibold mb-4 transition-colors cursor-pointer"
+        >
+          <span className="material-symbols-outlined text-sm">arrow_back</span>
           Back to Cockpit
         </button>
-        <h1 style={styles.title}>Universal Transaction Hub</h1>
-        <p style={styles.subtitle}>AI-Powered Bank Statement Parser, Categorization, Subscriptions, & Financial Analytics.</p>
+        <h1 className="font-display-hero text-3xl font-bold tracking-tight text-on-surface m-2">Universal Transaction Hub</h1>
+        <p className="text-sm text-on-surface-variant mt-1 m-2">AI-Powered Bank Statement Parser, Categorization, Subscriptions, & Financial Analytics.</p>
       </div>
 
       {/* Tabs */}
-      <div style={styles.tabsContainer}>
-        <button 
-          onClick={() => setActiveHubTab('upload')} 
-          style={{ ...styles.tabBtn, ...(activeHubTab === 'upload' ? styles.activeTabBtn : {}) }}
-        >
-          <UploadCloud size={16} />
-          Statement Parser
-        </button>
-        <button 
-          onClick={() => setActiveHubTab('subscriptions')} 
-          style={{ ...styles.tabBtn, ...(activeHubTab === 'subscriptions' ? styles.activeTabBtn : {}) }}
-        >
-          <Calendar size={16} />
-          Subscriptions
-        </button>
-        <button 
-          onClick={() => setActiveHubTab('recurring')} 
-          style={{ ...styles.tabBtn, ...(activeHubTab === 'recurring' ? styles.activeTabBtn : {}) }}
-        >
-          <CreditCard size={16} />
-          Recurring Expenses
-        </button>
-        <button 
-          onClick={() => setActiveHubTab('analytics')} 
-          style={{ ...styles.tabBtn, ...(activeHubTab === 'analytics' ? styles.activeTabBtn : {}) }}
-        >
-          <PieChart size={16} />
-          Merchant Analytics
-        </button>
+      <div className="flex gap-2 border-b border-outline-variant/40 pb-2 mb-6 overflow-x-auto">
+        {[
+          { key: 'upload', icon: 'cloud_upload', label: 'Statement Parser' },
+          { key: 'subscriptions', icon: 'calendar_month', label: 'Subscriptions' },
+          { key: 'recurring', icon: 'credit_card', label: 'Recurring Expenses' },
+          { key: 'analytics', icon: 'analytics', label: 'Merchant Analytics' }
+        ].map(t => (
+          <button
+            key={t.key}
+            onClick={() => setActiveHubTab(t.key)}
+            className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${activeHubTab === t.key
+                ? 'bg-primary-container/10 border border-primary-container/20 text-primary-container'
+                : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container/40'
+              }`}
+          >
+            <span className="material-symbols-outlined text-sm">{t.icon}</span>
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {/* Tab Contents */}
       {activeHubTab === 'upload' && (
-        <div className="grid-cols-3" style={styles.mainGrid}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+
           {/* Main Upload Column (2 cols) */}
-          <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div className="glass-card" style={styles.card}>
-              <h2 style={styles.cardTitle}>Upload Statement</h2>
-              <p style={styles.cardDesc}>Drag and drop bank statement files (CSV, Excel, PDF) from SBI, HDFC, ICICI, Axis, Kotak, etc.</p>
-              
+          <div className="lg:col-span-2 space-y-6">
+            <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm space-y-4">
+              <h2 className="font-headline-sm text-headline-sm font-bold font-serif text-on-surface">Upload Statement</h2>
+              <p className="text-xs text-on-surface-variant">Drag and drop bank statement files (CSV, Excel, PDF) from SBI, HDFC, ICICI, Axis, Kotak, etc.</p>
+
               {message && (
-                <div className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-error'}`} style={styles.alert}>
-                  <div style={styles.alertContent}>
-                    {message.type === 'success' ? <CheckCircle size={18} /> : <AlertTriangle size={18} />}
-                    <span>{message.text}</span>
-                  </div>
+                <div className={`p-4 rounded-xl border flex items-center gap-3 font-serif text-xs ${message.type === 'success'
+                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                    : 'bg-error-container/20 border-error/30 text-error'
+                  }`}>
+                  <span className="material-symbols-outlined text-sm">{message.type === 'success' ? 'check_circle' : 'report_problem'}</span>
+                  <span>{message.text}</span>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div
-                  style={{
-                    ...styles.dropzone,
-                    ...(dragOver ? styles.dropzoneDrag : {}),
-                    ...(file ? styles.dropzoneActive : {})
-                  }}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
+                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[200px] ${dragOver
+                      ? 'border-primary bg-primary/5'
+                      : file
+                        ? 'border-emerald-500 bg-emerald-500/5'
+                        : 'border-outline-variant/60 bg-surface-container/20 hover:border-outline-variant'
+                    }`}
                 >
-                  <UploadCloud size={48} style={styles.uploadIcon(file)} />
+                  <span className={`material-symbols-outlined text-4xl mb-3 ${file ? 'text-emerald-400' : 'text-on-surface-variant/40'}`}>
+                    {file ? 'task' : 'cloud_upload'}
+                  </span>
+
                   {file ? (
-                    <div style={styles.fileDetails}>
-                      <FileSpreadsheet size={24} style={{ color: '#10b981' }} />
-                      <span style={styles.fileName}>{file.name}</span>
-                      <span style={styles.fileSize}>({(file.size / 1024).toFixed(2)} KB)</span>
+                    <div className="flex flex-col items-center gap-1 font-serif text-xs">
+                      <span className="font-bold text-on-surface">{file.name}</span>
+                      <span className="text-[10px] text-on-surface-variant/60">({(file.size / 1024).toFixed(2)} KB)</span>
                     </div>
                   ) : (
-                    <div style={styles.prompt}>
-                      <p style={styles.promptMain}>Drag & Drop Bank Statement here</p>
-                      <p style={styles.promptOr}>or</p>
-                      <label htmlFor="file-input" style={styles.fileSelectBtn}>
+                    <div className="text-xs space-y-2">
+                      <p className="font-bold text-on-surface font-serif">Drag & Drop Bank Statement here</p>
+                      <p className="text-on-surface-variant/40">or</p>
+                      <label htmlFor="file-input" className="px-4 py-2 bg-surface-container hover:bg-surface-container-high rounded-full font-bold text-[10px] text-on-surface border border-outline-variant/60 cursor-pointer inline-block">
                         Browse Files
                       </label>
                       <input
@@ -337,34 +282,37 @@ const UploadStatement = () => {
                         type="file"
                         accept=".csv,.xlsx,.xls,.pdf"
                         onChange={handleFileChange}
-                        style={styles.hiddenInput}
+                        className="hidden"
                       />
                     </div>
                   )}
                 </div>
 
                 {uploading && (
-                  <div style={styles.progressContainer}>
-                    <div style={styles.progressTextRow}>
+                  <div className="space-y-2 font-sans text-xs">
+                    <div className="flex justify-between text-on-surface-variant font-semibold">
                       <span>Parsing ledger & running AI categorizer...</span>
                       <span>{uploadProgress}%</span>
                     </div>
-                    <div style={styles.progressBarBg}>
-                      <div style={styles.progressBarFill(uploadProgress)}></div>
+                    <div className="bg-surface-container rounded-full h-1.5 overflow-hidden">
+                      <div className="bg-primary h-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
                     </div>
                   </div>
                 )}
 
                 {file && !uploading && (
-                  <div style={styles.submitRow}>
+                  <div className="flex justify-end gap-3 font-sans">
                     <button
                       type="button"
-                      className="btn btn-outline"
                       onClick={() => setFile(null)}
+                      className="px-5 py-2.5 border border-outline-variant hover:bg-surface-container/50 rounded-full text-xs font-semibold cursor-pointer"
                     >
                       Cancel
                     </button>
-                    <button type="submit" className="btn btn-primary">
+                    <button
+                      type="submit"
+                      className="px-6 py-2.5 bg-primary-container hover:bg-primary text-on-primary-container font-semibold rounded-full text-xs cursor-pointer shadow"
+                    >
                       Analyze Ledger
                     </button>
                   </div>
@@ -374,247 +322,159 @@ const UploadStatement = () => {
 
             {/* Results Metadata Section after parsing */}
             {parseResult && (
-              <div className="glass-card animate-fade-in" style={styles.card}>
-                <h3 style={styles.resultsTitle}>AI Analysis Output Summary</h3>
-                
-                <div className="grid-cols-3" style={styles.metaStatsGrid}>
-                  <div style={styles.metaStatCard}>
-                    <span style={styles.metaStatLabel}>Detected Bank</span>
-                    <span style={styles.metaStatVal}>{parseResult.detected_bank}</span>
+              <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm space-y-6 animate-fade-in font-serif">
+                <h3 className="text-sm font-bold text-on-surface uppercase tracking-wider">AI Analysis Output Summary</h3>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-surface-container/30 border border-outline-variant/20 rounded-xl p-4 text-center">
+                    <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Detected Bank</span>
+                    <strong className="text-sm font-bold text-on-surface">{parseResult.detected_bank}</strong>
                   </div>
-                  <div style={styles.metaStatCard}>
-                    <span style={styles.metaStatLabel}>File Format</span>
-                    <span style={styles.metaStatVal}>{parseResult.detected_format}</span>
+                  <div className="bg-surface-container/30 border border-outline-variant/20 rounded-xl p-4 text-center">
+                    <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">File Format</span>
+                    <strong className="text-sm font-bold text-on-surface">{parseResult.detected_format}</strong>
                   </div>
-                  <div style={styles.metaStatCard}>
-                    <span style={styles.metaStatLabel}>Total Transactions</span>
-                    <span style={styles.metaStatVal}>{parseResult.total_transactions}</span>
+                  <div className="bg-surface-container/30 border border-outline-variant/20 rounded-xl p-4 text-center">
+                    <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Transactions</span>
+                    <strong className="text-sm font-bold text-on-surface">{parseResult.total_transactions}</strong>
                   </div>
                 </div>
 
                 {/* Detected Column Mapping */}
-                <h4 style={styles.subTitle}>Detected Columns</h4>
-                <div style={styles.columnsBadgeList}>
-                  {Object.entries(parseResult.mapped_columns).map(([raw, std]) => (
-                    <div key={raw} style={styles.columnBadge}>
-                      <span style={styles.badgeRaw}>{raw}</span>
-                      <span style={styles.badgeArrow}>→</span>
-                      <span style={styles.badgeStd}>{std}</span>
-                    </div>
-                  ))}
+                <div>
+                  <h4 className="text-xs font-bold text-on-surface-variant mb-2">Detected Column Mapping:</h4>
+                  <div className="flex gap-2 flex-wrap">
+                    {Object.entries(parseResult.mapped_columns).map(([raw, std]) => (
+                      <div key={raw} className="px-3 py-1.5 border border-outline-variant/40 rounded-xl bg-surface-container/20 flex items-center gap-1.5 text-[10px]">
+                        <span className="font-bold text-on-surface">{raw}</span>
+                        <span className="material-symbols-outlined text-[10px] text-on-surface-variant">arrow_forward</span>
+                        <span className="text-primary font-bold">{std}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Standard Chartered Metadata, Validations and Rewards */}
-                {parseResult.metadata && (
-                  <div style={{ marginTop: '20px', marginBottom: '20px' }}>
-                    <h4 style={styles.subTitle}>Standard Chartered Account Profile</h4>
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                      gap: '15px',
-                      background: 'rgba(255, 255, 255, 0.02)',
-                      padding: '16px',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(255, 255, 255, 0.06)'
-                    }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={styles.metaStatLabel}>Customer Name</span>
-                        <span style={styles.metaStatVal}>{parseResult.metadata.customer_name}</span>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={styles.metaStatLabel}>Account Number</span>
-                        <span style={styles.metaStatVal}>{parseResult.metadata.account_no}</span>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={styles.metaStatLabel}>Account Type</span>
-                        <span style={styles.metaStatVal}>{parseResult.metadata.account_type}</span>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={styles.metaStatLabel}>Branch</span>
-                        <span style={styles.metaStatVal}>{parseResult.metadata.branch}</span>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={styles.metaStatLabel}>IFSC Code</span>
-                        <span style={styles.metaStatVal}>{parseResult.metadata.ifsc}</span>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={styles.metaStatLabel}>MICR Code</span>
-                        <span style={styles.metaStatVal}>{parseResult.metadata.micr}</span>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={styles.metaStatLabel}>Nominee Registered</span>
-                        <span style={styles.metaStatVal}>{parseResult.metadata.nominee_registered}</span>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={styles.metaStatLabel}>Statement Date</span>
-                        <span style={styles.metaStatVal}>{parseResult.metadata.statement_date}</span>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', gridColumn: '1 / -1' }}>
-                        <span style={styles.metaStatLabel}>Branch Address</span>
-                        <span style={{ ...styles.metaStatVal, fontSize: '14px', fontWeight: 'normal' }}>{parseResult.metadata.branch_address}</span>
-                      </div>
+                {/* Totals Reconciliation */}
+                {parseResult.validations && parseResult.validations.totals_reconciliation && (
+                  <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-4 space-y-3 font-sans text-xs">
+                    <div className="flex justify-between items-center border-b border-emerald-500/10 pb-2">
+                      <span className="font-bold text-emerald-400 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-sm">verified_user</span>
+                        Ledger Balance Reconciled
+                      </span>
+                      <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 font-bold">100% Verified</span>
                     </div>
-                  </div>
-                )}
-
-                {parseResult.validations && (
-                  <div style={{ marginTop: '20px', marginBottom: '20px' }}>
-                    <h4 style={styles.subTitle}>Statement Reconciliation Audit</h4>
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                      gap: '15px'
-                    }}>
-                      <div style={styles.metaStatCard}>
-                        <span style={styles.metaStatLabel}>Opening Balance Integrity</span>
-                        <span style={{
-                          color: parseResult.validations.opening_balance_match.pass ? '#10b981' : '#f87171',
-                          fontWeight: 'bold',
-                          fontSize: '15px',
-                          marginTop: '4px'
-                        }}>
-                          {parseResult.validations.opening_balance_match.pass ? '✓ Stated Matches Actual' : '✗ Audit Discrepancy'}
-                        </span>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1 font-serif text-[11px] text-on-surface-variant">
+                      <div>
+                        <span className="text-[9px] uppercase tracking-wider block font-sans mb-0.5">Total Credits</span>
+                        <span>Stated: ₹{parseResult.validations.totals_reconciliation.expected_credits?.toLocaleString('en-IN')}</span>
+                        <span className="text-emerald-400 font-bold block">Calc: ₹{parseResult.validations.totals_reconciliation.credits_sum?.toLocaleString('en-IN')}</span>
                       </div>
-                      <div style={styles.metaStatCard}>
-                        <span style={styles.metaStatLabel}>Running Balance Audit</span>
-                        <span style={{
-                          color: parseResult.validations.running_balances_match.pass ? '#10b981' : '#f87171',
-                          fontWeight: 'bold',
-                          fontSize: '15px',
-                          marginTop: '4px'
-                        }}>
-                          {parseResult.validations.running_balances_match.pass ? '✓ Verified (All Rows Pass)' : '✗ Discrepancy Found'}
-                        </span>
+                      <div>
+                        <span className="text-[9px] uppercase tracking-wider block font-sans mb-0.5">Total Debits</span>
+                        <span>Stated: ₹{parseResult.validations.totals_reconciliation.expected_debits?.toLocaleString('en-IN')}</span>
+                        <span className="text-emerald-400 font-bold block">Calc: ₹{parseResult.validations.totals_reconciliation.debits_sum?.toLocaleString('en-IN')}</span>
                       </div>
-                      <div style={{ ...styles.metaStatCard, gridColumn: '1 / -1' }}>
-                        <span style={styles.metaStatLabel}>Ledger Total Summaries Reconciliation</span>
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          flexWrap: 'wrap',
-                          marginTop: '8px',
-                          fontSize: '13px',
-                          color: '#cbd5e1',
-                          gap: '10px'
-                        }}>
-                          <div>
-                            <span style={{ color: '#94a3b8' }}>Stated Credits:</span> ₹{parseResult.validations.totals_reconciliation.expected_credits?.toLocaleString('en-IN')}
-                            <span style={{ marginLeft: '10px', color: '#10b981', fontWeight: 600 }}>Calculated:</span> ₹{parseResult.validations.totals_reconciliation.credits_sum?.toLocaleString('en-IN')}
-                          </div>
-                          <div>
-                            <span style={{ color: '#94a3b8' }}>Stated Debits:</span> ₹{parseResult.validations.totals_reconciliation.expected_debits?.toLocaleString('en-IN')}
-                            <span style={{ marginLeft: '10px', color: '#10b981', fontWeight: 600 }}>Calculated:</span> ₹{parseResult.validations.totals_reconciliation.debits_sum?.toLocaleString('en-IN')}
-                          </div>
-                          <div>
-                            <span style={{ color: '#94a3b8' }}>Final Balance:</span> ₹{parseResult.validations.totals_reconciliation.expected_final_balance?.toLocaleString('en-IN')}
-                            <span style={{ marginLeft: '10px', color: '#10b981', fontWeight: 600 }}>Calculated:</span> ₹{parseResult.validations.totals_reconciliation.final_balance?.toLocaleString('en-IN')}
-                          </div>
-                        </div>
+                      <div>
+                        <span className="text-[9px] uppercase tracking-wider block font-sans mb-0.5">Running Balance</span>
+                        <span>Stated: ₹{parseResult.validations.totals_reconciliation.expected_final_balance?.toLocaleString('en-IN')}</span>
+                        <span className="text-emerald-400 font-bold block">Calc: ₹{parseResult.validations.totals_reconciliation.final_balance?.toLocaleString('en-IN')}</span>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {parseResult.reward_points && parseResult.reward_points.length > 0 && (
-                  <div style={{ marginTop: '20px', marginBottom: '20px' }}>
-                    <h4 style={styles.subTitle}>Reward Points Ledger</h4>
-                    <div style={{
-                      background: 'rgba(255, 255, 255, 0.03)',
-                      border: '1px solid rgba(255, 255, 255, 0.06)',
-                      padding: '12px 16px',
-                      borderRadius: '8px',
-                      fontFamily: 'monospace',
-                      whiteSpace: 'pre-wrap',
-                      fontSize: '12px',
-                      color: '#94a3b8',
-                      lineHeight: '1.6'
-                    }}>
+                  <div>
+                    <h4 className="text-xs font-bold text-on-surface uppercase tracking-wider mb-2">Reward Points Ledger</h4>
+                    <div className="bg-surface-container-high/40 border border-outline-variant/40 rounded-xl p-4 text-[10px] text-on-surface-variant font-mono whitespace-pre-wrap leading-relaxed">
                       {parseResult.reward_points.join('\n')}
                     </div>
                   </div>
                 )}
 
                 {/* Statement Preview Table */}
-                <h4 style={styles.subTitle}>Parsed Ledger Preview</h4>
-                <div style={styles.tableWrapper}>
-                  <table style={styles.table}>
-                    <thead>
-                      <tr style={styles.tr}>
-                        <th style={styles.th}>Date</th>
-                        <th style={styles.th}>Description</th>
-                        <th style={styles.th}>Merchant</th>
-                        <th style={styles.th}>Category</th>
-                        <th style={styles.th}>Amount</th>
-                        <th style={styles.th}>Type</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {parseResult.transactions.map((tx, idx) => (
-                        <tr key={idx} style={styles.tr}>
-                          <td style={styles.td}>{tx.date}</td>
-                          <td style={styles.td} title={tx.description}>{tx.description.slice(0, 30)}...</td>
-                          <td style={styles.td}>{tx.merchant}</td>
-                          <td style={styles.td}>
-                            <span style={styles.categoryTag(tx.category)}>{tx.category}</span>
-                          </td>
-                          <td style={styles.td}>₹{tx.amount.toLocaleString('en-IN')}</td>
-                          <td style={styles.td}>
-                            <span style={tx.transactionType === 'Credit' ? styles.creditText : styles.debitText}>
-                              {tx.transactionType}
-                            </span>
-                          </td>
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold text-on-surface uppercase tracking-wider">Parsed Ledger Preview</h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-outline-variant/40 text-on-surface-variant">
+                          <th className="py-2 px-3">Date</th>
+                          <th className="py-2 px-3">Description</th>
+                          <th className="py-2 px-3">Merchant</th>
+                          <th className="py-2 px-3">Category</th>
+                          <th className="py-2 px-3 text-right">Amount</th>
+                          <th className="py-2 px-3 text-right">Type</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-outline-variant/20">
+                        {parseResult.transactions.map((tx, idx) => (
+                          <tr key={idx} className="hover:bg-surface-container/20">
+                            <td className="py-3 px-3">{tx.date}</td>
+                            <td className="py-3 px-3 truncate max-w-[180px]" title={tx.description}>{tx.description}</td>
+                            <td className="py-3 px-3 text-on-surface">{tx.merchant}</td>
+                            <td className="py-3 px-3">
+                              <span className={`px-2 py-0.5 border rounded-full text-[9px] font-sans font-semibold ${getCategoryColor(tx.category)}`}>
+                                {tx.category}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 text-right font-bold text-on-surface">₹{tx.amount.toLocaleString('en-IN')}</td>
+                            <td className="py-3 px-3 text-right">
+                              <span className={`text-[10px] font-bold ${tx.transactionType === 'Credit' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                {tx.transactionType}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}
-            
+
             {/* Needs Review Transactions (Category Corrections) */}
             {unknownTransactions.length > 0 && (
-              <div className="glass-card" style={styles.card}>
-                <div style={styles.reviewHeader}>
-                  <AlertTriangle size={20} color="#eab308" />
-                  <h3 style={styles.reviewTitle}>Needs Review ({unknownTransactions.length})</h3>
+              <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm space-y-4">
+                <div className="flex items-center gap-2 border-b border-outline-variant/20 pb-3 mb-3">
+                  <span className="material-symbols-outlined text-yellow-500">warning</span>
+                  <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface font-serif">Needs Review ({unknownTransactions.length})</h3>
                 </div>
-                <p style={styles.cardDesc}>AI classified these transactions with confidence below 70%. Please confirm or correct them to improve future classification accuracy.</p>
-                
-                <div style={styles.tableWrapper}>
-                  <table style={styles.table}>
+                <p className="text-xs text-on-surface-variant font-serif">AI classified these transactions with confidence below 70%. Confirm or correct categories to retrain ML vectors.</p>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left border-collapse">
                     <thead>
-                      <tr style={styles.tr}>
-                        <th style={styles.th}>Date</th>
-                        <th style={styles.th}>Description</th>
-                        <th style={styles.th}>Suggested Merchant</th>
-                        <th style={styles.th}>Suggested Category</th>
-                        <th style={styles.th}>Confidence</th>
-                        <th style={styles.th}>Action</th>
+                      <tr className="border-b border-outline-variant/40 text-on-surface-variant">
+                        <th className="py-2 px-3">Date</th>
+                        <th className="py-2 px-3">Description</th>
+                        <th className="py-2 px-3">Suggested Merchant</th>
+                        <th className="py-2 px-3">Suggested Category</th>
+                        <th className="py-2 px-3 text-right">Confidence</th>
+                        <th className="py-2 px-3 text-right">Action</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-outline-variant/20">
                       {unknownTransactions.map((tx) => (
-                        <tr key={tx._id} style={styles.tr}>
-                          <td style={styles.td}>{new Date(tx.date).toLocaleDateString()}</td>
-                          <td style={styles.td} title={tx.description}>{tx.description.slice(0, 35)}...</td>
-                          <td style={styles.td}>{tx.merchant || 'None'}</td>
-                          <td style={styles.td}>
-                            <span style={styles.categoryTag(tx.category)}>{tx.category}</span>
-                          </td>
-                          <td style={styles.td}>
-                            <span style={styles.confidenceText(tx.confidence)}>
-                              {Math.round(tx.confidence * 100)}%
+                        <tr key={tx._id} className="hover:bg-surface-container/20">
+                          <td className="py-3 px-3">{new Date(tx.date).toLocaleDateString()}</td>
+                          <td className="py-3 px-3 truncate max-w-[180px]" title={tx.description}>{tx.description}</td>
+                          <td className="py-3 px-3 font-semibold text-on-surface">{tx.merchant || 'None'}</td>
+                          <td className="py-3 px-3">
+                            <span className={`px-2 py-0.5 border rounded-full text-[9px] font-sans font-semibold ${getCategoryColor(tx.category)}`}>
+                              {tx.category}
                             </span>
                           </td>
-                          <td style={styles.td}>
-                            <button 
+                          <td className="py-3 px-3 text-right font-sans text-amber-500 font-bold">
+                            {Math.round(tx.confidence * 100)}%
+                          </td>
+                          <td className="py-3 px-3 text-right">
+                            <button
                               onClick={() => openCorrectionModal(tx)}
-                              className="btn btn-outline"
-                              style={styles.correctBtn}
+                              className="px-3 py-1 rounded-full border border-outline-variant text-[10px] font-sans font-bold hover:border-primary hover:text-on-surface transition-all cursor-pointer inline-flex items-center gap-1"
                             >
-                              <Edit2 size={12} />
-                              Correct
+                              <span className="material-symbols-outlined text-xs">edit</span> Correct
                             </button>
                           </td>
                         </tr>
@@ -627,33 +487,38 @@ const UploadStatement = () => {
           </div>
 
           {/* Guidelines Column (1 col) */}
-          <div className="glass-card" style={styles.guidelinesCard}>
-            <div style={styles.guideHeader}>
-              <HelpCircle size={20} style={{ color: '#6366f1' }} />
-              <h3 style={styles.guideTitle}>Parser Guidelines</h3>
+          <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm space-y-6 lg:col-span-1">
+            <div className="flex items-center gap-2.5 border-b border-outline-variant/20 pb-3">
+              <span className="material-symbols-outlined text-primary text-xl">help</span>
+              <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface font-serif">Parser Guidelines</h3>
             </div>
-            <p style={styles.guideDesc}>
+            <p className="text-xs text-on-surface-variant font-serif leading-relaxed">
               Our AI engine automatically maps headings, removes UPI strings, extracts merchants, and guesses categories.
             </p>
-            <h4 style={styles.guideSub}>Supported Banks</h4>
-            <div style={styles.bankGrid}>
-              {['SBI', 'HDFC', 'ICICI', 'Axis', 'Kotak', 'Canara', 'BoB'].map(b => (
-                <span key={b} style={styles.bankBadge}>{b}</span>
-              ))}
-            </div>
-            
-            <h4 style={styles.guideSub}>Statement Columns Mapped</h4>
-            <ul style={styles.guideList}>
-              <li><strong>Txn Date / Value Date</strong> → date</li>
-              <li><strong>Narration / Description</strong> → description</li>
-              <li><strong>Withdrawal / Debit</strong> → debit</li>
-              <li><strong>Deposit / Credit</strong> → credit</li>
-              <li><strong>Balance / Running Bal</strong> → balance</li>
-            </ul>
 
-            <div style={styles.helpBox}>
-              <Info size={16} style={{ color: '#6366f1', flexShrink: 0 }} />
-              <span>We support uploading CSV, Excel (.xlsx), and statement PDFs directly. All numbers are normalized.</span>
+            <div className="space-y-1.5 font-serif text-xs">
+              <h4 className="font-bold text-on-surface">Supported Banks</h4>
+              <div className="flex gap-1.5 flex-wrap">
+                {['SBI', 'HDFC', 'ICICI', 'Axis', 'Kotak', 'Canara', 'BoB'].map(b => (
+                  <span key={b} className="px-2 py-0.5 border border-outline-variant/40 rounded bg-surface-container text-[10px] font-sans font-semibold">{b}</span>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2.5 font-serif text-xs">
+              <h4 className="font-bold text-on-surface">Statement Columns Mapped</h4>
+              <ul className="space-y-2 list-disc list-inside text-on-surface-variant">
+                <li><strong>Txn Date / Value Date</strong> → date</li>
+                <li><strong>Narration / Description</strong> → description</li>
+                <li><strong>Withdrawal / Debit</strong> → debit</li>
+                <li><strong>Deposit / Credit</strong> → credit</li>
+                <li><strong>Running Balance</strong> → balance</li>
+              </ul>
+            </div>
+
+            <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex gap-2.5 items-start text-xs text-on-surface-variant">
+              <span className="material-symbols-outlined text-primary text-base mt-0.5">info</span>
+              <span className="leading-relaxed">We support uploading CSV, Excel (.xlsx), and statement PDFs directly. All numbers are normalized.</span>
             </div>
           </div>
         </div>
@@ -661,51 +526,51 @@ const UploadStatement = () => {
 
       {/* Subscriptions Tab */}
       {activeHubTab === 'subscriptions' && (
-        <div style={styles.tabContentContainer}>
+        <div className="space-y-6 animate-fade-in font-serif">
           {/* Metrics Row */}
-          <div className="grid-cols-3" style={styles.metricsGrid}>
-            <div className="glass-card" style={styles.metricCard}>
-              <span style={styles.metaStatLabel}>Active Subscriptions</span>
-              <span style={styles.metricValue}>{subscriptions.length}</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="glass-card rounded-2xl p-5 border border-outline-variant/40 shadow-sm text-center">
+              <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Active Subscriptions</span>
+              <span className="text-2xl font-bold text-on-surface font-serif">{subscriptions.length}</span>
             </div>
-            <div className="glass-card" style={styles.metricCard}>
-              <span style={styles.metaStatLabel}>Monthly Cost</span>
-              <span style={styles.metricValue}>₹{subscriptions.reduce((acc, curr) => acc + curr.monthlyCost, 0).toLocaleString('en-IN')}</span>
+            <div className="glass-card rounded-2xl p-5 border border-outline-variant/40 shadow-sm text-center">
+              <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Monthly Cost</span>
+              <span className="text-2xl font-bold text-rose-400 font-serif">₹{subscriptions.reduce((acc, curr) => acc + curr.monthlyCost, 0).toLocaleString('en-IN')}</span>
             </div>
-            <div className="glass-card" style={styles.metricCard}>
-              <span style={styles.metaStatLabel}>Annual Cost</span>
-              <span style={styles.metricValue}>₹{subscriptions.reduce((acc, curr) => acc + curr.annualCost, 0).toLocaleString('en-IN')}</span>
+            <div className="glass-card rounded-2xl p-5 border border-outline-variant/40 shadow-sm text-center">
+              <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Annual Outflow</span>
+              <span className="text-2xl font-bold text-rose-400 font-serif">₹{subscriptions.reduce((acc, curr) => acc + curr.annualCost, 0).toLocaleString('en-IN')}</span>
             </div>
           </div>
 
-          <div className="glass-card" style={styles.card}>
-            <h3 style={styles.resultsTitle}>Detected Subscriptions</h3>
-            <p style={styles.cardDesc}>Automatically identified recurring digital services (Netflix, Spotify, Amazon, Adobe, etc.).</p>
-            
+          <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm space-y-4">
+            <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Detected Subscriptions</h3>
+            <p className="text-xs text-on-surface-variant -mt-2">Automatically identified recurring digital services (Netflix, Spotify, Amazon, Adobe, etc.).</p>
+
             {subscriptions.length === 0 ? (
-              <div style={styles.emptyState}>No active subscriptions detected. Try uploading an updated bank statement.</div>
+              <div className="py-12 border border-dashed border-outline-variant/20 rounded-xl text-center text-xs text-on-surface-variant">No active subscriptions detected. Try uploading an updated bank statement.</div>
             ) : (
-              <div style={styles.tableWrapper}>
-                <table style={styles.table}>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left border-collapse">
                   <thead>
-                    <tr style={styles.tr}>
-                      <th style={styles.th}>Brand</th>
-                      <th style={styles.th}>Billing Cycle</th>
-                      <th style={styles.th}>Monthly Price</th>
-                      <th style={styles.th}>Annual Price</th>
-                      <th style={styles.th}>Next Renewal Date</th>
-                      <th style={styles.th}>Total Spending</th>
+                    <tr className="border-b border-outline-variant/40 text-on-surface-variant">
+                      <th className="py-2.5 px-3">Brand</th>
+                      <th className="py-2.5 px-3">Billing Cycle</th>
+                      <th className="py-2.5 px-3 text-right">Monthly Price</th>
+                      <th className="py-2.5 px-3 text-right">Annual Price</th>
+                      <th className="py-2.5 px-3 text-right">Next Renewal Date</th>
+                      <th className="py-2.5 px-3 text-right">Total Spending</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-outline-variant/20">
                     {subscriptions.map((sub, idx) => (
-                      <tr key={idx} style={styles.tr}>
-                        <td style={styles.td}><strong>{sub.name}</strong></td>
-                        <td style={styles.td}>{sub.frequency}</td>
-                        <td style={styles.td}>₹{sub.monthlyCost.toLocaleString('en-IN')}</td>
-                        <td style={styles.td}>₹{sub.annualCost.toLocaleString('en-IN')}</td>
-                        <td style={styles.td}>{new Date(sub.renewalDate).toLocaleDateString()}</td>
-                        <td style={styles.td}>₹{sub.totalSubscriptionSpending.toLocaleString('en-IN')}</td>
+                      <tr key={idx} className="hover:bg-surface-container/20">
+                        <td className="py-3 px-3 text-on-surface"><strong>{sub.name}</strong></td>
+                        <td className="py-3 px-3 font-sans text-on-surface-variant">{sub.frequency}</td>
+                        <td className="py-3 px-3 text-right font-serif">₹{sub.monthlyCost.toLocaleString('en-IN')}</td>
+                        <td className="py-3 px-3 text-right font-serif">₹{sub.annualCost.toLocaleString('en-IN')}</td>
+                        <td className="py-3 px-3 text-right font-sans text-on-surface-variant">{new Date(sub.renewalDate).toLocaleDateString()}</td>
+                        <td className="py-3 px-3 text-right font-bold text-on-surface font-serif">₹{sub.totalSubscriptionSpending.toLocaleString('en-IN')}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -718,28 +583,27 @@ const UploadStatement = () => {
 
       {/* Recurring Tab */}
       {activeHubTab === 'recurring' && (
-        <div style={styles.tabContentContainer}>
-          <div className="glass-card" style={styles.card}>
-            <h3 style={styles.resultsTitle}>Recurring Payments Dashboard</h3>
-            <p style={styles.cardDesc}>Tracks standard monthly commitments like salaries, house rents, loan EMIs, utility bills, and insurance premiums.</p>
-            
+        <div className="space-y-6 animate-fade-in font-serif">
+          <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm space-y-4">
+            <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Recurring Payments Dashboard</h3>
+            <p className="text-xs text-on-surface-variant -mt-2">Tracks standard monthly commitments like salaries, house rents, loan EMIs, utility bills, and insurance premiums.</p>
+
             {transactions.length === 0 ? (
-              <div style={styles.emptyState}>No transactions available to analyze. Please upload a bank statement first.</div>
+              <div className="py-12 border border-dashed border-outline-variant/20 rounded-xl text-center text-xs text-on-surface-variant">No transactions available to analyze. Please upload a bank statement first.</div>
             ) : (
-              <div style={styles.tableWrapper}>
-                <table style={styles.table}>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left border-collapse">
                   <thead>
-                    <tr style={styles.tr}>
-                      <th style={styles.th}>Name</th>
-                      <th style={styles.th}>Payment Type</th>
-                      <th style={styles.th}>Amount</th>
-                      <th style={styles.th}>Frequency</th>
-                      <th style={styles.th}>Last Paid</th>
-                      <th style={styles.th}>Estimated Next Due</th>
+                    <tr className="border-b border-outline-variant/40 text-on-surface-variant">
+                      <th className="py-2.5 px-3">Name</th>
+                      <th className="py-2.5 px-3">Payment Type</th>
+                      <th className="py-2.5 px-3 text-right">Amount</th>
+                      <th className="py-2.5 px-3 text-right">Frequency</th>
+                      <th className="py-2.5 px-3 text-right">Last Paid</th>
+                      <th className="py-2.5 px-3 text-right">Estimated Next Due</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {/* Filter transactions to show recurring payments */}
+                  <tbody className="divide-y divide-outline-variant/20">
                     {transactions
                       .filter(t => {
                         const dl = t.description.toLowerCase();
@@ -751,7 +615,6 @@ const UploadStatement = () => {
                           ml.includes('emi') || ml.includes('loan') || ml.includes('rent') || ml.includes('salary')
                         );
                       })
-                      // Group and display distinct recurring items
                       .reduce((acc, curr) => {
                         const name = curr.merchant || curr.description;
                         const cleanName = name.split('/')[0].split('-')[0].trim();
@@ -761,12 +624,11 @@ const UploadStatement = () => {
                             name: cleanName,
                             category: curr.category,
                             amount: curr.amount,
-                            type: curr.transactionType === 'Credit' ? 'Salary Credit' : 
-                                  (curr.category === 'Bills' ? 'EMI / Bill Payment' : 'Rental / Transfer'),
+                            type: curr.transactionType === 'Credit' ? 'Salary Credit' :
+                              (curr.category === 'Bills' ? 'EMI / Bill Payment' : 'Rental / Transfer'),
                             lastPaid: new Date(curr.date),
                           });
                         } else {
-                          // Keep the most recent payment date
                           const currDate = new Date(curr.date);
                           if (currDate > existing.lastPaid) {
                             existing.lastPaid = currDate;
@@ -779,14 +641,14 @@ const UploadStatement = () => {
                         const nextDue = new Date(rec.lastPaid);
                         nextDue.setDate(nextDue.getDate() + 30);
                         return (
-                          <tr key={idx} style={styles.tr}>
-                            <td style={styles.td}><strong>{rec.name}</strong></td>
-                            <td style={styles.td}>{rec.type}</td>
-                            <td style={styles.td}>₹{rec.amount.toLocaleString('en-IN')}</td>
-                            <td style={styles.td}>Monthly</td>
-                            <td style={styles.td}>{rec.lastPaid.toLocaleDateString()}</td>
-                            <td style={styles.td}>
-                              <span style={styles.dueDateBadge}>{nextDue.toLocaleDateString()}</span>
+                          <tr key={idx} className="hover:bg-surface-container/20">
+                            <td className="py-3 px-3 text-on-surface"><strong>{rec.name}</strong></td>
+                            <td className="py-3 px-3 font-sans text-on-surface-variant">{rec.type}</td>
+                            <td className="py-3 px-3 text-right font-bold text-on-surface font-serif">₹{rec.amount.toLocaleString('en-IN')}</td>
+                            <td className="py-3 px-3 text-right font-sans text-on-surface-variant">Monthly</td>
+                            <td className="py-3 px-3 text-right font-sans text-on-surface-variant">{rec.lastPaid.toLocaleDateString()}</td>
+                            <td className="py-3 px-3 text-right">
+                              <span className="px-2 py-0.5 border border-primary/20 bg-primary/10 rounded-full text-[9px] font-sans font-semibold text-primary-container">{nextDue.toLocaleDateString()}</span>
                             </td>
                           </tr>
                         );
@@ -802,49 +664,49 @@ const UploadStatement = () => {
 
       {/* Analytics Tab */}
       {activeHubTab === 'analytics' && (
-        <div style={styles.tabContentContainer}>
+        <div className="space-y-6 animate-fade-in font-serif">
           {analytics ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div className="space-y-6">
               {/* Stats Cards */}
-              <div className="grid-cols-4" style={styles.metricsGrid}>
-                <div className="glass-card" style={styles.metricCard}>
-                  <span style={styles.metaStatLabel}>Total Inflow</span>
-                  <span style={{ ...styles.metricValue, color: '#10b981' }}>₹{analytics.total_income.toLocaleString('en-IN')}</span>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="glass-card rounded-2xl p-5 border border-outline-variant/40 shadow-sm text-center">
+                  <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Total Inflow</span>
+                  <strong className="text-xl font-bold text-emerald-400 font-serif">₹{analytics.total_income.toLocaleString('en-IN')}</strong>
                 </div>
-                <div className="glass-card" style={styles.metricCard}>
-                  <span style={styles.metaStatLabel}>Total Outflow</span>
-                  <span style={{ ...styles.metricValue, color: '#ef4444' }}>₹{analytics.total_expenses.toLocaleString('en-IN')}</span>
+                <div className="glass-card rounded-2xl p-5 border border-outline-variant/40 shadow-sm text-center">
+                  <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Total Outflow</span>
+                  <strong className="text-xl font-bold text-rose-400 font-serif">₹{analytics.total_expenses.toLocaleString('en-IN')}</strong>
                 </div>
-                <div className="glass-card" style={styles.metricCard}>
-                  <span style={styles.metaStatLabel}>Net Savings</span>
-                  <span style={{ ...styles.metricValue, color: '#6366f1' }}>₹{analytics.total_savings.toLocaleString('en-IN')}</span>
+                <div className="glass-card rounded-2xl p-5 border border-outline-variant/40 shadow-sm text-center">
+                  <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Net Savings</span>
+                  <strong className="text-xl font-bold text-primary font-serif">₹{analytics.total_savings.toLocaleString('en-IN')}</strong>
                 </div>
-                <div className="glass-card" style={styles.metricCard}>
-                  <span style={styles.metaStatLabel}>Avg Daily Spend</span>
-                  <span style={styles.metricValue}>₹{analytics.avg_daily_spend.toLocaleString('en-IN')}</span>
+                <div className="glass-card rounded-2xl p-5 border border-outline-variant/40 shadow-sm text-center">
+                  <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Avg Daily Spend</span>
+                  <strong className="text-xl font-bold text-on-surface font-serif">₹{analytics.avg_daily_spend.toLocaleString('en-IN')}</strong>
                 </div>
               </div>
 
               {/* Matplotlib Charts Row */}
               {analytics.charts && (
-                <div className="grid-cols-2" style={styles.chartsGrid}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {analytics.charts.category_pie && (
-                    <div className="glass-card" style={styles.chartCard}>
-                      <h4 style={styles.chartTitle}>Expense Categorization Breakdown</h4>
-                      <img 
-                        src={`data:image/png;base64,${analytics.charts.category_pie}`} 
-                        alt="Category Pie Chart" 
-                        style={styles.chartImage}
+                    <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm">
+                      <h4 className="text-xs font-bold text-on-surface uppercase tracking-wider mb-4">Expense Categorization Breakdown</h4>
+                      <img
+                        src={`data:image/png;base64,${analytics.charts.category_pie}`}
+                        alt="Category Pie Chart"
+                        className="w-full max-h-72 object-contain"
                       />
                     </div>
                   )}
                   {analytics.charts.cash_flow_bar && (
-                    <div className="glass-card" style={styles.chartCard}>
-                      <h4 style={styles.chartTitle}>Monthly Inflow vs Outflow</h4>
-                      <img 
-                        src={`data:image/png;base64,${analytics.charts.cash_flow_bar}`} 
-                        alt="Cash Flow Bar Chart" 
-                        style={styles.chartImage}
+                    <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm">
+                      <h4 className="text-xs font-bold text-on-surface uppercase tracking-wider mb-4">Monthly Inflow vs Outflow</h4>
+                      <img
+                        src={`data:image/png;base64,${analytics.charts.cash_flow_bar}`}
+                        alt="Cash Flow Bar Chart"
+                        className="w-full max-h-72 object-contain"
                       />
                     </div>
                   )}
@@ -852,23 +714,23 @@ const UploadStatement = () => {
               )}
 
               {/* Aggregation tables */}
-              <div className="grid-cols-2" style={styles.chartsGrid}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Top Merchants */}
-                <div className="glass-card" style={styles.card}>
-                  <h4 style={styles.resultsTitle}>Top 5 Merchants</h4>
-                  <div style={styles.tableWrapper}>
-                    <table style={styles.table}>
+                <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm space-y-4">
+                  <h4 className="text-sm font-bold text-on-surface uppercase tracking-wider">Top 5 Merchants</h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs text-left border-collapse">
                       <thead>
-                        <tr style={styles.tr}>
-                          <th style={styles.th}>Merchant</th>
-                          <th style={styles.th}>Spending</th>
+                        <tr className="border-b border-outline-variant/40 text-on-surface-variant">
+                          <th className="py-2.5 px-3">Merchant</th>
+                          <th className="py-2.5 px-3 text-right">Spending</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="divide-y divide-outline-variant/20">
                         {analytics.top_merchants.map((m, idx) => (
-                          <tr key={idx} style={styles.tr}>
-                            <td style={styles.td}><strong>{m.merchant}</strong></td>
-                            <td style={styles.td}>₹{m.amount.toLocaleString('en-IN')}</td>
+                          <tr key={idx} className="hover:bg-surface-container/20">
+                            <td className="py-3 px-3 text-on-surface"><strong>{m.merchant}</strong></td>
+                            <td className="py-3 px-3 text-right font-bold text-on-surface font-serif">₹{m.amount.toLocaleString('en-IN')}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -877,21 +739,21 @@ const UploadStatement = () => {
                 </div>
 
                 {/* Top Categories */}
-                <div className="glass-card" style={styles.card}>
-                  <h4 style={styles.resultsTitle}>Top 5 Categories</h4>
-                  <div style={styles.tableWrapper}>
-                    <table style={styles.table}>
+                <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm space-y-4">
+                  <h4 className="text-sm font-bold text-on-surface uppercase tracking-wider">Top 5 Categories</h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs text-left border-collapse">
                       <thead>
-                        <tr style={styles.tr}>
-                          <th style={styles.th}>Category</th>
-                          <th style={styles.th}>Spending</th>
+                        <tr className="border-b border-outline-variant/40 text-on-surface-variant">
+                          <th className="py-2.5 px-3">Category</th>
+                          <th className="py-2.5 px-3 text-right">Spending</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="divide-y divide-outline-variant/20">
                         {analytics.top_categories.map((c, idx) => (
-                          <tr key={idx} style={styles.tr}>
-                            <td style={styles.td}><strong>{c.category}</strong></td>
-                            <td style={styles.td}>₹{c.amount.toLocaleString('en-IN')}</td>
+                          <tr key={idx} className="hover:bg-surface-container/20">
+                            <td className="py-3 px-3 text-on-surface"><strong>{c.category}</strong></td>
+                            <td className="py-3 px-3 text-right font-bold text-on-surface font-serif">₹{c.amount.toLocaleString('en-IN')}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -901,611 +763,80 @@ const UploadStatement = () => {
               </div>
             </div>
           ) : (
-            <div style={styles.emptyState}>No expense analytics found. Try uploading a bank statement.</div>
+            <div className="py-12 border border-dashed border-outline-variant/20 rounded-xl text-center text-xs text-on-surface-variant">No expense analytics found. Try uploading a bank statement.</div>
           )}
         </div>
       )}
 
       {/* Category Correction Modal */}
       {correctionModal.isOpen && (
-        <div style={styles.modalOverlay}>
-          <div className="glass-card animate-fade-in" style={styles.modalCard}>
-            <h3 style={styles.modalTitle}>Correct Transaction Category</h3>
-            <p style={styles.modalDesc}>Correcting the category helps retrain our Naive Bayes Naive/Random Forest classifier models for future statements.</p>
-            
-            <div style={styles.modalInputGroup}>
-              <label style={styles.modalLabel}>Raw Description</label>
-              <div style={styles.modalValue}>{correctionModal.transaction.description}</div>
-            </div>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-surface-container border border-outline-variant p-6 rounded-2xl shadow-2xl relative animate-fade-in font-serif">
+            <button
+              onClick={() => setCorrectionModal({ isOpen: false, transaction: null })}
+              className="absolute right-4 top-4 hover:bg-surface-container-high w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant cursor-pointer"
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
 
-            <div style={styles.modalInputGroup}>
-              <label style={styles.modalLabel}>Merchant Name</label>
-              <input 
-                type="text" 
-                value={correctedMerchant} 
-                onChange={(e) => setCorrectedMerchant(e.target.value)} 
-                style={styles.modalInput}
-                placeholder="Enter merchant brand (e.g. Netflix)"
-              />
-            </div>
+            <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface mb-2">Correct Transaction Category</h3>
+            <p className="text-xs text-on-surface-variant mb-6 font-serif">Correcting the category helps retrain our Naive Bayes/Random Forest classifier models for future statements.</p>
 
-            <div style={styles.modalInputGroup}>
-              <label style={styles.modalLabel}>Correct Category</label>
-              <select 
-                value={correctedCategory} 
-                onChange={(e) => setCorrectedCategory(e.target.value)} 
-                style={styles.modalSelect}
-              >
-                {CATEGORIES.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
+            <div className="space-y-4 font-sans text-xs">
+              <div className="space-y-1">
+                <label className="text-[10px] font-semibold text-on-surface-variant block">Raw Description</label>
+                <div className="bg-surface border border-outline-variant/60 rounded-xl p-3 text-on-surface font-mono break-all">{correctionModal.transaction.description}</div>
+              </div>
 
-            <div style={styles.modalActions}>
-              <button 
-                onClick={() => setCorrectionModal({ isOpen: false, transaction: null })}
-                className="btn btn-outline"
-                disabled={submittingCorrection}
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={submitCorrection}
-                className="btn btn-primary"
-                disabled={submittingCorrection}
-              >
-                {submittingCorrection ? 'Saving...' : 'Confirm Category'}
-              </button>
+              <div className="space-y-1">
+                <label className="text-[10px] font-semibold text-on-surface-variant block">Merchant Name</label>
+                <input
+                  type="text"
+                  value={correctedMerchant}
+                  onChange={(e) => setCorrectedMerchant(e.target.value)}
+                  className="w-full bg-surface border border-outline-variant rounded-xl px-3 py-2.5 text-on-surface focus:outline-none focus:border-primary transition-all"
+                  placeholder="Enter merchant brand (e.g. Netflix)"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-semibold text-on-surface-variant block">Correct Category</label>
+                <div className="relative">
+                  <select
+                    value={correctedCategory}
+                    onChange={(e) => setCorrectedCategory(e.target.value)}
+                    className="w-full bg-surface border border-outline-variant rounded-xl px-3 py-2.5 text-on-surface appearance-none focus:outline-none focus:border-primary transition-all"
+                  >
+                    {CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                  <span className="material-symbols-outlined absolute right-3 top-3 text-on-surface-variant pointer-events-none text-base">expand_more</span>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant/40 mt-6">
+                <button
+                  onClick={() => setCorrectionModal({ isOpen: false, transaction: null })}
+                  className="px-4 py-2 border border-outline-variant hover:bg-surface-container/50 rounded-full font-bold cursor-pointer"
+                  disabled={submittingCorrection}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={submitCorrection}
+                  className="px-5 py-2 bg-primary text-on-primary rounded-full font-bold cursor-pointer"
+                  disabled={submittingCorrection}
+                >
+                  {submittingCorrection ? 'Saving...' : 'Confirm Category'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
     </div>
   );
-};
-
-const styles = {
-  pageContainer: {
-    paddingBottom: '60px'
-  },
-  header: {
-    marginBottom: '24px'
-  },
-  backBtn: {
-    background: 'transparent',
-    border: 'none',
-    color: '#94a3b8',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontSize: '14px',
-    marginBottom: '16px',
-    padding: '4px 0',
-    transition: 'color 0.2s ease'
-  },
-  title: {
-    fontSize: '32px',
-    color: '#ffffff',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  subtitle: {
-    fontSize: '15px',
-    color: '#94a3b8'
-  },
-  tabsContainer: {
-    display: 'flex',
-    gap: '12px',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-    paddingBottom: '12px',
-    marginBottom: '24px'
-  },
-  tabBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    background: 'transparent',
-    border: 'none',
-    color: '#94a3b8',
-    padding: '8px 16px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: 500,
-    borderRadius: '6px',
-    transition: 'all 0.2s ease',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  activeTabBtn: {
-    color: '#ffffff',
-    background: 'rgba(255, 255, 255, 0.08)',
-    boxShadow: '0 0 10px rgba(255, 255, 255, 0.02)'
-  },
-  mainGrid: {
-    gridTemplateColumns: '2fr 1fr',
-    gap: '24px'
-  },
-  card: {
-    padding: '24px',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center'
-  },
-  cardTitle: {
-    fontSize: '20px',
-    fontWeight: 600,
-    color: '#ffffff',
-    marginBottom: '8px',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  cardDesc: {
-    fontSize: '14px',
-    color: '#94a3b8',
-    marginBottom: '20px'
-  },
-  alert: {
-    marginBottom: '20px'
-  },
-  alertContent: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px'
-  },
-  dropzone: {
-    border: '2px dashed rgba(255, 255, 255, 0.12)',
-    borderRadius: '12px',
-    padding: '40px 24px',
-    textAlign: 'center',
-    cursor: 'pointer',
-    background: 'rgba(255, 255, 255, 0.01)',
-    transition: 'all 0.3s ease',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '220px'
-  },
-  dropzoneDrag: {
-    borderColor: '#6366f1',
-    background: 'rgba(99, 102, 241, 0.05)',
-  },
-  dropzoneActive: {
-    borderColor: '#10b981',
-    background: 'rgba(16, 185, 129, 0.03)'
-  },
-  uploadIcon: (file) => ({
-    color: file ? '#10b981' : '#64748b',
-    marginBottom: '16px',
-    transition: 'color 0.2s ease'
-  }),
-  hiddenInput: {
-    display: 'none'
-  },
-  prompt: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center'
-  },
-  promptMain: {
-    fontSize: '15px',
-    fontWeight: 500,
-    color: '#f8fafc',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  promptOr: {
-    fontSize: '13px',
-    color: '#64748b',
-    margin: '6px 0'
-  },
-  fileSelectBtn: {
-    display: 'inline-block',
-    background: 'rgba(255, 255, 255, 0.05)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
-    borderRadius: '8px',
-    color: '#f8fafc',
-    padding: '6px 16px',
-    fontSize: '13px',
-    fontWeight: 600,
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  fileDetails: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '6px'
-  },
-  fileName: {
-    fontSize: '15px',
-    fontWeight: 600,
-    color: '#f8fafc'
-  },
-  fileSize: {
-    fontSize: '13px',
-    color: '#94a3b8'
-  },
-  progressContainer: {
-    marginTop: '20px'
-  },
-  progressTextRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: '13px',
-    color: '#cbd5e1',
-    marginBottom: '8px'
-  },
-  progressBarBg: {
-    width: '100%',
-    height: '6px',
-    background: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: '3px',
-    overflow: 'hidden'
-  },
-  progressBarFill: (progress) => ({
-    width: `${progress}%`,
-    height: '100%',
-    background: 'linear-gradient(90deg, #6366f1 0%, #10b981 100%)',
-    transition: 'width 0.3s ease'
-  }),
-  submitRow: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '12px',
-    marginTop: '20px'
-  },
-  resultsTitle: {
-    fontSize: '18px',
-    fontWeight: 600,
-    color: '#ffffff',
-    marginBottom: '16px',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  subTitle: {
-    fontSize: '14px',
-    fontWeight: 600,
-    color: '#ffffff',
-    marginTop: '20px',
-    marginBottom: '12px',
-    fontFamily: 'Outfit, sans-serif',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em'
-  },
-  metaStatsGrid: {
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '16px',
-    marginBottom: '20px'
-  },
-  metaStatCard: {
-    background: 'rgba(255, 255, 255, 0.02)',
-    border: '1px solid rgba(255, 255, 255, 0.06)',
-    padding: '12px 16px',
-    borderRadius: '8px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px'
-  },
-  metaStatLabel: {
-    fontSize: '12px',
-    color: '#94a3b8',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em'
-  },
-  metaStatVal: {
-    fontSize: '16px',
-    fontWeight: 600,
-    color: '#ffffff',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  columnsBadgeList: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '10px',
-    marginBottom: '20px'
-  },
-  columnBadge: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    background: 'rgba(99, 102, 241, 0.08)',
-    border: '1px solid rgba(99, 102, 241, 0.2)',
-    padding: '4px 10px',
-    borderRadius: '20px',
-    fontSize: '12px'
-  },
-  badgeRaw: {
-    color: '#cbd5e1'
-  },
-  badgeArrow: {
-    color: '#6366f1',
-    fontWeight: 'bold'
-  },
-  badgeStd: {
-    color: '#10b981',
-    fontWeight: 600
-  },
-  tableWrapper: {
-    overflowX: 'auto',
-    width: '100%',
-    maxHeight: '400px',
-    border: '1px solid rgba(255, 255, 255, 0.06)',
-    borderRadius: '8px',
-    background: 'rgba(0, 0, 0, 0.15)'
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-    fontSize: '13px',
-    textAlign: 'left'
-  },
-  tr: {
-    borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-    '&:last-child': {
-      borderBottom: 'none'
-    }
-  },
-  th: {
-    padding: '12px 16px',
-    color: '#94a3b8',
-    fontWeight: 600,
-    fontFamily: 'Outfit, sans-serif',
-    background: 'rgba(255, 255, 255, 0.02)'
-  },
-  td: {
-    padding: '12px 16px',
-    color: '#cbd5e1'
-  },
-  creditText: {
-    color: '#10b981',
-    fontWeight: 600
-  },
-  debitText: {
-    color: '#f87171',
-    fontWeight: 600
-  },
-  categoryTag: (cat) => {
-    let color = '#94a3b8';
-    let bg = 'rgba(148, 163, 184, 0.1)';
-    if (cat === 'Salary') { color = '#10b981'; bg = 'rgba(16, 185, 129, 0.1)'; }
-    else if (cat === 'Food') { color = '#f59e0b'; bg = 'rgba(245, 158, 11, 0.1)'; }
-    else if (cat === 'Entertainment') { color = '#ec4899'; bg = 'rgba(236, 72, 153, 0.1)'; }
-    else if (cat === 'Shopping') { color = '#a855f7'; bg = 'rgba(168, 85, 247, 0.1)'; }
-    else if (cat === 'Travel') { color = '#3b82f6'; bg = 'rgba(59, 130, 246, 0.1)'; }
-    
-    return {
-      color,
-      background: bg,
-      padding: '2px 8px',
-      borderRadius: '12px',
-      fontSize: '11px',
-      fontWeight: 600,
-      display: 'inline-block'
-    };
-  },
-  confidenceText: (conf) => ({
-    color: conf >= 0.7 ? '#10b981' : '#eab308',
-    fontWeight: 600
-  }),
-  correctBtn: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '4px',
-    fontSize: '11px',
-    padding: '4px 8px',
-    height: 'auto'
-  },
-  reviewHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    marginBottom: '10px'
-  },
-  reviewTitle: {
-    fontSize: '18px',
-    fontWeight: 600,
-    color: '#eab308',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  guidelinesCard: {
-    padding: '24px',
-    alignSelf: 'start'
-  },
-  guideHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    marginBottom: '16px',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-    paddingBottom: '12px'
-  },
-  guideTitle: {
-    fontSize: '16px',
-    color: '#ffffff',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  guideDesc: {
-    fontSize: '13px',
-    color: '#cbd5e1',
-    lineHeight: '1.6',
-    marginBottom: '16px'
-  },
-  guideSub: {
-    fontSize: '12px',
-    fontWeight: 700,
-    color: '#94a3b8',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    marginTop: '16px',
-    marginBottom: '8px'
-  },
-  bankGrid: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '8px',
-    marginBottom: '16px'
-  },
-  bankBadge: {
-    background: 'rgba(255, 255, 255, 0.04)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    padding: '2px 8px',
-    borderRadius: '4px',
-    fontSize: '12px',
-    color: '#cbd5e1'
-  },
-  guideList: {
-    fontSize: '12px',
-    color: '#cbd5e1',
-    paddingLeft: '16px',
-    lineHeight: '1.8'
-  },
-  helpBox: {
-    display: 'flex',
-    gap: '10px',
-    background: 'rgba(99, 102, 241, 0.05)',
-    border: '1px solid rgba(99, 102, 241, 0.15)',
-    borderRadius: '8px',
-    padding: '12px',
-    marginTop: '20px',
-    fontSize: '12px',
-    color: '#cbd5e1',
-    lineHeight: '1.5'
-  },
-  tabContentContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px'
-  },
-  metricsGrid: {
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '20px'
-  },
-  metricCard: {
-    padding: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px'
-  },
-  metricValue: {
-    fontSize: '28px',
-    fontWeight: 800,
-    color: '#ffffff',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  dueDateBadge: {
-    background: 'rgba(239, 68, 68, 0.1)',
-    color: '#f87171',
-    padding: '2px 8px',
-    borderRadius: '12px',
-    fontSize: '11px',
-    fontWeight: 600
-  },
-  emptyState: {
-    textAlign: 'center',
-    padding: '40px 20px',
-    color: '#94a3b8',
-    fontSize: '14px'
-  },
-  chartsGrid: {
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '24px'
-  },
-  chartCard: {
-    padding: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center'
-  },
-  chartTitle: {
-    fontSize: '16px',
-    fontWeight: 600,
-    color: '#ffffff',
-    marginBottom: '16px',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  chartImage: {
-    maxWidth: '100%',
-    height: 'auto',
-    borderRadius: '8px'
-  },
-  modalOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'rgba(0, 0, 0, 0.6)',
-    backdropFilter: 'blur(4px)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 2000
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: '450px',
-    padding: '28px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px'
-  },
-  modalTitle: {
-    fontSize: '20px',
-    fontWeight: 600,
-    color: '#ffffff',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  modalDesc: {
-    fontSize: '13px',
-    color: '#94a3b8',
-    lineHeight: '1.5'
-  },
-  modalInputGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px'
-  },
-  modalLabel: {
-    fontSize: '12px',
-    fontWeight: 600,
-    color: '#94a3b8',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em'
-  },
-  modalValue: {
-    background: 'rgba(255, 255, 255, 0.03)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    padding: '10px 14px',
-    borderRadius: '6px',
-    color: '#cbd5e1',
-    fontSize: '13px',
-    wordBreak: 'break-all'
-  },
-  modalInput: {
-    background: 'rgba(0, 0, 0, 0.2)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
-    borderRadius: '6px',
-    padding: '10px 14px',
-    color: '#ffffff',
-    fontSize: '13px',
-    outline: 'none',
-    fontFamily: 'inherit'
-  },
-  modalSelect: {
-    background: 'rgba(0, 0, 0, 0.2)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
-    borderRadius: '6px',
-    padding: '10px 14px',
-    color: '#ffffff',
-    fontSize: '13px',
-    outline: 'none',
-    fontFamily: 'inherit'
-  },
-  modalActions: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '12px',
-    marginTop: '8px'
-  }
 };
 
 export default UploadStatement;

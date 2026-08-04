@@ -1,13 +1,13 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { Landmark, Compass, ShieldAlert, MessageSquare, LogOut, LayoutDashboard, UploadCloud, Lock, Zap, Settings } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout, togglePremium, t } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -24,298 +24,337 @@ const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
 
-  return (
-    <nav style={styles.nav}>
-      <div style={styles.container}>
-        <Link to="/" style={styles.logoContainer}>
-          <span style={styles.logoGlow}></span>
-          <span style={styles.logoText}>FinPilot <span style={styles.logoAccent}>AI</span></span>
+  // Render Horizontal Header for Public Pages (unauthenticated users)
+  if (!user) {
+    return (
+      <header className="fixed top-0 left-0 w-full h-16 bg-surface-container/80 backdrop-blur-xl border-b border-outline-variant z-50 px-6 md:px-12 flex items-center justify-between transition-colors">
+        <Link to="/" className="flex items-center gap-2 relative">
+          <span className="absolute w-8 h-8 bg-primary/20 rounded-full blur-md -left-2 -top-1 pointer-events-none"></span>
+          <span className="font-display-hero text-xl font-bold tracking-tight text-on-surface">
+          Finmate <span className="text-primary">AI</span>
+          </span>
         </Link>
+        <div className="flex items-center gap-6">
+          <Link
+            to="/login"
+            className={`font-label-md text-label-md transition-colors ${isActive('/login') ? 'text-primary' : 'text-on-surface-variant hover:text-on-surface'}`}
+          >
+            {t('login')}
+          </Link>
+          <Link
+            to="/register"
+            className="px-5 py-2.5 rounded-full font-label-md text-label-md bg-primary text-on-primary font-bold shadow-md hover:bg-primary-fixed-dim transition-colors"
+          >
+            {t('getStarted')}
+          </Link>
+        </div>
+      </header>
+    );
+  }
 
-        <div style={styles.links}>
-          {user ? (
-            <>
-              <Link to="/dashboard" style={{ ...styles.link, ...(isActive('/dashboard') ? styles.activeLink : {}) }}>
-                <LayoutDashboard size={18} />
+  // Render Fixed Sidebar Layout for Logged-In Users
+  return (
+    <>
+      {/* Fixed Left Sidebar Navigation */}
+      <aside className="fixed hidden md:flex h-screen left-0 top-0 w-sidebar-width bg-surface border-r border-outline-variant flex-col items-center py-6 z-50">
+        {/* Brand Logo Container */}
+        <div className="mb-10">
+          <Link to="/" className="w-12 h-12 bg-primary-container rounded-xl flex items-center justify-center text-on-primary-container relative group hover:scale-105 transition-transform">
+            <span className="material-symbols-outlined text-2xl font-bold">account_balance</span>
+            <span className="absolute left-16 bg-surface-container border border-outline-variant px-3 py-1.5 rounded-md text-label-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-50">
+              Finmate Dashboard
+            </span>
+          </Link>
+        </div>
+
+        {/* Navigation Icons Link Dock */}
+        <nav className="flex flex-col gap-5 items-center flex-1 w-full px-2">
+          {/* Dashboard */}
+          <Link
+            to="/dashboard"
+            title={t('dashboard')}
+            className={`group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${isActive('/dashboard')
+                ? 'bg-primary text-on-primary'
+                : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
+              }`}
+          >
+            <span className="material-symbols-outlined text-xl">dashboard</span>
+            <span className="absolute left-16 bg-surface-container border border-outline-variant px-3 py-1.5 rounded-md text-label-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-50">
+              {t('dashboard')}
+            </span>
+          </Link>
+
+          {/* Statement Hub */}
+          <Link
+            to="/upload"
+            title={t('statementHub')}
+            className={`group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${isActive('/upload')
+                ? 'bg-primary text-on-primary'
+                : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
+              }`}
+          >
+            <span className="material-symbols-outlined text-xl">cloud_upload</span>
+            <span className="absolute left-16 bg-surface-container border border-outline-variant px-3 py-1.5 rounded-md text-label-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-50">
+              {t('statementHub')}
+            </span>
+          </Link>
+
+          {/* Investments */}
+          <Link
+            to="/investments"
+            title={t('investments')}
+            className={`group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${isActive('/investments')
+                ? 'bg-primary text-on-primary'
+                : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
+              }`}
+          >
+            <span className="material-symbols-outlined text-xl">payments</span>
+            <span className="absolute left-16 bg-surface-container border border-outline-variant px-3 py-1.5 rounded-md text-label-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-50">
+              {t('investments')}
+            </span>
+          </Link>
+
+          {/* Insurance */}
+          <Link
+            to="/insurance"
+            title={t('insurance')}
+            className={`group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${isActive('/insurance')
+                ? 'bg-primary text-on-primary'
+                : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
+              }`}
+          >
+            <span className="material-symbols-outlined text-xl">account_balance_wallet</span>
+            <span className="absolute left-16 bg-surface-container border border-outline-variant px-3 py-1.5 rounded-md text-label-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-50">
+              {t('insurance')}
+            </span>
+          </Link>
+
+          {/* AI Assistant */}
+          <Link
+            to="/chatbot"
+            title={t('aiAssistant')}
+            className={`group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${isActive('/chatbot')
+                ? 'bg-primary text-on-primary'
+                : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
+              }`}
+          >
+            <span className="material-symbols-outlined text-xl">chat_bubble</span>
+            <span className="absolute left-16 bg-surface-container border border-outline-variant px-3 py-1.5 rounded-md text-label-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-50">
+              {t('aiAssistant')}
+            </span>
+          </Link>
+
+          {/* Premium Hub Link */}
+          <Link
+            to="/premium-dashboard"
+            title={t('premiumHub')}
+            className={`group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${isActive('/premium-dashboard')
+                ? 'bg-primary text-on-primary'
+                : user.isPremium
+                  ? 'bg-tertiary-container/20 text-tertiary border border-tertiary-container/30 hover:bg-tertiary-container/30'
+                  : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
+              }`}
+          >
+            <span className="material-symbols-outlined text-xl">
+              {user.isPremium ? 'verified' : 'lock'}
+            </span>
+            <span className="absolute left-16 bg-surface-container border border-outline-variant px-3 py-1.5 rounded-md text-label-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-50">
+              {t('premiumHub')} {user.isPremium ? '(Unlocked)' : '(Locked)'}
+            </span>
+          </Link>
+
+          {/* Settings */}
+          <Link
+            to="/settings"
+            title={t('settings')}
+            className={`group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${isActive('/settings')
+                ? 'bg-primary text-on-primary'
+                : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
+              }`}
+          >
+            <span className="material-symbols-outlined text-xl">settings</span>
+            <span className="absolute left-16 bg-surface-container border border-outline-variant px-3 py-1.5 rounded-md text-label-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-50">
+              {t('settings')}
+            </span>
+          </Link>
+        </nav>
+
+        {/* Help & Logout Actions */}
+        <div className="flex flex-col gap-4 items-center mt-auto w-full px-2">
+          <button
+            onClick={handleLogout}
+            title={t('logout')}
+            className="group relative w-12 h-12 text-error hover:bg-error-container/20 transition-colors rounded-xl flex items-center justify-center"
+          >
+            <span className="material-symbols-outlined text-xl">logout</span>
+            <span className="absolute left-16 bg-surface-container border border-outline-variant px-3 py-1.5 rounded-md text-label-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-50">
+              {t('logout')}
+            </span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Top Header Navigation Bar */}
+      <header className="fixed top-0 right-0 left-0 md:left-sidebar-width h-16 bg-surface/90 backdrop-blur-xl border-b border-outline-variant z-40 px-6 flex items-center justify-between transition-all">
+        {/* Left Side: Page Title or Branding */}
+        <div className="flex items-center gap-4">
+          {/* Mobile Menu Toggle Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="flex md:hidden w-10 h-10 items-center justify-center rounded-xl hover:bg-surface-container-high text-on-surface"
+          >
+            <span className="material-symbols-outlined">{mobileMenuOpen ? 'close' : 'menu'}</span>
+          </button>
+
+          <h1 className="font-display-hero text-lg md:text-xl font-bold text-on-surface flex items-center gap-2">
+            <span className="md:hidden w-8 h-8 bg-primary-container rounded-lg flex items-center justify-center text-on-primary-container font-semibold">
+              <span className="material-symbols-outlined text-lg">account_balance</span>
+            </span>
+            Finmate
+          </h1>
+        </div>
+
+        {/* Right Side: Search, Notification, Profile Actions */}
+        <div className="flex items-center gap-2 md:gap-4">
+          {!user.isPremium && (
+            <button
+              onClick={handleTogglePremium}
+              className="px-4 py-1.5 rounded-full bg-primary-container text-on-primary-container font-bold text-xs flex items-center gap-1.5 hover:scale-95 active:scale-90 transition-all cursor-pointer shadow-sm shadow-primary-container/20"
+              title="Unlock Premium features"
+            >
+              <span className="material-symbols-outlined text-sm">zap</span>
+              {t('goPremium')}
+            </button>
+          )}
+
+          {/* User profile dropdown and metadata */}
+          <div className="h-8 w-px bg-outline-variant mx-1 hidden sm:block"></div>
+
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
+              <p className="font-label-md text-label-md font-bold text-on-surface leading-tight">{t('hello')}, {user.name}</p>
+              <p className={`font-label-sm text-[10px] uppercase font-bold tracking-wider ${user.isPremium ? 'text-primary' : 'text-on-surface-variant'}`}>
+                {user.isPremium ? 'Premium Plan' : 'Free Member'}
+              </p>
+            </div>
+
+            <div className="relative group">
+              {user.profileImage ? (
+                <img
+                  className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/40 cursor-pointer hover:ring-primary transition-all"
+                  src={user.profileImage.startsWith('http') ? user.profileImage : axios.defaults.baseURL + user.profileImage}
+                  alt={user.name}
+                />
+              ) : (
+                <div className="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-sm ring-2 ring-primary/40 cursor-pointer hover:ring-primary transition-all">
+                  {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Drawer Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-45 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <div
+            className="absolute left-0 top-0 h-full w-64 bg-surface border-r border-outline-variant p-6 flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-8">
+              <span className="font-display-hero text-xl font-bold text-on-surface">Finmate Navigation</span>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-container-high"
+              >
+                <span className="material-symbols-outlined text-xl">close</span>
+              </button>
+            </div>
+
+            <nav className="flex flex-col gap-2 flex-1">
+              <Link
+                to="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl font-label-md text-label-md transition-colors ${isActive('/dashboard') ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:bg-surface-container'
+                  }`}
+              >
+                <span className="material-symbols-outlined">dashboard</span>
                 {t('dashboard')}
               </Link>
-              <Link to="/upload" style={{ ...styles.link, ...(isActive('/upload') ? styles.activeLink : {}) }}>
-                <UploadCloud size={18} />
+              <Link
+                to="/upload"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl font-label-md text-label-md transition-colors ${isActive('/upload') ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:bg-surface-container'
+                  }`}
+              >
+                <span className="material-symbols-outlined">cloud_upload</span>
                 {t('statementHub')}
               </Link>
-              <Link to="/investments" style={{ ...styles.link, ...(isActive('/investments') ? styles.activeLink : {}) }}>
-                <Compass size={18} />
+              <Link
+                to="/investments"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl font-label-md text-label-md transition-colors ${isActive('/investments') ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:bg-surface-container'
+                  }`}
+              >
+                <span className="material-symbols-outlined">payments</span>
                 {t('investments')}
               </Link>
-              <Link to="/insurance" style={{ ...styles.link, ...(isActive('/insurance') ? styles.activeLink : {}) }}>
-                <ShieldAlert size={18} />
+              <Link
+                to="/insurance"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl font-label-md text-label-md transition-colors ${isActive('/insurance') ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:bg-surface-container'
+                  }`}
+              >
+                <span className="material-symbols-outlined">account_balance_wallet</span>
                 {t('insurance')}
               </Link>
-              <Link to="/chatbot" style={{ ...styles.link, ...(isActive('/chatbot') ? styles.activeLink : {}) }}>
-                <MessageSquare size={18} />
+              <Link
+                to="/chatbot"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl font-label-md text-label-md transition-colors ${isActive('/chatbot') ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:bg-surface-container'
+                  }`}
+              >
+                <span className="material-symbols-outlined">chat_bubble</span>
                 {t('aiAssistant')}
               </Link>
-              
-              {/* Premium Hub Link */}
-              <Link 
-                to="/premium-dashboard" 
-                style={{ 
-                  ...styles.link, 
-                  ...(isActive('/premium-dashboard') ? styles.activeLink : {}),
-                  ...(user.isPremium ? styles.premiumLink : styles.lockedLink)
-                }}
+              <Link
+                to="/premium-dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl font-label-md text-label-md transition-colors ${isActive('/premium-dashboard') ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:bg-surface-container'
+                  }`}
               >
-                {user.isPremium ? <Zap size={18} color="#eab308" /> : <Lock size={18} color="#94a3b8" />}
+                <span className="material-symbols-outlined">{user.isPremium ? 'verified' : 'lock'}</span>
                 {t('premiumHub')}
               </Link>
-
-              <Link to="/settings" style={{ ...styles.link, ...(isActive('/settings') ? styles.activeLink : {}) }}>
-                <Settings size={18} />
+              <Link
+                to="/settings"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl font-label-md text-label-md transition-colors ${isActive('/settings') ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:bg-surface-container'
+                  }`}
+              >
+                <span className="material-symbols-outlined">settings</span>
                 {t('settings')}
               </Link>
-              
-              <div style={styles.userSection}>
-                {user.profileImage ? (
-                  <img 
-                    src={user.profileImage.startsWith('http') ? user.profileImage : axios.defaults.baseURL + user.profileImage} 
-                    alt={user.name} 
-                    style={styles.avatar} 
-                  />
-                ) : (
-                  <div style={styles.avatarFallback}>
-                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                  </div>
-                )}
-                
-                <div style={styles.userInfo}>
-                  <span style={styles.userName}>{t('hello')}, {user.name}</span>
-                  <span style={user.isPremium ? styles.premiumBadge : styles.freeBadge}>
-                    {user.isPremium ? 'PREMIUM' : 'FREE'}
-                  </span>
-                </div>
-                
-                {!user.isPremium && (
-                  <button 
-                    onClick={handleTogglePremium} 
-                    style={{
-                      ...styles.toggleBtn,
-                      ...styles.upgradeBtn
-                    }}
-                    title="Upgrade to Premium tier"
-                  >
-                    {t('goPremium')}
-                  </button>
-                )}
+            </nav>
 
-                <button onClick={handleLogout} style={styles.logoutBtn} title={t('logout')}>
-                  <LogOut size={16} />
-                  {t('logout')}
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <Link to="/login" style={{ ...styles.link, ...(isActive('/login') ? styles.activeLink : {}) }}>{t('login')}</Link>
-              <Link to="/register" style={{ ...styles.link, ...(isActive('/register') ? styles.btnLink : {}) }}>{t('getStarted')}</Link>
-            </>
-          )}
+            <div className="pt-4 border-t border-outline-variant mt-auto">
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-4 px-4 py-3 w-full rounded-xl font-label-md text-label-md text-error hover:bg-error-container/20 transition-colors"
+              >
+                <span className="material-symbols-outlined">logout</span>
+                {t('logout')}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </nav>
+      )}
+    </>
   );
-};
-
-const styles = {
-  nav: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '64px',
-    background: 'rgba(3, 7, 18, 0.75)',
-    backdropFilter: 'blur(16px)',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-    zIndex: 1000,
-    display: 'flex',
-    alignItems: 'center',
-  },
-  container: {
-    width: '100%',
-    maxWidth: '1280px',
-    margin: '0 auto',
-    padding: '0 24px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  logoContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    textDecoration: 'none',
-    position: 'relative',
-  },
-  logoText: {
-    fontSize: '22px',
-    fontWeight: 800,
-    fontFamily: 'Outfit, sans-serif',
-    color: '#ffffff',
-    letterSpacing: '-0.03em',
-  },
-  logoAccent: {
-    background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-  },
-  logoGlow: {
-    position: 'absolute',
-    width: '40px',
-    height: '40px',
-    background: 'rgba(99, 102, 241, 0.3)',
-    borderRadius: '50%',
-    filter: 'blur(20px)',
-    left: '-10px',
-    top: '-5px',
-    pointerEvents: 'none',
-  },
-  links: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-  },
-  link: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    color: '#94a3b8',
-    textDecoration: 'none',
-    fontSize: '14px',
-    fontWeight: 500,
-    padding: '8px 12px',
-    borderRadius: '8px',
-    transition: 'all 0.2s ease',
-    fontFamily: 'Outfit, sans-serif',
-  },
-  activeLink: {
-    color: '#ffffff',
-    background: 'rgba(255, 255, 255, 0.05)',
-    borderBottom: '2px solid #6366f1',
-    borderRadius: '8px 8px 0 0',
-  },
-  premiumLink: {
-    color: '#fef08a',
-    background: 'rgba(234, 179, 8, 0.05)',
-    border: '1px solid rgba(234, 179, 8, 0.2)',
-  },
-  lockedLink: {
-    opacity: 0.8,
-  },
-  btnLink: {
-    background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-    color: '#ffffff',
-    textDecoration: 'none',
-    fontSize: '14px',
-    fontWeight: 600,
-    padding: '8px 16px',
-    borderRadius: '8px',
-    boxShadow: '0 0 15px rgba(99, 102, 241, 0.3)',
-    transition: 'all 0.2s ease',
-    fontFamily: 'Outfit, sans-serif',
-  },
-  userSection: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    marginLeft: '16px',
-    paddingLeft: '16px',
-    borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
-  },
-  avatar: {
-    width: '32px',
-    height: '32px',
-    borderRadius: '50%',
-    objectFit: 'cover',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-  },
-  avatarFallback: {
-    width: '32px',
-    height: '32px',
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-    color: '#ffffff',
-    fontSize: '14px',
-    fontWeight: 700,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-  },
-  userInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    gap: '2px',
-  },
-  userName: {
-    fontSize: '14px',
-    color: '#f8fafc',
-    fontWeight: 500,
-    fontFamily: 'Outfit, sans-serif',
-  },
-  freeBadge: {
-    fontSize: '10px',
-    fontWeight: 700,
-    color: '#94a3b8',
-    background: 'rgba(148, 163, 184, 0.15)',
-    padding: '2px 6px',
-    borderRadius: '4px',
-    fontFamily: 'Outfit, sans-serif',
-    marginTop: '2px',
-  },
-  premiumBadge: {
-    fontSize: '10px',
-    fontWeight: 700,
-    color: '#10b981',
-    background: 'rgba(16, 185, 129, 0.15)',
-    padding: '2px 6px',
-    borderRadius: '4px',
-    fontFamily: 'Outfit, sans-serif',
-    marginTop: '2px',
-    border: '1px solid rgba(16, 185, 129, 0.3)',
-  },
-  toggleBtn: {
-    fontSize: '12px',
-    fontWeight: 600,
-    padding: '6px 10px',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    border: 'none',
-    fontFamily: 'Outfit, sans-serif',
-  },
-  upgradeBtn: {
-    background: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
-    color: '#000000',
-    boxShadow: '0 0 10px rgba(234, 179, 8, 0.2)',
-  },
-  downgradeBtn: {
-    background: 'rgba(255, 255, 255, 0.08)',
-    color: '#cbd5e1',
-    border: '1px solid rgba(255, 255, 255, 0.15)',
-  },
-  logoutBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    background: 'transparent',
-    border: '1px solid rgba(239, 68, 68, 0.3)',
-    color: '#fca5a5',
-    padding: '6px 12px',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: 500,
-    transition: 'all 0.2s ease',
-  },
 };
 
 export default Navbar;

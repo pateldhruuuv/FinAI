@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { UserCheck, ArrowLeft, Award, Shield, Key, Landmark, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const FinancialTwin = () => {
@@ -27,19 +26,21 @@ const FinancialTwin = () => {
 
   if (loading) {
     return (
-      <div style={styles.loadingContainer}>
-        <h2>Materializing Digital Twin...</h2>
-        <p style={{ color: '#94a3b8', marginTop: '6px' }}>Fitting personality profiles and outstanding liabilities...</p>
+      <div className="flex flex-col items-center justify-center min-h-[80vh] md:pl-20 mt-16 text-on-surface font-sans">
+        <span className="material-symbols-outlined text-4xl animate-spin text-primary-container mb-4">refresh</span>
+        <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">Materializing Digital Twin...</h2>
+        <p className="text-xs text-on-surface-variant mt-2 font-serif">Fitting personality profiles and outstanding liabilities...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={styles.errorContainer}>
-        <h3>Twin Sync Error</h3>
-        <p style={{ color: '#fca5a5', marginTop: '8px' }}>{error}</p>
-        <button onClick={fetchTwin} style={styles.retryBtn}>Retry</button>
+      <div className="flex flex-col items-center justify-center min-h-[80vh] md:pl-20 mt-16 text-error font-sans p-6">
+        <span className="material-symbols-outlined text-4xl text-error mb-4">report_problem</span>
+        <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Twin Sync Error</h3>
+        <p className="text-xs text-on-surface-variant mt-2 font-serif">{error}</p>
+        <button onClick={fetchTwin} className="mt-4 px-5 py-2 border border-outline-variant hover:bg-surface-container rounded-full text-xs font-semibold cursor-pointer">Retry</button>
       </div>
     );
   }
@@ -47,316 +48,115 @@ const FinancialTwin = () => {
   const { digitalTwin, portfolioAllocation, netWorth, loanEligibility } = twin;
 
   return (
-    <div style={styles.page}>
-      <header style={styles.header}>
-        <Link to="/premium-dashboard" style={styles.backLink}>
-          <ArrowLeft size={16} />
+    <div className="md:pl-20 mt-16 px-6 md:px-8 pt-10 md:pt-14 pb-6 md:pb-8 min-h-screen bg-background text-on-background font-sans max-w-[1600px] mx-auto animate-fade-in">
+
+      {/* Header */}
+      <header className="mb-8 border-b border-outline-variant pb-6">
+        <Link to="/premium-dashboard" className="inline-flex items-center gap-2 text-xs text-on-surface-variant hover:text-on-surface font-semibold mb-4 transition-colors">
+          <span className="material-symbols-outlined text-sm">arrow_back</span>
           Back to Hub
         </Link>
-        <div style={styles.titleRow}>
-          <UserCheck size={28} color="#06b6d4" />
-          <h1 style={styles.title}>Financial Digital Twin</h1>
+        <div className="flex items-center gap-3">
+          <span className="material-symbols-outlined text-3xl text-primary-container font-bold m-2">person_search</span>
+          <h1 className="font-display-hero text-3xl font-bold tracking-tight text-on-surface">Financial Digital Twin</h1>
         </div>
-        <p style={styles.subtitle}>Explore your contextual profile mapping: your stability score, financial age, and money personality traits.</p>
+        <p className="text-sm text-on-surface-variant mt-1 m-2">Explore your contextual profile mapping: your stability score, financial age, and money personality traits.</p>
       </header>
 
-      <div style={styles.container}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         {/* Profile Card */}
-        <div style={styles.twinCard}>
-          <div style={styles.twinHeader}>
-            <div style={styles.glowBg}></div>
-            <Award size={36} color="#06b6d4" style={styles.avatarIcon} />
-            <h2 style={styles.twinTitle}>{twin.digitalTwin?.savingsPersonality || 'Balanced Saver'}</h2>
-            <span style={styles.stabilityVal}>Stability Score: {digitalTwin?.stabilityScore || 75}/100</span>
+        <div className="glass-card rounded-2xl p-6 md:p-8 border border-outline-variant/40 shadow-sm relative overflow-hidden flex flex-col items-center text-center">
+          <div className="w-16 h-16 rounded-full bg-primary-container/10 border border-primary-container/20 flex items-center justify-center text-primary-container mb-4">
+            <span className="material-symbols-outlined text-3xl font-bold">person</span>
           </div>
+          <h2 className="font-headline-md text-headline-md font-bold text-on-surface font-serif mb-1">{twin.digitalTwin?.savingsPersonality || 'Balanced Saver'}</h2>
+          <span className="px-3.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-semibold tracking-wider font-sans mb-6">
+            Stability Index: {digitalTwin?.stabilityScore || 75} / 100
+          </span>
 
-          <div style={styles.traitGrid}>
-            <div style={styles.traitBox}>
-              <span style={styles.traitLabel}>Financial Age</span>
-              <strong style={styles.traitValText}>{digitalTwin?.financialAge || 28} Years</strong>
-              <span style={styles.traitSub}>Based on asset/debt ratios</span>
+          <div className="grid grid-cols-2 gap-4 w-full font-serif text-xs text-left">
+            <div className="bg-surface-container/30 border border-outline-variant/20 rounded-xl p-4 flex flex-col gap-1">
+              <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans font-bold">Financial Age</span>
+              <strong className="text-sm text-on-surface">{digitalTwin?.financialAge || 28} Years</strong>
+              <span className="text-[9px] text-on-surface-variant/40 font-sans mt-0.5">Based on asset/debt ratios</span>
             </div>
 
-            <div style={styles.traitBox}>
-              <span style={styles.traitLabel}>Risk tolerance</span>
-              <strong style={{ ...styles.traitValText, color: '#eab308' }}>{digitalTwin?.riskLevel || 'Moderate'}</strong>
-              <span style={styles.traitSub}>Portfolio volatility index</span>
+            <div className="bg-surface-container/30 border border-outline-variant/20 rounded-xl p-4 flex flex-col gap-1">
+              <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans font-bold">Risk Tolerance</span>
+              <strong className="text-sm text-primary">{digitalTwin?.riskLevel || 'Moderate'}</strong>
+              <span className="text-[9px] text-on-surface-variant/40 font-sans mt-0.5">Portfolio volatility index</span>
             </div>
 
-            <div style={styles.traitBox}>
-              <span style={styles.traitLabel}>Savings trait</span>
-              <strong style={styles.traitValTextDetail}>{digitalTwin?.savingsPersonality || 'Balanced'}</strong>
-              <span style={styles.traitSub}>Income vs saving speed</span>
+            <div className="bg-surface-container/30 border border-outline-variant/20 rounded-xl p-4 flex flex-col gap-1">
+              <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans font-bold">Savings Trait</span>
+              <strong className="text-sm text-on-surface">{digitalTwin?.savingsPersonality || 'Balanced'}</strong>
+              <span className="text-[9px] text-on-surface-variant/40 font-sans mt-0.5">Income vs saving speed</span>
             </div>
 
-            <div style={styles.traitBox}>
-              <span style={styles.traitLabel}>Investment Trait</span>
-              <strong style={styles.traitValTextDetail}>{digitalTwin?.investmentPersonality || 'Rebalancer'}</strong>
-              <span style={styles.traitSub}>Asset distribution profile</span>
+            <div className="bg-surface-container/30 border border-outline-variant/20 rounded-xl p-4 flex flex-col gap-1">
+              <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans font-bold">Investment Trait</span>
+              <strong className="text-sm text-on-surface">{digitalTwin?.investmentPersonality || 'Rebalancer'}</strong>
+              <span className="text-[9px] text-on-surface-variant/40 font-sans mt-0.5">Asset distribution profile</span>
             </div>
           </div>
         </div>
 
         {/* Ledger breakdown card */}
-        <div style={styles.ledgerCard}>
-          <h3 style={styles.ledgerTitle}>Digital Twin Balance Sheet</h3>
+        <div className="glass-card rounded-2xl p-6 md:p-8 border border-outline-variant/40 shadow-sm space-y-6">
+          <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface font-serif">Digital Twin Balance Sheet</h3>
 
-          <div style={styles.ledgerList}>
+          <div className="space-y-6 font-serif text-xs">
             {/* Assets */}
-            <div style={styles.ledgerSection}>
-              <h4 style={{ ...styles.ledgerSecHeader, color: '#10b981' }}>Identified Assets</h4>
-              <div style={styles.ledgerItem}>
-                <span>Stock Equities:</span>
-                <strong>₹{portfolioAllocation?.stocks?.toLocaleString() || '0'}</strong>
-              </div>
-              <div style={styles.ledgerItem}>
-                <span>Mutual Funds:</span>
-                <strong>₹{portfolioAllocation?.mutualFunds?.toLocaleString() || '0'}</strong>
-              </div>
-              <div style={styles.ledgerItem}>
-                <span>Fixed Deposits:</span>
-                <strong>₹{portfolioAllocation?.fd?.toLocaleString() || '0'}</strong>
-              </div>
-              <div style={styles.ledgerItem}>
-                <span>Gold Hedge:</span>
-                <strong>₹{portfolioAllocation?.gold?.toLocaleString() || '0'}</strong>
-              </div>
-              <div style={styles.ledgerItem}>
-                <span>Property:</span>
-                <strong>₹{portfolioAllocation?.property?.toLocaleString() || '0'}</strong>
+            <div className="space-y-2">
+              <h4 className="font-bold text-emerald-400 uppercase tracking-wider font-serif">Identified Assets</h4>
+              <div className="space-y-2 font-sans">
+                <div className="flex justify-between items-center bg-surface-container/30 border border-outline-variant/20 rounded-xl p-3">
+                  <span className="text-on-surface-variant">Stock Equities:</span>
+                  <strong className="text-on-surface font-serif">₹{portfolioAllocation?.stocks?.toLocaleString() || '0'}</strong>
+                </div>
+                <div className="flex justify-between items-center bg-surface-container/30 border border-outline-variant/20 rounded-xl p-3">
+                  <span className="text-on-surface-variant">Mutual Funds:</span>
+                  <strong className="text-on-surface font-serif">₹{portfolioAllocation?.mutualFunds?.toLocaleString() || '0'}</strong>
+                </div>
+                <div className="flex justify-between items-center bg-surface-container/30 border border-outline-variant/20 rounded-xl p-3">
+                  <span className="text-on-surface-variant">Fixed Deposits:</span>
+                  <strong className="text-on-surface font-serif">₹{portfolioAllocation?.fd?.toLocaleString() || '0'}</strong>
+                </div>
+                <div className="flex justify-between items-center bg-surface-container/30 border border-outline-variant/20 rounded-xl p-3">
+                  <span className="text-on-surface-variant">Gold Hedge:</span>
+                  <strong className="text-on-surface font-serif">₹{portfolioAllocation?.gold?.toLocaleString() || '0'}</strong>
+                </div>
+                <div className="flex justify-between items-center bg-surface-container/30 border border-outline-variant/20 rounded-xl p-3">
+                  <span className="text-on-surface-variant">Real Estate Property:</span>
+                  <strong className="text-on-surface font-serif">₹{portfolioAllocation?.property?.toLocaleString() || '0'}</strong>
+                </div>
               </div>
             </div>
 
             {/* Liabilities */}
-            <div style={styles.ledgerSection}>
-              <h4 style={{ ...styles.ledgerSecHeader, color: '#ef4444' }}>Identified Liabilities</h4>
-              <div style={styles.ledgerItem}>
-                <span>Monthly EMIs / Outstandings:</span>
-                <strong>₹{twin.loanEligibility ? (twin.loanEligibility.maxEmi * 0.1).toLocaleString() : '₹12,000'}</strong>
-              </div>
-              <div style={styles.ledgerItem}>
-                <span>Estimated Outstanding Loans:</span>
-                <strong>₹{loanEligibility ? (loanEligibility.maxEmi * 15).toLocaleString() : '₹1,50,000'}</strong>
+            <div className="space-y-2">
+              <h4 className="font-bold text-rose-400 uppercase tracking-wider font-serif">Identified Liabilities</h4>
+              <div className="space-y-2 font-sans">
+                <div className="flex justify-between items-center bg-surface-container/30 border border-outline-variant/20 rounded-xl p-3">
+                  <span className="text-on-surface-variant">Monthly EMIs / Outstandings:</span>
+                  <strong className="text-on-surface font-serif">₹{twin.loanEligibility ? (twin.loanEligibility.maxEmi * 0.1).toLocaleString() : '₹12,000'}</strong>
+                </div>
+                <div className="flex justify-between items-center bg-surface-container/30 border border-outline-variant/20 rounded-xl p-3">
+                  <span className="text-on-surface-variant">Estimated Outstanding Loans:</span>
+                  <strong className="text-on-surface font-serif">₹{loanEligibility ? (loanEligibility.maxEmi * 15).toLocaleString() : '₹1,50,000'}</strong>
+                </div>
               </div>
             </div>
           </div>
 
-          <div style={styles.netWorthSummary}>
-            <span>Net Worth Status:</span>
-            <strong>₹{netWorth ? netWorth.toLocaleString() : '---'}</strong>
+          <div className="flex justify-between items-center p-4 bg-surface-container/40 border border-outline-variant rounded-xl font-serif text-sm">
+            <span className="text-on-surface font-bold">Total Net Worth Status:</span>
+            <strong className="text-emerald-400 font-bold">₹{netWorth ? netWorth.toLocaleString() : '---'}</strong>
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-const styles = {
-  page: {
-    minHeight: '100vh',
-    marginTop: '64px',
-    backgroundColor: '#030712',
-    color: '#f8fafc',
-    fontFamily: 'Outfit, sans-serif',
-    padding: '40px 24px',
-  },
-  header: {
-    maxWidth: '1200px',
-    margin: '0 auto 32px auto',
-  },
-  backLink: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    color: '#94a3b8',
-    textDecoration: 'none',
-    fontSize: '13px',
-    fontWeight: 500,
-    marginBottom: '16px',
-    width: 'fit-content',
-  },
-  titleRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    marginBottom: '8px',
-  },
-  title: {
-    fontSize: '28px',
-    fontWeight: 800,
-    color: '#ffffff',
-  },
-  subtitle: {
-    color: '#cbd5e1',
-    fontSize: '14px',
-  },
-  container: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    display: 'grid',
-    gridTemplateColumns: '1.2fr 1fr',
-    gap: '32px',
-    alignItems: 'start',
-  },
-  twinCard: {
-    background: 'rgba(17, 24, 39, 0.45)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '24px',
-    padding: '40px',
-    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.25)',
-    textAlign: 'center',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  twinHeader: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginBottom: '32px',
-  },
-  glowBg: {
-    position: 'absolute',
-    width: '120px',
-    height: '120px',
-    background: 'rgba(6, 182, 212, 0.15)',
-    borderRadius: '50%',
-    filter: 'blur(30px)',
-    top: '20px',
-    zIndex: 0,
-  },
-  avatarIcon: {
-    position: 'relative',
-    zIndex: 1,
-    marginBottom: '16px',
-  },
-  twinTitle: {
-    fontSize: '24px',
-    fontWeight: 800,
-    color: '#ffffff',
-    marginBottom: '6px',
-  },
-  stabilityVal: {
-    fontSize: '12px',
-    color: '#06b6d4',
-    background: 'rgba(6, 182, 212, 0.12)',
-    padding: '4px 12px',
-    borderRadius: '20px',
-    fontWeight: 700,
-    border: '1px solid rgba(6, 182, 212, 0.25)',
-  },
-  traitGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '16px',
-  },
-  traitBox: {
-    background: 'rgba(255, 255, 255, 0.015)',
-    border: '1px solid rgba(255, 255, 255, 0.03)',
-    borderRadius: '16px',
-    padding: '20px 16px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '6px',
-  },
-  traitLabel: {
-    fontSize: '11px',
-    color: '#94a3b8',
-    textTransform: 'uppercase',
-    fontWeight: 600,
-  },
-  traitValText: {
-    fontSize: '18px',
-    fontWeight: 800,
-    color: '#ffffff',
-  },
-  traitValTextDetail: {
-    fontSize: '13px',
-    fontWeight: 700,
-    color: '#cbd5e1',
-    textAlign: 'center',
-  },
-  traitSub: {
-    fontSize: '10px',
-    color: '#64748b',
-  },
-  ledgerCard: {
-    background: 'rgba(17, 24, 39, 0.45)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '24px',
-    padding: '32px',
-    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.2)',
-  },
-  ledgerTitle: {
-    fontSize: '18px',
-    fontWeight: 700,
-    marginBottom: '20px',
-    color: '#ffffff',
-  },
-  ledgerList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-    marginBottom: '24px',
-  },
-  ledgerSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
-  },
-  ledgerSecHeader: {
-    fontSize: '12px',
-    fontWeight: 700,
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    marginBottom: '4px',
-  },
-  ledgerItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: '13px',
-    color: '#cbd5e1',
-    paddingBottom: '6px',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
-  },
-  netWorthSummary: {
-    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-    paddingTop: '20px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    fontSize: '15px',
-  },
-  loadingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    backgroundColor: '#030712',
-    color: '#f8fafc',
-    fontFamily: 'Outfit, sans-serif',
-  },
-  errorContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    backgroundColor: '#030712',
-    color: '#fca5a5',
-    fontFamily: 'Outfit, sans-serif',
-    padding: '24px',
-  },
-  retryBtn: {
-    marginTop: '16px',
-    padding: '8px 16px',
-    background: 'rgba(255, 255, 255, 0.1)',
-    color: '#ffffff',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    borderRadius: '8px',
-    cursor: 'pointer',
-  },
 };
 
 export default FinancialTwin;

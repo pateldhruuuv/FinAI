@@ -1,20 +1,16 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { 
-  Send, Bot, User, Sparkles, MessageCircle, Plus, Trash2, 
-  Edit2, MoreVertical, Search, Menu, X, Check 
-} from 'lucide-react';
 
 const Chatbot = () => {
-  const { token, user } = useContext(AuthContext);
+  const { token, user, t } = useContext(AuthContext);
   
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([
     {
       id: 'welcome',
       role: 'assistant',
-      content: 'Hello! I am your FinPilot AI assistant. How can I help you today? You can ask me about investments, saving tips, or insurance coverage, or click one of the quick queries below!',
+      content: 'Hello! I am your Finmate AI assistant. How can I help you today? You can ask me about investments, saving tips, or insurance coverage, or click one of the quick queries below!',
       timestamp: new Date()
     }
   ]);
@@ -152,7 +148,7 @@ const Chatbot = () => {
       {
         id: 'welcome',
         role: 'assistant',
-        content: 'Hello! I am your FinPilot AI assistant. How can I help you today? You can ask me about investments, saving tips, or insurance coverage, or click one of the quick queries below!',
+        content: 'Hello! I am your Finmate AI assistant. How can I help you today? You can ask me about investments, saving tips, or insurance coverage, or click one of the quick queries below!',
         timestamp: new Date()
       }
     ]);
@@ -162,7 +158,7 @@ const Chatbot = () => {
     }
   };
 
-  // Handle message sending (optimistic updates + dynamic routes)
+  // Handle message sending
   const handleSendMessage = async (textToSend) => {
     if (!textToSend.trim() || loading) return;
 
@@ -185,7 +181,6 @@ const Chatbot = () => {
           const aiMsg = res.data.reply;
           setMessages(prev => [...prev, aiMsg]);
           
-          // Re-fetch or update the current conversation title/preview in the sidebar
           setConversations(prev => {
             const index = prev.findIndex(c => c.id === currentChatId);
             if (index !== -1) {
@@ -199,7 +194,6 @@ const Chatbot = () => {
             }
             return prev;
           });
-          // Call history refresh just in case auto-title changed it
           fetchConversations(1, false, searchQuery);
         }
       } else {
@@ -215,7 +209,6 @@ const Chatbot = () => {
             setMessages([userMessage, aiMessage]);
           }
 
-          // Insert into sidebar
           setConversations(prev => [
             {
               id: conversation.id,
@@ -248,7 +241,6 @@ const Chatbot = () => {
     handleSendMessage(inputText);
   };
 
-  // Rename a conversation
   const handleRename = async (chatId, newTitle) => {
     if (!newTitle.trim()) {
       setRenamingId(null);
@@ -273,7 +265,6 @@ const Chatbot = () => {
     setActiveMenuId(null);
   };
 
-  // Delete a conversation
   const handleDelete = async (chatId, e) => {
     e.stopPropagation();
     if (!window.confirm('Are you sure you want to delete this conversation?')) {
@@ -295,7 +286,6 @@ const Chatbot = () => {
     }
   };
 
-  // Clear all chats
   const handleClearAll = async () => {
     if (!window.confirm('Are you sure you want to delete ALL conversations? This cannot be undone.')) return;
     try {
@@ -314,7 +304,6 @@ const Chatbot = () => {
     setActiveMenuId(activeMenuId === chatId ? null : chatId);
   };
 
-  // Helper to categorize dates
   const groupConversations = (list) => {
     const groups = {
       today: [],
@@ -348,10 +337,8 @@ const Chatbot = () => {
     return groups;
   };
 
-  // Parse text block for simple markdown rendering (bolding and code blocks)
   const renderMessageContent = (content) => {
     if (!content) return null;
-
     const parts = content.split(/(```[\s\S]*?```)/g);
 
     return parts.map((part, index) => {
@@ -361,10 +348,10 @@ const Chatbot = () => {
         const code = match ? match[2] : part.slice(3, -3);
 
         return (
-          <div key={index} style={styles.codeBlockContainer}>
-            {language && <div style={styles.codeBlockHeader}>{language}</div>}
-            <pre style={styles.codeBlockPre}>
-              <code style={styles.codeBlockCode}>{code.trim()}</code>
+          <div key={index} className="my-4 rounded-xl overflow-hidden border border-outline-variant/40 bg-surface-container font-sans text-xs">
+            {language && <div className="bg-surface-container-high px-4 py-2 text-on-surface-variant font-bold border-b border-outline-variant/30 uppercase">{language}</div>}
+            <pre className="p-4 overflow-x-auto text-[11px] leading-relaxed text-on-surface">
+              <code>{code.trim()}</code>
             </pre>
           </div>
         );
@@ -374,7 +361,7 @@ const Chatbot = () => {
       const inlineRendered = inlineParts.map((subPart, subIndex) => {
         if (subPart.startsWith('`') && subPart.endsWith('`')) {
           return (
-            <code key={subIndex} style={styles.inlineCode}>
+            <code key={subIndex} className="px-1.5 py-0.5 rounded bg-surface-container border border-outline-variant/40 text-xs text-primary font-sans">
               {subPart.slice(1, -1)}
             </code>
           );
@@ -383,17 +370,16 @@ const Chatbot = () => {
         const boldParts = subPart.split(/(\*\*[^*]+\*\*)/g);
         return boldParts.map((boldPart, boldIndex) => {
           if (boldPart.startsWith('**') && boldPart.endsWith('**')) {
-            return <strong key={boldIndex}>{boldPart.slice(2, -2)}</strong>;
+            return <strong key={boldIndex} className="font-bold text-on-surface">{boldPart.slice(2, -2)}</strong>;
           }
           return boldPart;
         });
       });
 
-      return <span key={index} style={{ whiteSpace: 'pre-wrap' }}>{inlineRendered}</span>;
+      return <span key={index} className="white-space-pre-wrap">{inlineRendered}</span>;
     });
   };
 
-  // Quick prompt buttons
   const quickReplies = [
     'Can I invest?',
     'Should I save more?',
@@ -404,252 +390,264 @@ const Chatbot = () => {
   const showSidebar = !isMobile || sidebarOpen;
 
   return (
-    <div className="main-content" style={styles.mainContent}>
-      {/* Mobile Sidebar overlay backdrop */}
+    <div className="md:pl-20 mt-16 px-4 md:px-6 pt-8 md:pt-10 pb-4 md:pb-6 min-h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] bg-background text-on-background flex gap-6 overflow-hidden relative font-sans">
+      
+      {/* Mobile Sidebar backdrop */}
       {isMobile && sidebarOpen && (
         <div 
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(3, 7, 18, 0.65)',
-            backdropFilter: 'blur(4px)',
-            zIndex: 99,
-          }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-45"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      <div style={styles.chatContainer}>
-        {/* Sidebar Component */}
-        {showSidebar && (
-          <div style={isMobile ? styles.sidebarMobile : styles.sidebarDesktop}>
-            <div style={styles.sidebarHeader}>
-              <h3 style={styles.sidebarTitle}>Chats History</h3>
+      {/* Sidebar Component */}
+      {showSidebar && (
+        <div className={`flex flex-col bg-surface border border-outline-variant rounded-2xl p-4 flex-shrink-0 z-50 transition-all duration-300 ${
+          isMobile 
+            ? 'fixed left-0 top-0 bottom-0 w-72 shadow-2xl h-full rounded-none border-y-0 border-l-0' 
+            : 'w-72 h-full'
+        }`}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface font-serif">Chats History</h3>
+            {isMobile && (
+              <button 
+                onClick={() => setSidebarOpen(false)} 
+                className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-container-high text-on-surface-variant cursor-pointer"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            )}
+          </div>
+
+          <button 
+            onClick={startNewChat} 
+            className="w-full py-3 mb-4 rounded-full bg-primary-container hover:bg-primary text-on-primary-container font-semibold transition-all flex items-center justify-center gap-2 text-sm cursor-pointer shadow-sm shadow-primary-container/10"
+          >
+            <span className="material-symbols-outlined text-lg">add</span>
+            New Consultation
+          </button>
+
+          {/* Search */}
+          <div className="relative flex items-center mb-4">
+            <span className="material-symbols-outlined text-on-surface-variant/40 absolute left-3 text-lg">search</span>
+            <input 
+              type="text"
+              placeholder="Search chats..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-surface-container/60 border border-outline-variant rounded-xl pl-10 pr-8 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container transition-all"
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="absolute right-2 text-on-surface-variant/60 hover:text-on-surface">
+                <span className="material-symbols-outlined text-sm">close</span>
+              </button>
+            )}
+          </div>
+
+          {/* Conversations list */}
+          <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-none">
+            {conversationsLoading ? (
+              Array(4).fill(0).map((_, i) => (
+                <div key={i} className="flex gap-3 items-center p-2 animate-pulse">
+                  <div className="w-8 h-8 rounded-lg bg-surface-container-highest" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3.5 bg-surface-container-highest rounded w-3/4" />
+                    <div className="h-2.5 bg-surface-container-highest rounded w-1/2" />
+                  </div>
+                </div>
+              ))
+            ) : conversations.length === 0 ? (
+              <div className="text-center text-xs text-on-surface-variant/50 font-serif py-12">
+                No past consultations found.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Today */}
+                {groupedChats.today.length > 0 && (
+                  <div>
+                    <div className="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/40 mb-2 pl-2 font-sans">Today</div>
+                    <div className="space-y-1">{groupedChats.today.map(conv => renderSidebarItem(conv))}</div>
+                  </div>
+                )}
+
+                {/* Yesterday */}
+                {groupedChats.yesterday.length > 0 && (
+                  <div>
+                    <div className="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/40 mb-2 pl-2 font-sans">Yesterday</div>
+                    <div className="space-y-1">{groupedChats.yesterday.map(conv => renderSidebarItem(conv))}</div>
+                  </div>
+                )}
+
+                {/* Previous 7 Days */}
+                {groupedChats.previous7Days.length > 0 && (
+                  <div>
+                    <div className="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/40 mb-2 pl-2 font-sans">Previous 7 Days</div>
+                    <div className="space-y-1">{groupedChats.previous7Days.map(conv => renderSidebarItem(conv))}</div>
+                  </div>
+                )}
+
+                {/* Older */}
+                {groupedChats.older.length > 0 && (
+                  <div>
+                    <div className="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/40 mb-2 pl-2 font-sans">Older</div>
+                    <div className="space-y-1">{groupedChats.older.map(conv => renderSidebarItem(conv))}</div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {conversations.length > 0 && (
+            <button 
+              onClick={handleClearAll} 
+              className="w-full py-2.5 mt-2 border border-outline-variant/60 hover:bg-error-container/10 hover:text-error text-on-surface-variant rounded-xl flex items-center justify-center gap-2 text-xs transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-sm">delete</span>
+              Clear All Chats
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Chat Area Component */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        <div className="flex-1 flex flex-col glass-card border border-outline-variant rounded-2xl overflow-hidden h-full">
+          
+          {/* Chat Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface/30">
+            <div className="flex items-center gap-3">
               {isMobile && (
                 <button 
-                  onClick={() => setSidebarOpen(false)} 
-                  style={{ background: 'transparent', border: 'none', color: '#cbd5e1', cursor: 'pointer' }}
+                  onClick={() => setSidebarOpen(true)} 
+                  className="w-10 h-10 rounded-xl hover:bg-surface-container-high text-on-surface flex items-center justify-center cursor-pointer"
                 >
-                  <X size={20} />
+                  <span className="material-symbols-outlined">menu</span>
                 </button>
               )}
-            </div>
-
-            <button onClick={startNewChat} className="new-chat-btn">
-              <Plus size={18} />
-              New Chat
-            </button>
-
-            <div style={styles.searchContainer}>
-              <Search size={16} style={styles.searchIcon} />
-              <input 
-                type="text"
-                placeholder="Search chats..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={styles.searchInput}
-              />
-              {searchQuery && (
-                <button onClick={() => setSearchQuery('')} style={styles.clearSearchBtn}>
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-
-            <div style={styles.historyList}>
-              {conversationsLoading ? (
-                // Loading skeletons
-                Array(4).fill(0).map((_, i) => (
-                  <div key={i} style={styles.skeletonItem}>
-                    <div style={styles.skeletonCircle} />
-                    <div style={{ flex: 1 }}>
-                      <div style={styles.skeletonLine(75)} />
-                      <div style={styles.skeletonLine(45)} />
-                    </div>
-                  </div>
-                ))
-              ) : conversations.length === 0 ? (
-                <div style={{ textAlign: 'center', color: '#64748b', fontSize: '13px', padding: '20px 0' }}>
-                  No conversations found.
-                </div>
-              ) : (
-                <>
-                  {/* Today Group */}
-                  {groupedChats.today.length > 0 && (
-                    <div style={styles.historyGroup}>
-                      <div style={styles.groupHeader}>Today</div>
-                      {groupedChats.today.map(conv => renderSidebarItem(conv))}
-                    </div>
-                  )}
-
-                  {/* Yesterday Group */}
-                  {groupedChats.yesterday.length > 0 && (
-                    <div style={styles.historyGroup}>
-                      <div style={styles.groupHeader}>Yesterday</div>
-                      {groupedChats.yesterday.map(conv => renderSidebarItem(conv))}
-                    </div>
-                  )}
-
-                  {/* Previous 7 Days Group */}
-                  {groupedChats.previous7Days.length > 0 && (
-                    <div style={styles.historyGroup}>
-                      <div style={styles.groupHeader}>Previous 7 Days</div>
-                      {groupedChats.previous7Days.map(conv => renderSidebarItem(conv))}
-                    </div>
-                  )}
-
-                  {/* Older Group */}
-                  {groupedChats.older.length > 0 && (
-                    <div style={styles.historyGroup}>
-                      <div style={styles.groupHeader}>Older Chats</div>
-                      {groupedChats.older.map(conv => renderSidebarItem(conv))}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
-            {conversations.length > 0 && (
-              <button onClick={handleClearAll} className="clear-history-btn">
-                <Trash2 size={15} />
-                Clear All Conversations
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Chat Area Component */}
-        <div style={styles.chatArea}>
-          <div className="glass-card" style={styles.chatCard}>
-            {/* Chat Header */}
-            <div style={styles.chatHeader}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                {isMobile && (
-                  <button onClick={() => setSidebarOpen(true)} style={styles.hamburgerBtn}>
-                    <Menu size={20} />
-                  </button>
-                )}
-                <div style={styles.botIconBadge}>
-                  <Bot size={20} style={{ color: '#6366f1' }} />
-                </div>
-                <div style={{ marginLeft: '12px' }}>
-                  <h3 style={styles.chatTitle}>
-                    {currentChatId 
-                      ? (conversations.find(c => c.id === currentChatId)?.title || 'FinPilot Advisor') 
-                      : 'New Consultation'}
-                  </h3>
-                  <span style={styles.chatStatus}>Gemini Model Active</span>
-                </div>
+              <div className="bg-primary-container/10 border border-primary-container/20 rounded-xl p-2.5 text-primary-container flex items-center justify-center">
+                <span className="material-symbols-outlined text-xl">psychology</span>
+              </div>
+              <div>
+                <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface font-serif max-w-[240px] md:max-w-[400px] truncate leading-tight">
+                  {currentChatId 
+                    ? (conversations.find(c => c.id === currentChatId)?.title || 'FinPilot Advisor') 
+                    : 'New Consultation'}
+                </h3>
+                <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Gemini LLM Engine Online
+                </span>
               </div>
             </div>
+          </div>
 
-            {/* Message Area */}
-            <div style={styles.messageBox}>
-              {historyLoading ? (
-                // Loader when fetching conversation details
-                Array(3).fill(0).map((_, i) => (
-                  <div key={i} style={{ ...styles.messageRow, alignSelf: i % 2 === 0 ? 'flex-start' : 'flex-end', width: '60%' }}>
-                    <div style={styles.avatar(i % 2 === 0 ? 'assistant' : 'user')}>
-                      {i % 2 === 0 ? <Bot size={14} style={{ color: '#ffffff' }} /> : <User size={14} style={{ color: '#ffffff' }} />}
-                    </div>
-                    <div style={{ ...styles.messageBubble(i % 2 === 0), width: '100%' }}>
-                      <div style={styles.skeletonLine(90)} />
-                      <div style={styles.skeletonLine(65)} />
-                    </div>
-                  </div>
-                ))
-              ) : messages.length <= 1 && !currentChatId ? (
-                // Welcome / Empty state
-                <div style={styles.emptyStateContainer}>
-                  <MessageCircle size={48} style={{ color: '#6366f1', opacity: 0.5, marginBottom: '16px' }} />
-                  <h3 style={{ fontSize: '18px', color: '#ffffff', marginBottom: '8px', fontFamily: 'Outfit, sans-serif' }}>Finance AI Assistant</h3>
-                  <p style={{ fontSize: '14px', color: '#94a3b8', textAlign: 'center', maxWidth: '380px' }}>
-                    Ask FinPilot about portfolio analysis, tax optimizations, investment options, or insurance planning.
-                  </p>
-                </div>
-              ) : (
-                messages.map((msg) => {
-                  const isAi = msg.role === 'assistant' || msg.sender === 'ai';
-                  return (
-                    <div
-                      key={msg.id}
-                      style={{
-                        ...styles.messageRow,
-                        alignSelf: isAi ? 'flex-start' : 'flex-end',
-                      }}
-                    >
-                      {isAi && (
-                        <div style={styles.avatar('assistant')}>
-                          <Bot size={14} style={{ color: '#ffffff' }} />
-                        </div>
-                      )}
-                      <div style={styles.messageBubble(isAi)}>
-                        <p style={styles.messageText}>{renderMessageContent(msg.content || msg.message)}</p>
-                        <span style={styles.messageTime}>
-                          {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                      {!isAi && (
-                        <div style={styles.avatar('user')}>
-                          <User size={14} style={{ color: '#ffffff' }} />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-
-              {loading && (
-                <div style={{ ...styles.messageRow, alignSelf: 'flex-start' }}>
-                  <div style={styles.avatar('assistant')}>
-                    <Bot size={14} style={{ color: '#ffffff' }} />
-                  </div>
-                  <div style={styles.typingBubble}>
-                    <span className="dot" style={styles.dot1}></span>
-                    <span className="dot" style={styles.dot2}></span>
-                    <span className="dot" style={styles.dot3}></span>
+          {/* Message Area */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-surface-container-lowest/10 scrollbar-none flex flex-col">
+            {historyLoading ? (
+              Array(3).fill(0).map((_, i) => (
+                <div key={i} className={`flex gap-3 max-w-[80%] ${i % 2 === 0 ? 'self-start' : 'self-end flex-row-reverse'} animate-pulse`}>
+                  <div className="w-8 h-8 rounded-full bg-surface-container" />
+                  <div className="space-y-2 bg-surface-container/60 border border-outline-variant/40 p-4 rounded-2xl w-[260px]">
+                    <div className="h-3 bg-surface-container-highest rounded w-3/4" />
+                    <div className="h-2.5 bg-surface-container-highest rounded w-1/2" />
                   </div>
                 </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Quick Replies */}
-            {messages.length <= 1 && (
-              <div style={styles.quickRepliesContainer}>
-                {quickReplies.map((reply) => (
-                  <button
-                    key={reply}
-                    style={styles.quickReplyBtn}
-                    onClick={() => handleSendMessage(reply)}
-                    disabled={loading}
+              ))
+            ) : messages.length <= 1 && !currentChatId ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-center p-6 self-center">
+                <div className="w-16 h-16 rounded-2xl bg-primary-container/10 border border-primary-container/20 flex items-center justify-center text-primary-container mb-4">
+                  <span className="material-symbols-outlined text-3xl font-bold">forum</span>
+                </div>
+                <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface font-serif mb-2">Finance AI Assistant</h3>
+                <p className="text-sm text-on-surface-variant max-w-[360px] leading-relaxed font-serif">
+                  Ask me questions regarding asset valuations, mutual funds, insurance caps, or budget forecasts, or click a helper prompt below.
+                </p>
+              </div>
+            ) : (
+              messages.map((msg) => {
+                const isAi = msg.role === 'assistant' || msg.sender === 'ai';
+                return (
+                  <div
+                    key={msg.id}
+                    className={`flex gap-3 max-w-[85%] ${isAi ? 'self-start' : 'self-end flex-row-reverse animate-fade-in'}`}
                   >
-                    <Sparkles size={12} style={{ color: '#a855f7' }} />
-                    {reply}
-                  </button>
-                ))}
-              </div>
+                    {isAi ? (
+                      <div className="w-8 h-8 rounded-full bg-primary-container/10 border border-primary-container/20 flex items-center justify-center text-primary-container flex-shrink-0 mt-1">
+                        <span className="material-symbols-outlined text-base">psychology</span>
+                      </div>
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-surface-container border border-outline-variant/60 flex items-center justify-center text-on-surface-variant flex-shrink-0 mt-1">
+                        <span className="material-symbols-outlined text-base">person</span>
+                      </div>
+                    )}
+                    
+                    <div className={`p-4 rounded-2xl flex flex-col gap-2 relative ${
+                      isAi 
+                        ? 'bg-surface-container/60 border border-outline-variant/50 rounded-tl-none text-on-surface' 
+                        : 'bg-primary text-on-primary rounded-tr-none shadow-md shadow-primary/10'
+                    }`}>
+                      <div className="text-sm leading-relaxed font-serif font-medium break-words">
+                        {renderMessageContent(msg.content || msg.message)}
+                      </div>
+                      <span className={`text-[9px] text-right font-sans block mt-1 ${isAi ? 'text-on-surface-variant/60' : 'text-on-primary/60'}`}>
+                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
             )}
 
-            {/* Input Form */}
-            <form onSubmit={handleSubmit} style={styles.inputForm}>
-              <input
-                type="text"
-                className="form-input"
-                placeholder="Ask a financial question..."
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                style={styles.chatInput}
-                disabled={loading}
-              />
-              <button type="submit" className="btn btn-primary" style={styles.sendBtn} disabled={loading || !inputText.trim()}>
-                <Send size={18} />
-              </button>
-            </form>
+            {loading && (
+              <div className="flex gap-3 max-w-[80%] self-start animate-pulse">
+                <div className="w-8 h-8 rounded-full bg-primary-container/10 border border-primary-container/20 flex items-center justify-center text-primary-container flex-shrink-0 mt-1">
+                  <span className="material-symbols-outlined text-base">psychology</span>
+                </div>
+                <div className="bg-surface-container/60 border border-outline-variant/50 p-4 rounded-2xl rounded-tl-none flex items-center gap-1.5 h-10 self-start">
+                  <span className="w-1.5 h-1.5 bg-on-surface-variant/60 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></span>
+                  <span className="w-1.5 h-1.5 bg-on-surface-variant/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                  <span className="w-1.5 h-1.5 bg-on-surface-variant/60 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </div>
+
+          {/* Quick Replies */}
+          {messages.length <= 1 && (
+            <div className="flex gap-2 p-4 border-t border-outline-variant/40 flex-wrap flex-shrink-0 bg-surface/20">
+              {quickReplies.map((reply) => (
+                <button
+                  key={reply}
+                  onClick={() => handleSendMessage(reply)}
+                  disabled={loading}
+                  className="px-4 py-2 border border-outline-variant rounded-full text-xs font-semibold text-on-surface-variant hover:border-primary hover:text-on-surface transition-all flex items-center gap-1.5 bg-surface-container/40 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[10px] text-primary">auto_awesome</span>
+                  {reply}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Input Form */}
+          <form onSubmit={handleSubmit} className="flex p-4 border-t border-outline-variant bg-surface/40 gap-3 items-center flex-shrink-0">
+            <input
+              type="text"
+              placeholder="Ask a financial question..."
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              disabled={loading}
+              className="flex-1 bg-surface-container/60 border border-outline-variant rounded-full px-5 py-3 text-sm text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
+            />
+            <button 
+              type="submit" 
+              disabled={loading || !inputText.trim()}
+              className="p-3 rounded-full bg-primary-container text-on-primary-container hover:bg-primary shadow-sm hover:scale-105 active:scale-95 disabled:opacity-40 disabled:scale-100 disabled:pointer-events-none transition-all flex items-center justify-center cursor-pointer"
+            >
+              <span className="material-symbols-outlined font-bold text-lg">send</span>
+            </button>
+          </form>
         </div>
       </div>
     </div>
@@ -665,12 +663,18 @@ const Chatbot = () => {
       <div 
         key={conv.id} 
         onClick={() => !isRenaming && loadChat(conv.id)}
-        className={`sidebar-item ${isActive ? 'active' : ''}`}
+        className={`flex items-center justify-between p-2.5 rounded-xl transition-all select-none cursor-pointer group ${
+          isActive 
+            ? 'bg-surface-container-high border border-outline-variant/60 text-on-surface' 
+            : 'text-on-surface-variant/80 hover:bg-surface-container/40 hover:text-on-surface'
+        }`}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, overflow: 'hidden' }}>
-          <MessageCircle size={16} style={{ color: isActive ? '#6366f1' : '#64748b', flexShrink: 0 }} />
+        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+          <span className={`material-symbols-outlined text-lg ${isActive ? 'text-primary' : 'text-on-surface-variant/60'}`}>
+            chat_bubble
+          </span>
           
-          <div style={styles.itemInfo}>
+          <div className="flex-1 min-w-0 flex flex-col text-left">
             {isRenaming ? (
               <input 
                 value={renameTitle}
@@ -682,40 +686,44 @@ const Chatbot = () => {
                 onBlur={() => handleRename(conv.id, renameTitle)}
                 onClick={(e) => e.stopPropagation()}
                 autoFocus
-                style={styles.renameInput}
+                className="w-full bg-surface border border-outline-variant rounded-md px-2 py-1 text-xs text-on-surface focus:outline-none focus:border-primary-container"
               />
             ) : (
               <>
-                <span style={styles.itemTitle}>{conv.title}</span>
-                <span style={styles.previewText}>{conv.lastMessagePreview || 'No messages'}</span>
+                <span className="text-xs font-bold font-serif truncate text-on-surface leading-normal">{conv.title}</span>
+                <span className="text-[10px] text-on-surface-variant/60 truncate leading-normal mt-0.5">{conv.lastMessagePreview || 'No messages'}</span>
               </>
             )}
           </div>
         </div>
 
         {!isRenaming && (
-          <div style={{ position: 'relative' }}>
+          <div className="relative flex-shrink-0">
             <button 
               onClick={(e) => toggleMenu(conv.id, e)} 
-              className="context-menu-btn"
+              className="p-1 rounded hover:bg-surface-container-highest text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer flex items-center justify-center"
             >
-              <MoreVertical size={14} />
+              <span className="material-symbols-outlined text-sm font-bold">more_vert</span>
             </button>
 
             {isMenuOpen && (
-              <div ref={dropdownRef} className="dropdown-menu">
+              <div 
+                ref={dropdownRef} 
+                className="absolute right-0 mt-1 w-28 bg-surface-container border border-outline-variant rounded-xl shadow-xl z-50 p-1 flex flex-col font-sans"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <button 
                   onClick={(e) => startRename(conv.id, conv.title, e)} 
-                  className="dropdown-item"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-left text-xs text-on-surface hover:bg-surface-container-high transition-colors w-full cursor-pointer"
                 >
-                  <Edit2 size={13} />
+                  <span className="material-symbols-outlined text-sm">edit</span>
                   Rename
                 </button>
                 <button 
                   onClick={(e) => handleDelete(conv.id, e)} 
-                  className="dropdown-item danger"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-left text-xs text-error hover:bg-error-container/10 transition-colors w-full cursor-pointer"
                 >
-                  <Trash2 size={13} />
+                  <span className="material-symbols-outlined text-sm">delete</span>
                   Delete
                 </button>
               </div>
@@ -726,523 +734,5 @@ const Chatbot = () => {
     );
   }
 };
-
-const styles = {
-  mainContent: {
-    height: 'calc(100vh - 64px)',
-    marginTop: '64px',
-    display: 'flex',
-    padding: '24px',
-    gap: '24px',
-    maxWidth: '100%',
-    width: '100%',
-    overflow: 'hidden',
-    boxSizing: 'border-box',
-    position: 'relative'
-  },
-  chatContainer: {
-    display: 'flex',
-    flex: 1,
-    gap: '24px',
-    overflow: 'hidden',
-    height: '100%',
-    width: '100%'
-  },
-  sidebarDesktop: {
-    width: '280px',
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    padding: '20px',
-    background: 'rgba(17, 24, 39, 0.7)',
-    backdropFilter: 'blur(12px)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '16px',
-    flexShrink: 0
-  },
-  sidebarMobile: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: '280px',
-    zIndex: 100,
-    background: '#0d111d',
-    boxShadow: '4px 0 25px rgba(0,0,0,0.5)',
-    display: 'flex',
-    flexDirection: 'column',
-    padding: '20px',
-    borderRight: '1px solid rgba(255, 255, 255, 0.08)',
-    height: '100%'
-  },
-  sidebarHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: '16px'
-  },
-  sidebarTitle: {
-    fontSize: '18px',
-    color: '#ffffff',
-    fontWeight: 600,
-    fontFamily: 'Outfit, sans-serif'
-  },
-  searchContainer: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: '16px',
-    width: '100%'
-  },
-  searchIcon: {
-    position: 'absolute',
-    left: '12px',
-    color: '#64748b',
-    pointerEvents: 'none'
-  },
-  searchInput: {
-    width: '100%',
-    padding: '8px 36px 8px 36px',
-    background: 'rgba(0, 0, 0, 0.2)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '8px',
-    color: '#ffffff',
-    fontSize: '14px',
-    outline: 'none',
-    transition: 'border-color 0.2s'
-  },
-  clearSearchBtn: {
-    position: 'absolute',
-    right: '12px',
-    background: 'transparent',
-    border: 'none',
-    color: '#64748b',
-    cursor: 'pointer',
-    padding: 0
-  },
-  historyList: {
-    flex: 1,
-    overflowY: 'auto',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-    paddingRight: '4px',
-    marginBottom: '16px'
-  },
-  historyGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    marginBottom: '8px'
-  },
-  groupHeader: {
-    fontSize: '11px',
-    fontWeight: 700,
-    textTransform: 'uppercase',
-    color: '#64748b',
-    letterSpacing: '0.05em',
-    marginBottom: '8px',
-    paddingLeft: '4px'
-  },
-  chatArea: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    overflow: 'hidden'
-  },
-  chatCard: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    padding: 0,
-    overflow: 'hidden',
-    height: '100%',
-    borderRadius: '16px',
-    background: 'rgba(17, 24, 39, 0.7)',
-    backdropFilter: 'blur(12px)',
-    border: '1px solid rgba(255, 255, 255, 0.08)'
-  },
-  chatHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '16px 24px',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-    background: 'rgba(255, 255, 255, 0.01)',
-    flexShrink: 0
-  },
-  botIconBadge: {
-    background: 'rgba(99, 102, 241, 0.1)',
-    borderRadius: '10px',
-    padding: '8px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  chatTitle: {
-    fontSize: '16px',
-    color: '#ffffff',
-    fontFamily: 'Outfit, sans-serif',
-    fontWeight: 600,
-    maxWidth: '300px',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap'
-  },
-  chatStatus: {
-    fontSize: '11px',
-    color: '#10b981',
-    fontWeight: 500
-  },
-  messageBox: {
-    flex: 1,
-    overflowY: 'auto',
-    padding: '24px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-    background: 'rgba(0, 0, 0, 0.15)'
-  },
-  messageRow: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: '12px',
-    maxWidth: '85%',
-    marginBottom: '8px'
-  },
-  avatar: (role) => ({
-    width: '32px',
-    height: '32px',
-    borderRadius: '50%',
-    background: role === 'assistant' ? 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)' : 'rgba(255, 255, 255, 0.1)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-    marginTop: '4px'
-  }),
-  messageBubble: (isAi) => ({
-    background: isAi ? 'rgba(255, 255, 255, 0.03)' : 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-    border: isAi ? '1px solid rgba(255, 255, 255, 0.08)' : 'none',
-    padding: '14px 18px',
-    borderRadius: isAi ? '16px 16px 16px 0' : '16px 16px 0 16px',
-    color: '#ffffff',
-    boxShadow: isAi ? 'none' : '0 4px 15px rgba(99, 102, 241, 0.25)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px'
-  }),
-  messageText: {
-    fontSize: '14.5px',
-    lineHeight: '1.6',
-  },
-  messageTime: {
-    fontSize: '10px',
-    color: 'rgba(255, 255, 255, 0.4)',
-    display: 'block',
-    textAlign: 'right',
-  },
-  typingBubble: {
-    background: 'rgba(255, 255, 255, 0.03)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    padding: '12px 16px',
-    borderRadius: '12px 12px 12px 0',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-    height: '40px',
-    alignSelf: 'flex-start',
-  },
-  dot1: { width: '6px', height: '6px', background: '#94a3b8', borderRadius: '50%', display: 'inline-block', animation: 'bounce 1.4s infinite ease-in-out' },
-  dot2: { width: '6px', height: '6px', background: '#94a3b8', borderRadius: '50%', display: 'inline-block', animation: 'bounce 1.4s infinite ease-in-out', animationDelay: '0.2s' },
-  dot3: { width: '6px', height: '6px', background: '#94a3b8', borderRadius: '50%', display: 'inline-block', animation: 'bounce 1.4s infinite ease-in-out', animationDelay: '0.4s' },
-  quickRepliesContainer: {
-    display: 'flex',
-    gap: '10px',
-    padding: '12px 24px',
-    background: 'rgba(255, 255, 255, 0.01)',
-    borderTop: '1px solid rgba(255, 255, 255, 0.04)',
-    flexWrap: 'wrap',
-    flexShrink: 0
-  },
-  quickReplyBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    background: 'rgba(255, 255, 255, 0.03)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '20px',
-    color: '#cbd5e1',
-    padding: '6px 16px',
-    fontSize: '12px',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  inputForm: {
-    display: 'flex',
-    padding: '16px 24px',
-    gap: '12px',
-    background: 'rgba(255, 255, 255, 0.02)',
-    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-    alignItems: 'center',
-    flexShrink: 0
-  },
-  chatInput: {
-    flex: 1,
-    background: 'rgba(0, 0, 0, 0.2)'
-  },
-  sendBtn: {
-    padding: '12px',
-    borderRadius: '8px',
-    flexShrink: 0
-  },
-  codeBlockContainer: {
-    borderRadius: '8px',
-    overflow: 'hidden',
-    margin: '8px 0',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    background: '#090d16',
-  },
-  codeBlockHeader: {
-    background: 'rgba(255, 255, 255, 0.03)',
-    padding: '6px 12px',
-    fontSize: '11px',
-    color: '#94a3b8',
-    textTransform: 'uppercase',
-    fontFamily: 'Outfit, sans-serif',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-  },
-  codeBlockPre: {
-    margin: 0,
-    padding: '12px',
-    overflowX: 'auto',
-  },
-  codeBlockCode: {
-    fontFamily: 'Consolas, Monaco, "Andale Mono", monospace',
-    fontSize: '13px',
-    color: '#f8fafc',
-  },
-  inlineCode: {
-    background: 'rgba(255, 255, 255, 0.1)',
-    padding: '2px 6px',
-    borderRadius: '4px',
-    fontSize: '13px',
-    fontFamily: 'Consolas, Monaco, monospace',
-    color: '#a855f7',
-  },
-  skeletonItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    padding: '10px 12px',
-    borderRadius: '8px',
-    background: 'rgba(255, 255, 255, 0.01)',
-    marginBottom: '8px'
-  },
-  skeletonCircle: {
-    width: '28px',
-    height: '28px',
-    borderRadius: '50%',
-    background: 'rgba(255, 255, 255, 0.05)',
-    animation: 'pulse 1.5s infinite ease-in-out'
-  },
-  skeletonLine: (width) => ({
-    height: '10px',
-    width: `${width}%`,
-    background: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: '4px',
-    margin: '6px 0',
-    animation: 'pulse 1.5s infinite ease-in-out'
-  }),
-  emptyStateContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    padding: '40px',
-    color: '#cbd5e1'
-  },
-  renameInput: {
-    background: 'rgba(0, 0, 0, 0.3)',
-    border: '1px solid #6366f1',
-    borderRadius: '4px',
-    color: '#ffffff',
-    padding: '4px 8px',
-    fontSize: '13px',
-    width: '90%',
-    outline: 'none'
-  },
-  previewText: {
-    fontSize: '12px',
-    color: '#64748b',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    marginTop: '2px',
-    maxWidth: '180px'
-  },
-  itemInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    flex: 1,
-    overflow: 'hidden',
-    paddingRight: '8px'
-  },
-  itemTitle: {
-    fontSize: '13.5px',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap'
-  },
-  hamburgerBtn: {
-    background: 'transparent',
-    border: 'none',
-    color: '#ffffff',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '8px',
-    borderRadius: '8px',
-    marginRight: '12px',
-  }
-};
-
-const styleSheet = document.createElement("style");
-styleSheet.innerText = `
-  @keyframes bounce {
-    0%, 80%, 100% { transform: scale(0); }
-    40% { transform: scale(1.0); }
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
-  }
-  
-  .sidebar-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-bottom: 4px;
-    border: 1px solid transparent;
-    color: #cbd5e1;
-    position: relative;
-  }
-  .sidebar-item:hover {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(255, 255, 255, 0.06);
-    color: #ffffff;
-  }
-  .sidebar-item.active {
-    background: rgba(99, 102, 241, 0.12);
-    border-color: rgba(99, 102, 241, 0.25);
-    color: #ffffff;
-    font-weight: 500;
-  }
-  .context-menu-btn {
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    background: transparent;
-    border: none;
-    color: #94a3b8;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
-  }
-  .sidebar-item:hover .context-menu-btn {
-    opacity: 1;
-  }
-  .context-menu-btn:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.1);
-  }
-  .dropdown-menu {
-    position: absolute;
-    right: 0px;
-    top: 24px;
-    background: #0f172a;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    z-index: 200;
-    display: flex;
-    flex-direction: column;
-    padding: 4px;
-    min-width: 120px;
-  }
-  .dropdown-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    font-size: 13px;
-    color: #cbd5e1;
-    border: none;
-    background: transparent;
-    text-align: left;
-    cursor: pointer;
-    border-radius: 4px;
-    width: 100%;
-    transition: background 0.2s;
-  }
-  .dropdown-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #ffffff;
-  }
-  .dropdown-item.danger:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: #f87171;
-  }
-  .clear-history-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    background: transparent;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #fca5a5;
-    padding: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    margin-top: auto;
-    transition: all 0.2s;
-  }
-  .clear-history-btn:hover {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.5);
-  }
-  .new-chat-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    background: var(--grad-primary);
-    color: white;
-    padding: 12px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 14px;
-    margin-bottom: 16px;
-    box-shadow: var(--shadow-glow-primary);
-    transition: all 0.2s;
-  }
-  .new-chat-btn:hover {
-    filter: brightness(1.1);
-    box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
-  }
-`;
-document.head.appendChild(styleSheet);
 
 export default Chatbot;

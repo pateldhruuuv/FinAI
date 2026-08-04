@@ -92,22 +92,33 @@ def generate_expense_analysis(transactions):
     # Chart 1: Category Breakdown (Donut Chart)
     if not expense_df.empty:
         try:
-            plt.figure(figsize=(6, 5))
+            fig, ax = plt.subplots(figsize=(6, 5))
+            fig.patch.set_facecolor('none')
+            ax.set_facecolor('none')
+            
             cat_data = expense_df.groupby("category")["amount"].sum().reset_index()
             cat_data = cat_data.sort_values(by="amount", ascending=False)
             
-            # Use seaborn color palette
-            colors = sns.color_palette("pastel")[0:len(cat_data)]
+            colors = ['#ff6b35', '#918cff', '#ffb59d', '#10b981', '#c4c0ff', '#f43f5e', '#a855f7', '#3b82f6', '#eab308']
+            colors = colors[:len(cat_data)]
             
-            plt.pie(
+            patches, texts, autotexts = ax.pie(
                 cat_data["amount"], 
                 labels=cat_data["category"], 
                 autopct='%1.1f%%', 
                 startangle=140,
                 colors=colors,
-                wedgeprops=dict(width=0.4, edgecolor='w')
+                wedgeprops=dict(width=0.4, edgecolor='none')
             )
-            plt.title("Expense Breakdown by Category", fontsize=14, pad=20)
+            for t in texts:
+                t.set_color('#cbd5e1')
+                t.set_fontsize(8)
+            for t in autotexts:
+                t.set_color('white')
+                t.set_fontsize(8)
+                t.set_weight('bold')
+                
+            ax.set_title("Expense Breakdown by Category", color='white', fontsize=12, pad=15)
             plt.tight_layout()
             
             buf = io.BytesIO()
@@ -121,7 +132,6 @@ def generate_expense_analysis(transactions):
     # Chart 2: Monthly Cash Flow (Bar Chart)
     if monthly_flow:
         try:
-            plt.figure(figsize=(7, 4.5))
             m_labels = [x["month"] for x in monthly_flow]
             incomes = [x["income"] for x in monthly_flow]
             expenses = [x["expenses"] for x in monthly_flow]
@@ -130,15 +140,30 @@ def generate_expense_analysis(transactions):
             width = 0.35
             
             fig, ax = plt.subplots(figsize=(7, 4.5))
-            rects1 = ax.bar(x - width/2, incomes, width, label='Income', color='#10b981')
-            rects2 = ax.bar(x + width/2, expenses, width, label='Expenses', color='#ef4444')
+            fig.patch.set_facecolor('none')
+            ax.set_facecolor('none')
             
-            ax.set_title('Monthly Income vs Expenses (Cash Flow)', fontsize=14, pad=15)
+            rects1 = ax.bar(x - width/2, incomes, width, label='Income', color='#10b981')
+            rects2 = ax.bar(x + width/2, expenses, width, label='Expenses', color='#f43f5e')
+            
+            ax.set_title('Monthly Income vs Expenses (Cash Flow)', color='white', fontsize=12, pad=15)
             ax.set_xticks(x)
-            ax.set_xticklabels(m_labels, rotation=45)
-            ax.legend()
+            ax.set_xticklabels(m_labels, rotation=45, color='#cbd5e1', fontsize=8)
+            ax.tick_params(colors='#e3e2e2', labelsize=8)
+            ax.spines['bottom'].set_color('#594139')
+            ax.spines['left'].set_color('#594139')
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
+            ax.xaxis.label.set_color('#e3e2e2')
+            ax.yaxis.label.set_color('#e3e2e2')
+            
+            leg = ax.legend()
+            if leg:
+                for text in leg.get_texts():
+                    text.set_color('#cbd5e1')
+                leg.get_frame().set_facecolor('none')
+                leg.get_frame().set_edgecolor('#594139')
+                
             plt.tight_layout()
             
             buf = io.BytesIO()
@@ -148,6 +173,7 @@ def generate_expense_analysis(transactions):
             plt.close()
         except Exception as e:
             print(f"Failed to generate cash flow chart: {e}")
+
             
     analysis_results = {
         "total_income": round(total_income, 2),

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { Compass, Sparkles, TrendingUp, AlertTriangle, ShieldCheck, HelpCircle } from 'lucide-react';
 
 const InvestmentAdvisor = () => {
   const { user } = useContext(AuthContext);
@@ -11,7 +10,7 @@ const InvestmentAdvisor = () => {
   const [rec, setRec] = useState(null);
   const [userFinancials, setUserFinancials] = useState({ age: 25, income: 50000, savings: 0 });
 
-  // Fetch user details and latest transaction balance from dashboard endpoint on load
+  // Fetch user details and latest transaction balance on load
   useEffect(() => {
     const fetchUserStats = async () => {
       try {
@@ -26,7 +25,6 @@ const InvestmentAdvisor = () => {
         }
       } catch (err) {
         console.error('Failed to pre-populate financials', err);
-        // Fallback to user context defaults
         if (user) {
           setUserFinancials({ age: user.age, income: user.monthlyIncome, savings: 0 });
         }
@@ -58,53 +56,59 @@ const InvestmentAdvisor = () => {
   };
 
   return (
-    <div className="main-content animate-fade-in">
-      <div style={styles.header}>
-        <h1 style={styles.title}>AI Investment Advisor</h1>
-        <p style={styles.subtitle}>
+    <div className="md:pl-20 mt-16 px-6 md:px-8 pt-10 md:pt-14 pb-6 md:pb-8 min-h-screen bg-background text-on-background font-sans max-w-[1600px] mx-auto animate-fade-in">
+
+      {/* Header */}
+      <div className="mb-8 border-b border-outline-variant pb-6">
+        <h1 className="font-display-hero text-3xl font-bold tracking-tight text-on-surface m-2">AI Investment Advisor</h1>
+        <p className="text-sm text-on-surface-variant mt-1 m-2">
           Decision Tree classification models map your age, income, and risk profile to optimal allocations.
         </p>
       </div>
 
-      <div className="grid-cols-3" style={styles.mainGrid}>
-        
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+
         {/* Input Form Card */}
-        <div className="glass-card" style={styles.inputCard}>
-          <div style={styles.cardHeader}>
-            <Sparkles size={20} style={{ color: '#6366f1' }} />
-            <h3 style={styles.cardTitle}>Diagnostic Parameters</h3>
+        <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm lg:col-span-1">
+          <div className="flex items-center gap-3 border-b border-outline-variant/40 pb-4 mb-6">
+            <span className="material-symbols-outlined text-primary text-xl">psychology</span>
+            <h3 className="font-headline-sm text-headline-sm font-bold font-serif text-on-surface">Diagnostic Parameters</h3>
           </div>
 
-          <form onSubmit={handleGenerate}>
+          <form onSubmit={handleGenerate} className="space-y-6">
             {/* Auto-filled details */}
-            <div style={styles.contextBox}>
-              <h4 style={styles.contextTitle}>User Profile Context</h4>
-              <div style={styles.contextRow}>
-                <span>Age:</span>
-                <strong>{userFinancials.age} Years</strong>
+            <div className="bg-surface-container/40 border border-outline-variant/40 rounded-xl p-4 space-y-2.5 font-serif text-xs">
+              <h4 className="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold font-sans mb-1">User Profile Context</h4>
+              <div className="flex justify-between">
+                <span className="text-on-surface-variant">Age:</span>
+                <strong className="text-on-surface">{userFinancials.age} Years</strong>
               </div>
-              <div style={styles.contextRow}>
-                <span>Income Base:</span>
-                <strong>₹{userFinancials.income.toLocaleString()} / mo</strong>
+              <div className="flex justify-between">
+                <span className="text-on-surface-variant">Income Base:</span>
+                <strong className="text-on-surface">₹{userFinancials.income.toLocaleString()} / mo</strong>
               </div>
-              <div style={styles.contextRow}>
-                <span>Calculated Savings:</span>
-                <strong>₹{userFinancials.savings.toLocaleString()}</strong>
+              <div className="flex justify-between">
+                <span className="text-on-surface-variant">Calculated Savings:</span>
+                <strong className="text-on-surface">₹{userFinancials.savings.toLocaleString()}</strong>
               </div>
             </div>
 
-            <div className="form-group" style={{ marginTop: '20px' }}>
-              <label className="form-label">Select Risk Profile</label>
-              <div style={styles.riskSelectContainer}>
+            <div className="space-y-2.5">
+              <label className="text-xs font-semibold text-on-surface-variant block ml-1">Select Risk Appetite</label>
+              <div className="grid grid-cols-3 gap-2">
                 {['Conservative', 'Moderate', 'Aggressive'].map((level) => (
                   <button
                     key={level}
                     type="button"
-                    style={{
-                      ...styles.riskBtn,
-                      ...(riskProfile === level ? styles.riskBtnActive(level) : {})
-                    }}
                     onClick={() => setRiskProfile(level)}
+                    className={`py-2 px-3 rounded-full text-xs font-bold transition-all cursor-pointer border ${riskProfile === level
+                        ? level === 'Conservative'
+                          ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400'
+                          : level === 'Moderate'
+                            ? 'bg-primary-container/10 border-primary-container text-primary-container'
+                            : 'bg-rose-500/10 border-rose-500 text-rose-400'
+                        : 'bg-surface border-outline-variant hover:bg-surface-container text-on-surface-variant hover:text-on-surface'
+                      }`}
                   >
                     {level}
                   </button>
@@ -114,68 +118,67 @@ const InvestmentAdvisor = () => {
 
             <button
               type="submit"
-              className="btn btn-primary"
-              style={styles.submitBtn}
+              className="w-full bg-primary-container hover:bg-primary text-on-primary-container font-semibold py-3 rounded-full transition-all flex items-center justify-center gap-2 cursor-pointer text-sm mt-6"
               disabled={loading}
             >
-              <Compass size={18} />
+              <span className="material-symbols-outlined text-md">compass_calibration</span>
               {loading ? 'Consulting Decision Tree...' : 'Generate Recommendations'}
             </button>
           </form>
         </div>
 
         {/* Results / Recommendation Column (2 cols width) */}
-        <div style={styles.resultsCol}>
+        <div className="lg:col-span-2">
           {error && (
-            <div className="alert alert-error">
-              <div style={styles.alertContent}>
-                <AlertTriangle size={18} />
-                <span>{error}</span>
-              </div>
+            <div className="bg-error-container/20 border-l-4 border-error text-error p-4 rounded-xl text-sm mb-6 flex items-center gap-2">
+              <span className="material-symbols-outlined text-lg">report_problem</span>
+              <span>{error}</span>
             </div>
           )}
 
           {rec ? (
-            <div className="glass-card animate-fade-in" style={styles.recCard}>
-              <h2 style={styles.recCardTitle}>Your Tailored Investment Strategy</h2>
-              <p style={styles.recCardSubtitle}>Generated by Decision Tree Classifier</p>
+            <div className="glass-card rounded-2xl p-6 md:p-8 border border-outline-variant/40 shadow-sm space-y-8 animate-fade-in">
+              <div>
+                <h2 className="font-headline-lg text-headline-lg text-on-surface mb-1 font-serif">Your Tailored Investment Strategy</h2>
+                <p className="text-xs text-on-surface-variant">Generated by Decision Tree Classifier</p>
+              </div>
 
               {/* Suggestions row */}
-              <div className="grid-cols-2" style={{ gap: '20px', marginBottom: '32px' }}>
-                <div style={styles.suggestionBox('short')}>
-                  <span style={styles.sugLabel}>Short-Term Suggestion (1-3 yrs)</span>
-                  <h3 style={styles.sugValue}>{rec.shortTerm}</h3>
-                  <p style={styles.sugDesc}>
-                    Excellent for liquidity and preserving capital while generating moderate yields.
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-serif">
+                <div className="bg-surface-container/30 border border-outline-variant/60 rounded-xl p-5 relative overflow-hidden">
+                  <span className="text-[10px] text-on-surface-variant uppercase tracking-widest block mb-1">Short-Term Strategy (1-3 yrs)</span>
+                  <h3 className="text-lg font-bold text-on-surface mb-2">{rec.shortTerm}</h3>
+                  <p className="text-xs text-on-surface-variant leading-relaxed">
+                    Designed to preserve capital while generating stable, high yields with absolute liquidity.
                   </p>
                 </div>
 
-                <div style={styles.suggestionBox('long')}>
-                  <span style={styles.sugLabel}>Long-Term Suggestion (3+ yrs)</span>
-                  <h3 style={styles.sugValue}>{rec.longTerm}</h3>
-                  <p style={styles.sugDesc}>
-                    Tailored to compound your wealth over time and outpace inflation.
+                <div className="bg-surface-container/30 border border-outline-variant/60 rounded-xl p-5 relative overflow-hidden">
+                  <span className="text-[10px] text-on-surface-variant uppercase tracking-widest block mb-1">Long-Term Strategy (3+ yrs)</span>
+                  <h3 className="text-lg font-bold text-primary mb-2">{rec.longTerm}</h3>
+                  <p className="text-xs text-on-surface-variant leading-relaxed">
+                    Configured to compound your wealth over market cycles and outpace inflation hedges.
                   </p>
                 </div>
               </div>
 
               {/* Allocation bars */}
-              <div>
-                <h3 style={styles.allocationTitle}>Recommended Asset Allocation</h3>
-                <div style={styles.allocationContainer}>
+              <div className="border-t border-outline-variant/40 pt-6">
+                <h3 className="text-sm font-bold text-on-surface mb-4 font-serif uppercase tracking-wider">Recommended Asset Allocation</h3>
+                <div className="space-y-4">
                   {Object.entries(rec.recommendedAllocations).map(([asset, pct], index) => {
                     const widthVal = pct;
-                    const colors = ['#10b981', '#6366f1', '#a855f7'];
+                    const colors = ['#ff6b35', '#918cff', '#10b981'];
                     const color = colors[index % colors.length];
 
                     return (
-                      <div key={asset} style={styles.allocationBarRow}>
-                        <div style={styles.allocationMeta}>
-                          <span style={styles.assetName}>{asset}</span>
-                          <span style={{ ...styles.assetPct, color }}>{pct}</span>
+                      <div key={asset} className="space-y-1 font-sans">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="font-semibold text-on-surface">{asset}</span>
+                          <span className="font-bold font-serif text-sm" style={{ color }}>{pct}</span>
                         </div>
-                        <div style={styles.barBg}>
-                          <div style={{ ...styles.barFill, width: widthVal, background: color }}></div>
+                        <div className="bg-surface-container-high rounded-full h-2 overflow-hidden border border-outline-variant/10">
+                          <div className="h-full rounded-full transition-all" style={{ width: widthVal, background: color }}></div>
                         </div>
                       </div>
                     );
@@ -185,11 +188,11 @@ const InvestmentAdvisor = () => {
 
               {/* SEBI Market Insights */}
               {rec.suggestions && rec.suggestions.length > 0 && (
-                <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                  <h3 style={styles.sectionTitle}>SEBI Bulletin Trends & Insights</h3>
-                  <ul style={styles.bulletList}>
+                <div className="border-t border-outline-variant/40 pt-6 font-serif">
+                  <h3 className="text-sm font-bold text-on-surface mb-3 font-serif uppercase tracking-wider">Regulatory Trends & Risk Check</h3>
+                  <ul className="list-disc list-inside space-y-2 text-xs text-on-surface-variant leading-relaxed">
                     {rec.suggestions.map((sug, i) => (
-                      <li key={i} style={styles.bulletItem}>{sug}</li>
+                      <li key={i}>{sug}</li>
                     ))}
                   </ul>
                 </div>
@@ -197,11 +200,11 @@ const InvestmentAdvisor = () => {
 
               {/* Passive Income Strategies */}
               {rec.passiveIncomeStrategies && rec.passiveIncomeStrategies.length > 0 && (
-                <div style={{ marginTop: '24px' }}>
-                  <h3 style={styles.sectionTitle}>Passive Income Source Recommendations</h3>
-                  <ul style={styles.bulletList}>
+                <div className="border-t border-outline-variant/40 pt-6 font-serif">
+                  <h3 className="text-sm font-bold text-on-surface mb-3 font-serif uppercase tracking-wider">Passive Yield Recommendations</h3>
+                  <ul className="list-disc list-inside space-y-2 text-xs text-on-surface-variant leading-relaxed">
                     {rec.passiveIncomeStrategies.map((strat, i) => (
-                      <li key={i} style={styles.bulletItem}>{strat}</li>
+                      <li key={i}>{strat}</li>
                     ))}
                   </ul>
                 </div>
@@ -209,19 +212,19 @@ const InvestmentAdvisor = () => {
 
               {/* Live Investment Products */}
               {rec.concreteOptions && (
-                <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                  <h3 style={styles.sectionTitle}>Live Investment Opportunities</h3>
-                  <p style={styles.sectionSubtitle}>Top-performing live products based on current yields and rates:</p>
-                  
-                  <div style={styles.productGrid}>
+                <div className="border-t border-outline-variant/40 pt-6 font-serif">
+                  <h3 className="text-sm font-bold text-on-surface mb-1 uppercase tracking-wider">Live Investment Opportunities</h3>
+                  <p className="text-xs text-on-surface-variant mb-4">Top-performing retail instruments synced with recent indices:</p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {/* FDs */}
-                    <div style={styles.productCol}>
-                      <h4 style={styles.productColTitle}>Cash & Fixed Deposits</h4>
+                    <div className="bg-surface-container/30 border border-outline-variant/40 rounded-xl p-4 space-y-3">
+                      <h4 className="text-xs font-bold text-on-surface uppercase tracking-wider border-b border-outline-variant/20 pb-2">Cash & FDs</h4>
                       {rec.concreteOptions.Cash_FD?.map((fd, i) => (
-                        <div key={i} style={styles.productCard}>
-                          <strong>{fd.name}</strong>
-                          <div style={styles.productMeta}>
-                            <span>Rate: <strong style={{ color: '#10b981' }}>{fd.rate}</strong></span>
+                        <div key={i} className="bg-surface-container-high/30 p-2.5 rounded border border-outline-variant/20 text-xs">
+                          <strong className="text-on-surface block truncate">{fd.name}</strong>
+                          <div className="flex justify-between items-center text-[10px] text-on-surface-variant mt-1.5 font-sans">
+                            <span>Rate: <strong className="text-emerald-400">{fd.rate}</strong></span>
                             <span>{fd.type}</span>
                           </div>
                         </div>
@@ -229,13 +232,13 @@ const InvestmentAdvisor = () => {
                     </div>
 
                     {/* Bonds */}
-                    <div style={styles.productCol}>
-                      <h4 style={styles.productColTitle}>Bonds & Sovereign Debt</h4>
+                    <div className="bg-surface-container/30 border border-outline-variant/40 rounded-xl p-4 space-y-3">
+                      <h4 className="text-xs font-bold text-on-surface uppercase tracking-wider border-b border-outline-variant/20 pb-2">Bonds & Debt</h4>
                       {rec.concreteOptions.Bonds_Debt?.map((bond, i) => (
-                        <div key={i} style={styles.productCard}>
-                          <strong>{bond.name}</strong>
-                          <div style={styles.productMeta}>
-                            <span>Yield: <strong style={{ color: '#6366f1' }}>{bond.yield}</strong></span>
+                        <div key={i} className="bg-surface-container-high/30 p-2.5 rounded border border-outline-variant/20 text-xs">
+                          <strong className="text-on-surface block truncate">{bond.name}</strong>
+                          <div className="flex justify-between items-center text-[10px] text-on-surface-variant mt-1.5 font-sans">
+                            <span>Yield: <strong className="text-primary">{bond.yield}</strong></span>
                             <span>{bond.type}</span>
                           </div>
                         </div>
@@ -243,13 +246,13 @@ const InvestmentAdvisor = () => {
                     </div>
 
                     {/* Equities */}
-                    <div style={styles.productCol}>
-                      <h4 style={styles.productColTitle}>Equities & Index ETFs</h4>
+                    <div className="bg-surface-container/30 border border-outline-variant/40 rounded-xl p-4 space-y-3">
+                      <h4 className="text-xs font-bold text-on-surface uppercase tracking-wider border-b border-outline-variant/20 pb-2">Equities & ETFs</h4>
                       {rec.concreteOptions.Equities?.map((eq, i) => (
-                        <div key={i} style={styles.productCard}>
-                          <strong>{eq.name}</strong>
-                          <div style={styles.productMeta}>
-                            {eq.expense_ratio && <span>Expense: <strong>{eq.expense_ratio}</strong></span>}
+                        <div key={i} className="bg-surface-container-high/30 p-2.5 rounded border border-outline-variant/20 text-xs">
+                          <strong className="text-on-surface block truncate">{eq.name}</strong>
+                          <div className="flex justify-between items-center text-[10px] text-on-surface-variant mt-1.5 font-sans">
+                            {eq.expense_ratio && <span>ER: <strong>{eq.expense_ratio}</strong></span>}
                             <span>{eq.type}</span>
                           </div>
                         </div>
@@ -260,11 +263,11 @@ const InvestmentAdvisor = () => {
               )}
             </div>
           ) : (
-            <div className="glass-card" style={styles.placeholderCard}>
-              <Compass size={48} style={{ color: '#64748b', marginBottom: '16px' }} />
-              <h3>Awaiting Diagnostics</h3>
-              <p style={{ color: '#94a3b8', marginTop: '8px' }}>
-                Select a risk profile on the left and run the generator to invoke the Decision Tree ML advisor.
+            <div className="glass-card rounded-2xl p-12 border border-outline-variant/40 shadow-sm text-center flex flex-col items-center justify-center min-h-[300px]">
+              <span className="material-symbols-outlined text-5xl text-on-surface-variant/40 mb-4 animate-pulse">compass_calibration</span>
+              <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface font-serif">Awaiting Parameter Submission</h3>
+              <p className="text-sm text-on-surface-variant max-w-sm mt-2 font-serif leading-relaxed">
+                Select your risk category in the parameter form and request consultations to invoke decision tree classifiers.
               </p>
             </div>
           )}
@@ -273,266 +276,6 @@ const InvestmentAdvisor = () => {
       </div>
     </div>
   );
-};
-
-const styles = {
-  header: {
-    marginBottom: '32px'
-  },
-  title: {
-    fontSize: '32px',
-    color: '#ffffff',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  subtitle: {
-    fontSize: '15px',
-    color: '#94a3b8'
-  },
-  mainGrid: {
-    gridTemplateColumns: '1.2fr 1.8fr',
-    gap: '24px'
-  },
-  inputCard: {
-    padding: '24px'
-  },
-  cardHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    marginBottom: '20px',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-    paddingBottom: '12px'
-  },
-  cardTitle: {
-    fontSize: '18px',
-    color: '#ffffff',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  contextBox: {
-    background: 'rgba(0, 0, 0, 0.2)',
-    borderRadius: '10px',
-    padding: '16px',
-    border: '1px solid rgba(255, 255, 255, 0.04)'
-  },
-  contextTitle: {
-    fontSize: '12px',
-    color: '#94a3b8',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    marginBottom: '12px',
-    fontWeight: 600
-  },
-  contextRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: '13px',
-    color: '#cbd5e1',
-    marginBottom: '8px'
-  },
-  riskSelectContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
-    marginTop: '8px'
-  },
-  riskBtn: {
-    padding: '12px',
-    background: 'rgba(255, 255, 255, 0.02)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '8px',
-    color: '#94a3b8',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: 600,
-    transition: 'all 0.2s ease',
-    textAlign: 'center',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  riskBtnActive: (level) => {
-    let color = '#6366f1';
-    let bg = 'rgba(99, 102, 241, 0.1)';
-    if (level === 'Conservative') {
-      color = '#10b981';
-      bg = 'rgba(16, 185, 129, 0.1)';
-    } else if (level === 'Aggressive') {
-      color = '#f43f5e';
-      bg = 'rgba(244, 63, 94, 0.1)';
-    }
-    return {
-      borderColor: color,
-      color: '#ffffff',
-      background: bg,
-      boxShadow: `0 0 15px ${bg}`
-    };
-  },
-  submitBtn: {
-    width: '100%',
-    marginTop: '24px'
-  },
-  resultsCol: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px'
-  },
-  alertContent: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px'
-  },
-  recCard: {
-    padding: '32px'
-  },
-  recCardTitle: {
-    fontSize: '24px',
-    color: '#ffffff',
-    fontFamily: 'Outfit, sans-serif',
-    marginBottom: '4px'
-  },
-  recCardSubtitle: {
-    fontSize: '13px',
-    color: '#94a3b8',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    marginBottom: '28px'
-  },
-  suggestionBox: (type) => ({
-    background: type === 'short' ? 'rgba(99, 102, 241, 0.04)' : 'rgba(168, 85, 247, 0.04)',
-    border: `1px solid ${type === 'short' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(168, 85, 247, 0.15)'}`,
-    borderRadius: '12px',
-    padding: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px'
-  }),
-  sugLabel: {
-    fontSize: '12px',
-    color: '#94a3b8',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em'
-  },
-  sugValue: {
-    fontSize: '22px',
-    color: '#ffffff',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  sugDesc: {
-    fontSize: '13px',
-    color: '#cbd5e1',
-    lineHeight: '1.5',
-    marginTop: '4px'
-  },
-  allocationTitle: {
-    fontSize: '18px',
-    color: '#ffffff',
-    marginBottom: '16px',
-    fontFamily: 'Outfit, sans-serif'
-  },
-  allocationContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px'
-  },
-  allocationBarRow: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px'
-  },
-  allocationMeta: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: '14px',
-    fontWeight: 500
-  },
-  assetName: {
-    color: '#cbd5e1'
-  },
-  assetPct: {
-    fontWeight: 700
-  },
-  barBg: {
-    height: '8px',
-    background: 'rgba(255,255,255,0.05)',
-    borderRadius: '4px',
-    overflow: 'hidden'
-  },
-  barFill: {
-    height: '100%',
-    borderRadius: '4px',
-    transition: 'width 1s cubic-bezier(0.1, 0.8, 0.2, 1)'
-  },
-  placeholderCard: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '400px',
-    textAlign: 'center',
-    color: '#64748b'
-  },
-  sectionTitle: {
-    fontSize: '16px',
-    color: '#ffffff',
-    marginBottom: '12px',
-    fontFamily: 'Outfit, sans-serif',
-    fontWeight: 600
-  },
-  sectionSubtitle: {
-    fontSize: '13px',
-    color: '#94a3b8',
-    marginBottom: '16px'
-  },
-  bulletList: {
-    paddingLeft: '20px',
-    marginBottom: '16px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px'
-  },
-  bulletItem: {
-    fontSize: '13px',
-    color: '#cbd5e1',
-    lineHeight: '1.5',
-    listStyleType: 'disc'
-  },
-  productGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '16px',
-    marginTop: '12px'
-  },
-  productCol: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-    background: 'rgba(255, 255, 255, 0.01)',
-    border: '1px solid rgba(255, 255, 255, 0.04)',
-    borderRadius: '12px',
-    padding: '16px'
-  },
-  productColTitle: {
-    fontSize: '13px',
-    fontWeight: 700,
-    color: '#f8fafc',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-    paddingBottom: '8px',
-    marginBottom: '4px'
-  },
-  productCard: {
-    background: 'rgba(255, 255, 255, 0.02)',
-    border: '1px solid rgba(255, 255, 255, 0.05)',
-    borderRadius: '8px',
-    padding: '12px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px'
-  },
-  productMeta: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2px',
-    fontSize: '11px',
-    color: '#94a3b8'
-  }
 };
 
 export default InvestmentAdvisor;
