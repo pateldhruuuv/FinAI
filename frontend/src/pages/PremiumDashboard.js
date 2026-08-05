@@ -65,7 +65,7 @@ const PremiumDashboard = () => {
           <div className="mb-2">
             <span className="bg-primary/10 border border-primary/20 text-primary-container text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-wider m-2">Premium Advisory Hub</span>
           </div>
-          <h1 className="font-display-hero text-3xl font-bold tracking-tight text-on-surface m-2">FinPilot Digital Twin & Hub</h1>
+          <h1 className="font-display-hero text-3xl font-bold tracking-tight text-on-surface m-2">Finmate Digital Twin & Hub</h1>
           <p className="text-sm text-on-surface-variant mt-1 m-2">Institutional robo-wealth insights tailored for {user.name}.</p>
         </div>
 

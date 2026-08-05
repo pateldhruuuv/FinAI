@@ -25,14 +25,14 @@ const extractGeminiReply = (data) => {
 
 const buildChatPrompt = ({ message, context, history, advisorContext }) => {
   const recentMessages = history
-    .map((chat) => `${chat.sender === 'user' ? 'User' : 'FinPilot'}: ${chat.message}`)
+    .map((chat) => `${chat.sender === 'user' ? 'User' : 'Finmate'}: ${chat.message}`)
     .join('\n');
 
-  return `You are FinPilot, a helpful financial assistant inside a personal finance app.
+  return `You are Finmate, a helpful financial assistant inside a personal finance app.
 
 CRITICAL INSTRUCTIONS:
 - You must ONLY answer questions regarding the user's financial details, portfolios, goals, tax optimization, loan eligibility, debt rescue, and purchase affordability in this app.
-- If the user asks general questions outside personal finance or this project (e.g. "who is the president", "explain photosynthesis", "write python code", "how to build a house"), you MUST decline politely: "I am your FinPilot assistant. I can only help you with questions related to your personal finances, investments, goals, and advisor utilities in this application."
+- If the user asks general questions outside personal finance or this project (e.g. "who is the president", "explain photosynthesis", "write python code", "how to build a house"), you MUST decline politely: "I am your Finmate assistant. I can only help you with questions related to your personal finances, investments, goals, and advisor utilities in this application."
 - Under no circumstances answer off-topic questions.
 - If a calculation result is provided under "Advisory Calculations", use those exact numbers and rephrase them nicely in a conversational, helpful personal advisor tone.
 
@@ -763,7 +763,7 @@ exports.generateFinancialReport = async (req, res) => {
     // Return files
     if (format.toUpperCase() === 'CSV') {
       res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', `attachment; filename=FinPilot_${reportType}_Report.csv`);
+      res.setHeader('Content-Disposition', `attachment; filename=Finmate_${reportType}_Report.csv`);
 
       let csvContent = 'Metric,Value\n';
       csvContent += `Report Type,${reportType}\n`;
@@ -785,13 +785,13 @@ exports.generateFinancialReport = async (req, res) => {
       // PDF format using pdfkit
       const doc = new PDFDocument();
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename=FinPilot_${reportType}_Report.pdf`);
+      res.setHeader('Content-Disposition', `attachment; filename=Finmate_${reportType}_Report.pdf`);
 
       doc.pipe(res);
 
       // Header Banner
       doc.rect(0, 0, 612, 100).fill('#1e1b4b');
-      doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold').text('FinPilot AI', 50, 30);
+      doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold').text('Finmate AI', 50, 30);
       doc.fontSize(12).font('Helvetica').text('Premium Financial Performance Report', 50, 60);
 
       // Metas
@@ -831,7 +831,7 @@ exports.generateFinancialReport = async (req, res) => {
 
       // Footer
       doc.moveTo(50, 720).lineTo(560, 720).strokeColor('#e5e7eb').stroke();
-      doc.fontSize(8).font('Helvetica-Oblique').text('FinPilot AI is a premium robo-advisory utility. Past returns do not guarantee future performance.', 50, 735, { align: 'center', width: 512 });
+      doc.fontSize(8).font('Helvetica-Oblique').text('Finmate AI is a premium robo-advisory utility. Past returns do not guarantee future performance.', 50, 735, { align: 'center', width: 512 });
 
       doc.end();
     }

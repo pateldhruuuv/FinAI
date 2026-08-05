@@ -10,7 +10,7 @@ const Chatbot = () => {
     {
       id: 'welcome',
       role: 'assistant',
-      content: 'Hello! I am your FinPilot AI assistant. How can I help you today? You can ask me about investments, saving tips, or insurance coverage, or click one of the quick queries below!',
+      content: 'Hello! I am your Finmate AI assistant. How can I help you today? You can ask me about investments, saving tips, or insurance coverage, or click one of the quick queries below!',
       timestamp: new Date()
     }
   ]);
@@ -60,7 +60,7 @@ const Chatbot = () => {
 
   // Fetch initial conversations list & restore selected chat
   useEffect(() => {
-    const activeChatId = localStorage.getItem('finpilot_active_chat_id');
+    const activeChatId = localStorage.getItem('finmate_active_chat_id');
     
     const loadInitialData = async () => {
       setConversationsLoading(true);
@@ -133,11 +133,11 @@ const Chatbot = () => {
       if (res.data?.status === 'success') {
         setMessages(res.data.messages);
         setCurrentChatId(chatId);
-        localStorage.setItem('finpilot_active_chat_id', chatId);
+        localStorage.setItem('finmate_active_chat_id', chatId);
       }
     } catch (err) {
       console.error('Failed to load chat:', err);
-      localStorage.removeItem('finpilot_active_chat_id');
+      localStorage.removeItem('finmate_active_chat_id');
       startNewChat();
     } finally {
       setHistoryLoading(false);
@@ -154,11 +154,11 @@ const Chatbot = () => {
       {
         id: 'welcome',
         role: 'assistant',
-        content: 'Hello! I am your FinPilot AI assistant. How can I help you today? You can ask me about investments, saving tips, or insurance coverage, or click one of the quick queries below!',
+        content: 'Hello! I am your Finmate AI assistant. How can I help you today? You can ask me about investments, saving tips, or insurance coverage, or click one of the quick queries below!',
         timestamp: new Date()
       }
     ]);
-    localStorage.removeItem('finpilot_active_chat_id');
+    localStorage.removeItem('finmate_active_chat_id');
     if (isMobile) {
       setSidebarOpen(false);
     }
@@ -226,7 +226,7 @@ const Chatbot = () => {
           const { conversation, userMessage, aiMessage } = res.data;
           
           setCurrentChatId(conversation.id);
-          localStorage.setItem('finpilot_active_chat_id', conversation.id);
+          localStorage.setItem('finmate_active_chat_id', conversation.id);
           
           if (userMessage && aiMessage) {
             setMessages([userMessage]);
@@ -678,7 +678,7 @@ const Chatbot = () => {
               <div>
                 <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface font-serif max-w-[240px] md:max-w-[400px] truncate leading-tight flex items-center gap-2">
                   {currentChatId 
-                    ? (conversations.find(c => c.id === currentChatId)?.title || 'FinPilot Advisor') 
+                    ? (conversations.find(c => c.id === currentChatId)?.title || 'Finmate Advisor') 
                     : 'New Consultation'}
                   {user?.isPremium && (
                     <span className="text-[9px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/35 font-bold uppercase tracking-wider font-sans">

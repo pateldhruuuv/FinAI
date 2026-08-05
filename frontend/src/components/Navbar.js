@@ -31,7 +31,7 @@ const Navbar = () => {
         <Link to="/" className="flex items-center gap-2 relative">
           <span className="absolute w-8 h-8 bg-primary/20 rounded-full blur-md -left-2 -top-1 pointer-events-none"></span>
           <span className="font-display-hero text-xl font-bold tracking-tight text-on-surface">
-          Finmate <span className="text-primary">AI</span>
+            Finmate <span className="text-primary">AI</span>
           </span>
         </Link>
         <div className="flex items-center gap-6">
@@ -74,8 +74,8 @@ const Navbar = () => {
             to="/dashboard"
             title={t('dashboard')}
             className={`group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${isActive('/dashboard')
-                ? 'bg-primary text-on-primary'
-                : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
+              ? 'bg-primary text-on-primary'
+              : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
               }`}
           >
             <span className="material-symbols-outlined text-xl">dashboard</span>
@@ -89,8 +89,8 @@ const Navbar = () => {
             to="/upload"
             title={t('statementHub')}
             className={`group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${isActive('/upload')
-                ? 'bg-primary text-on-primary'
-                : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
+              ? 'bg-primary text-on-primary'
+              : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
               }`}
           >
             <span className="material-symbols-outlined text-xl">cloud_upload</span>
@@ -104,8 +104,8 @@ const Navbar = () => {
             to="/investments"
             title={t('investments')}
             className={`group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${isActive('/investments')
-                ? 'bg-primary text-on-primary'
-                : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
+              ? 'bg-primary text-on-primary'
+              : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
               }`}
           >
             <span className="material-symbols-outlined text-xl">payments</span>
@@ -119,8 +119,8 @@ const Navbar = () => {
             to="/insurance"
             title={t('insurance')}
             className={`group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${isActive('/insurance')
-                ? 'bg-primary text-on-primary'
-                : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
+              ? 'bg-primary text-on-primary'
+              : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
               }`}
           >
             <span className="material-symbols-outlined text-xl">account_balance_wallet</span>
@@ -134,8 +134,8 @@ const Navbar = () => {
             to="/chatbot"
             title={t('aiAssistant')}
             className={`group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${isActive('/chatbot')
-                ? 'bg-primary text-on-primary'
-                : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
+              ? 'bg-primary text-on-primary'
+              : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
               }`}
           >
             <span className="material-symbols-outlined text-xl">chat_bubble</span>
@@ -149,10 +149,10 @@ const Navbar = () => {
             to="/premium-dashboard"
             title={t('premiumHub')}
             className={`group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${isActive('/premium-dashboard')
-                ? 'bg-primary text-on-primary'
-                : user.isPremium
-                  ? 'bg-tertiary-container/20 text-tertiary border border-tertiary-container/30 hover:bg-tertiary-container/30'
-                  : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
+              ? 'bg-primary text-on-primary'
+              : user.isPremium
+                ? 'bg-tertiary-container/20 text-tertiary border border-tertiary-container/30 hover:bg-tertiary-container/30'
+                : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
               }`}
           >
             <span className="material-symbols-outlined text-xl">
@@ -168,8 +168,8 @@ const Navbar = () => {
             to="/settings"
             title={t('settings')}
             className={`group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${isActive('/settings')
-                ? 'bg-primary text-on-primary'
-                : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
+              ? 'bg-primary text-on-primary'
+              : 'text-secondary hover:bg-surface-container-high hover:text-on-surface'
               }`}
           >
             <span className="material-symbols-outlined text-xl">settings</span>
@@ -222,7 +222,7 @@ const Navbar = () => {
               className="px-4 py-1.5 rounded-full bg-primary-container text-on-primary-container font-bold text-xs flex items-center gap-1.5 hover:scale-95 active:scale-90 transition-all cursor-pointer shadow-sm shadow-primary-container/20"
               title="Unlock Premium features"
             >
-              <span className="material-symbols-outlined text-sm">zap</span>
+              <span className="material-symbols-outlined text-sm">diamond</span>
               {t('goPremium')}
             </button>
           )}

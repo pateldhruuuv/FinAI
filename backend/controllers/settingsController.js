@@ -561,7 +561,7 @@ exports.downloadPersonalData = async (req, res) => {
       exportMetadata: {
         exportedAt: new Date(),
         version: '1.0.0',
-        app: 'FinPilot AI'
+        app: 'Finmate AI'
       },
       profile: user,
       linkedAccounts,
@@ -572,7 +572,7 @@ exports.downloadPersonalData = async (req, res) => {
     };
 
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', `attachment; filename=FinPilot_PersonalData_${userId}.json`);
+    res.setHeader('Content-Disposition', `attachment; filename=Finmate_PersonalData_${userId}.json`);
     res.send(JSON.stringify(personalData, null, 2));
   } catch (err) {
     console.error(err);
@@ -671,7 +671,7 @@ exports.downloadSettingsReport = async (req, res) => {
 
       if (isCSV) {
         res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', `attachment; filename=FinPilot_Expense_Report.csv`);
+        res.setHeader('Content-Disposition', `attachment; filename=Finmate_Expense_Report.csv`);
         let csv = `Report Scope,${scopeLabel}\nCategory,Spent Amount\n`;
         Object.entries(categories).forEach(([cat, amt]) => {
           csv += `"${cat}",₹${amt}\n`;
@@ -683,11 +683,11 @@ exports.downloadSettingsReport = async (req, res) => {
       } else {
         const doc = new PDFDocument();
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=FinPilot_Expense_Report.pdf`);
+        res.setHeader('Content-Disposition', `attachment; filename=Finmate_Expense_Report.pdf`);
         doc.pipe(res);
 
         doc.rect(0, 0, 612, 100).fill('#1e1b4b');
-        doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold').text('FinPilot AI', 50, 30);
+        doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold').text('Finmate AI', 50, 30);
         doc.fontSize(12).font('Helvetica').text(`Expense & Ledger Report - ${scopeLabel}`, 50, 60);
 
         doc.fillColor('#111827').fontSize(14).font('Helvetica-Bold').text(`Client Expense Overview`, 50, 130);
@@ -726,7 +726,7 @@ exports.downloadSettingsReport = async (req, res) => {
 
       if (isCSV) {
         res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', `attachment; filename=FinPilot_Investment_Report.csv`);
+        res.setHeader('Content-Disposition', `attachment; filename=Finmate_Investment_Report.csv`);
         let csv = 'Asset Class,Current Value\n';
         csv += `Stocks,₹${portfolio.stocks}\n`;
         csv += `Mutual Funds,₹${portfolio.mutualFunds}\n`;
@@ -741,11 +741,11 @@ exports.downloadSettingsReport = async (req, res) => {
       } else {
         const doc = new PDFDocument();
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=FinPilot_Investment_Report.pdf`);
+        res.setHeader('Content-Disposition', `attachment; filename=Finmate_Investment_Report.pdf`);
         doc.pipe(res);
 
         doc.rect(0, 0, 612, 100).fill('#1e1b4b');
-        doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold').text('FinPilot AI', 50, 30);
+        doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold').text('Finmate AI', 50, 30);
         doc.fontSize(12).font('Helvetica').text('Portfolio Allocation & Investment Advisory', 50, 60);
 
         doc.fillColor('#111827').fontSize(14).font('Helvetica-Bold').text(`Investment Portfolio Overview`, 50, 130);
@@ -796,7 +796,7 @@ exports.downloadSettingsReport = async (req, res) => {
 
       if (isCSV) {
         res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', `attachment; filename=FinPilot_Insurance_Report.csv`);
+        res.setHeader('Content-Disposition', `attachment; filename=Finmate_Insurance_Report.csv`);
         let csv = 'Advisory Parameter,Value\n';
         csv += `Suggested Net Protection Coverage,₹${recommendation.insuranceCoverageAmount}\n`;
         csv += `Total Dependents,${user.dependents || 0}\n`;
@@ -805,11 +805,11 @@ exports.downloadSettingsReport = async (req, res) => {
       } else {
         const doc = new PDFDocument();
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=FinPilot_Insurance_Report.pdf`);
+        res.setHeader('Content-Disposition', `attachment; filename=Finmate_Insurance_Report.pdf`);
         doc.pipe(res);
 
         doc.rect(0, 0, 612, 100).fill('#1e1b4b');
-        doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold').text('FinPilot AI', 50, 30);
+        doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold').text('Finmate AI', 50, 30);
         doc.fontSize(12).font('Helvetica').text('Risk Mitigation & Insurance Gap Analysis', 50, 60);
 
         doc.fillColor('#111827').fontSize(14).font('Helvetica-Bold').text(`Client Risk Summary`, 50, 130);
@@ -862,7 +862,7 @@ exports.downloadSettingsReport = async (req, res) => {
 
       if (isCSV) {
         res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', `attachment; filename=FinPilot_Tax_Report.csv`);
+        res.setHeader('Content-Disposition', `attachment; filename=Finmate_Tax_Report.csv`);
         let csv = `Report Scope,${scopeLabel}\nTax Category,Amount\n`;
         csv += `Estimated Annual Gross Income,₹${annualIncome}\n`;
         csv += `Old Regime Estimated Tax Liability,₹${oldTax}\n`;
@@ -873,11 +873,11 @@ exports.downloadSettingsReport = async (req, res) => {
       } else {
         const doc = new PDFDocument();
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=FinPilot_Tax_Report.pdf`);
+        res.setHeader('Content-Disposition', `attachment; filename=Finmate_Tax_Report.pdf`);
         doc.pipe(res);
 
         doc.rect(0, 0, 612, 100).fill('#1e1b4b');
-        doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold').text('FinPilot AI', 50, 30);
+        doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold').text('Finmate AI', 50, 30);
         doc.fontSize(12).font('Helvetica').text(`Tax Optimization & Regime Evaluation - ${scopeLabel}`, 50, 60);
 
         doc.fillColor('#111827').fontSize(14).font('Helvetica-Bold').text(`Client Tax Optimization Audit`, 50, 130);
@@ -936,7 +936,7 @@ exports.downloadSettingsReport = async (req, res) => {
 
       if (isCSV) {
         res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', `attachment; filename=FinPilot_Health_Report.csv`);
+        res.setHeader('Content-Disposition', `attachment; filename=Finmate_Health_Report.csv`);
         let csv = `Report Scope,${scopeLabel}\nParameter,Value\n`;
         csv += `Financial Health Index Rating,${rec.healthScore} / 100\n`;
         csv += `System Diagnostic Classification,${rec.healthStatus}\n`;
@@ -948,11 +948,11 @@ exports.downloadSettingsReport = async (req, res) => {
       } else {
         const doc = new PDFDocument();
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=FinPilot_Health_Report.pdf`);
+        res.setHeader('Content-Disposition', `attachment; filename=Finmate_Health_Report.pdf`);
         doc.pipe(res);
 
         doc.rect(0, 0, 612, 100).fill('#1e1b4b');
-        doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold').text('FinPilot AI', 50, 30);
+        doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold').text('Finmate AI', 50, 30);
         doc.fontSize(12).font('Helvetica').text(`Comprehensive Financial Diagnostics Audit - ${scopeLabel}`, 50, 60);
 
         doc.fillColor('#111827').fontSize(14).font('Helvetica-Bold').text(`Client Diagnostics Dossier`, 50, 130);

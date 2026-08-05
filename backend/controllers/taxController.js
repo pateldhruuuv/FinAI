@@ -875,7 +875,7 @@ exports.exportPDFReport = async (req, res) => {
 
     const doc = new PDFDocument({ margin: 50 });
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=FinPilot_TaxReport_${record._id}.pdf`);
+    res.setHeader('Content-Disposition', `attachment; filename=Finmate_TaxReport_${record._id}.pdf`);
 
     doc.pipe(res);
 
@@ -887,7 +887,7 @@ exports.exportPDFReport = async (req, res) => {
 
     // Top Indigo Banner
     doc.rect(0, 0, 612, 100).fill(primaryColor);
-    doc.fillColor('#ffffff').fontSize(22).font('Helvetica-Bold').text('FinPilot AI - Tax Optimizer 3.0', 50, 30);
+    doc.fillColor('#ffffff').fontSize(22).font('Helvetica-Bold').text('Finmate AI - Tax Optimizer 3.0', 50, 30);
     doc.fontSize(10).font('Helvetica').text('Official Indian Tax Rules Compliant Report', 50, 60);
 
     // Report Details
@@ -1038,7 +1038,7 @@ exports.exportPDFReport = async (req, res) => {
     // Page Footer
     doc.moveTo(50, 720).lineTo(562, 720).strokeColor('#cbd5e1').lineWidth(0.5).stroke();
     doc.fontSize(8).font('Helvetica-Oblique').fillColor('#64748b')
-       .text('Disclaimer: This report is generated based on information provided by the user. FinPilot AI provides general estimates and is not a registered tax adviser. Please consult a qualified CA for official tax filings.', 50, 735, { align: 'center', width: 512 });
+       .text('Disclaimer: This report is generated based on information provided by the user. Finmate AI provides general estimates and is not a registered tax adviser. Please consult a qualified CA for official tax filings.', 50, 735, { align: 'center', width: 512 });
 
     doc.end();
   } catch (err) {

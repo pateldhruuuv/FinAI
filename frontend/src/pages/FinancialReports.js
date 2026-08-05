@@ -30,7 +30,7 @@ const FinancialReports = () => {
       const blob = new Blob([res.data], { type: typeMap[format] });
       const link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
-      link.download = `FinPilot_${reportType}_Report_${new Date().toISOString().split('T')[0]}.${format.toLowerCase()}`;
+      link.download = `Finmate_${reportType}_Report_${new Date().toISOString().split('T')[0]}.${format.toLowerCase()}`;
       link.click();
 
       setSuccess(true);

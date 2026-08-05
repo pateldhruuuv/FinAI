@@ -35,7 +35,7 @@ const generateAIResponse = async ({ userId, message, history }) => {
   // 2. Fallback if Out of Scope
   if (intent === 'General Platform Help' && confidenceScore === 0.2) {
     return {
-      reply: "I can assist only with financial planning and the features available within FinPilot AI.",
+      reply: "I can assist only with financial planning and the features available within Finmate AI.",
       suggestions: ['Show my financial health score', 'Analyze my spending', 'Improve my financial health'],
       modelUsed: 'Fallback',
       responseTime: Date.now() - startTime
@@ -150,7 +150,7 @@ User message: ${message}`;
 ${advisorContext ? `Advisory Calculations:\n${advisorContext}\n` : ''}
 
 Recent conversation history:
-${history.map(h => `${h.role === 'user' ? 'User' : 'FinPilot'}: ${h.content}`).join('\n') || 'No previous history.'}
+${history.map(h => `${h.role === 'user' ? 'User' : 'Finmate'}: ${h.content}`).join('\n') || 'No previous history.'}
 
 User message: ${message}`;
   }

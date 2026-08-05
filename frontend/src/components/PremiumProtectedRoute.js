@@ -76,11 +76,11 @@ const PremiumProtectedRoute = ({ children }) => {
           </div>
 
           {/* Action Button */}
-          <button 
-            onClick={() => togglePremium()} 
+          <button
+            onClick={() => togglePremium()}
             className="w-full py-3.5 rounded-full bg-primary text-on-primary font-bold hover:bg-primary-fixed-dim transition-all flex items-center justify-center gap-2 cursor-pointer text-label-md"
           >
-            <span className="material-symbols-outlined text-lg">zap</span>
+            <span className="material-symbols-outlined text-lg">diamond</span>
             Unlock Premium Advisory (Trial Mode)
           </button>
         </div>
