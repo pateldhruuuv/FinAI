@@ -621,7 +621,7 @@ exports.updateSharingConsent = async (req, res) => {
 // POST /settings/reports
 exports.downloadSettingsReport = async (req, res) => {
   try {
-    const { reportType, format } = req.body;
+    const { reportType, format, scope } = req.body;
     if (!reportType || !format) {
       return res.status(400).json({ status: 'error', message: 'Report type and file format are required' });
     }
@@ -634,8 +634,28 @@ exports.downloadSettingsReport = async (req, res) => {
 
     const isCSV = format.toUpperCase() === 'CSV';
 
+    // Compute Date Threshold from Scope
+    let dateLimit = null;
+    let scopeLabel = 'Yearly (Last 365 Days)';
+    if (scope === 'Monthly') {
+      dateLimit = new Date();
+      dateLimit.setDate(dateLimit.getDate() - 30);
+      scopeLabel = 'Monthly (Last 30 Days)';
+    } else if (scope === 'Quarterly') {
+      dateLimit = new Date();
+      dateLimit.setDate(dateLimit.getDate() - 90);
+      scopeLabel = 'Quarterly (Last 90 Days)';
+    } else {
+      dateLimit = new Date();
+      dateLimit.setDate(dateLimit.getDate() - 365);
+    }
+
     if (reportType === 'Expense') {
-      const transactions = await Transaction.find({ userId });
+      const query = { userId };
+      if (dateLimit) {
+        query.date = { $gte: dateLimit };
+      }
+      const transactions = await Transaction.find(query);
       const categories = {};
       let totalSpent = 0;
       let totalIncome = 0;
@@ -652,7 +672,7 @@ exports.downloadSettingsReport = async (req, res) => {
       if (isCSV) {
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader('Content-Disposition', `attachment; filename=FinPilot_Expense_Report.csv`);
-        let csv = 'Category,Spent Amount\n';
+        let csv = `Report Scope,${scopeLabel}\nCategory,Spent Amount\n`;
         Object.entries(categories).forEach(([cat, amt]) => {
           csv += `"${cat}",₹${amt}\n`;
         });
@@ -668,13 +688,13 @@ exports.downloadSettingsReport = async (req, res) => {
 
         doc.rect(0, 0, 612, 100).fill('#1e1b4b');
         doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold').text('FinPilot AI', 50, 30);
-        doc.fontSize(12).font('Helvetica').text('Expense & Ledger Report', 50, 60);
+        doc.fontSize(12).font('Helvetica').text(`Expense & Ledger Report - ${scopeLabel}`, 50, 60);
 
         doc.fillColor('#111827').fontSize(14).font('Helvetica-Bold').text(`Client Expense Overview`, 50, 130);
         doc.fontSize(10).font('Helvetica')
            .text(`Prepared For: ${user.name}`, 50, 155)
            .text(`Email: ${user.email}`, 50, 170)
-           .text(`Date: ${new Date().toLocaleDateString()}`, 50, 185);
+           .text(`Scope Period: ${scopeLabel}`, 50, 185);
 
         doc.moveTo(50, 210).lineTo(560, 210).strokeColor('#e5e7eb').lineWidth(1).stroke();
 
@@ -822,23 +842,28 @@ exports.downloadSettingsReport = async (req, res) => {
     } 
     else if (reportType === 'Tax') {
       const tax = await TaxAnalysis.findOne({ userId }).sort({ createdAt: -1 });
-      const annualIncome = user.monthlyIncome * 12;
 
-      // Dummy calculation helper if no TaxAnalysis saved
-      const taxableOld = Math.max(annualIncome - 150000 - 50000, 0);
-      const taxableNew = Math.max(annualIncome - 75000, 0);
+      let incomeMultiplier = 12;
+      if (scope === 'Monthly') incomeMultiplier = 1;
+      else if (scope === 'Quarterly') incomeMultiplier = 3;
+
+      const annualIncome = user.monthlyIncome * incomeMultiplier;
+
+      // Dummy calculation helper scaled to scope
+      const taxableOld = Math.max(annualIncome - (150000 / 12 * incomeMultiplier) - (50000 / 12 * incomeMultiplier), 0);
+      const taxableNew = Math.max(annualIncome - (75000 / 12 * incomeMultiplier), 0);
       
-      const estimatedOldRegime = taxableOld <= 500000 ? 0 : taxableOld * 0.15;
-      const estimatedNewRegime = taxableNew <= 700000 ? 0 : taxableNew * 0.10;
+      const estimatedOldRegime = taxableOld <= (500000 / 12 * incomeMultiplier) ? 0 : taxableOld * 0.15;
+      const estimatedNewRegime = taxableNew <= (700000 / 12 * incomeMultiplier) ? 0 : taxableNew * 0.10;
 
-      const oldTax = tax ? tax.oldRegimeTax : estimatedOldRegime;
-      const newTax = tax ? tax.newRegimeTax : estimatedNewRegime;
-      const savings = tax ? tax.potentialSavings : Math.max(oldTax - newTax, 0);
+      const oldTax = tax ? (tax.oldRegimeTax / 12 * incomeMultiplier) : estimatedOldRegime;
+      const newTax = tax ? (tax.newRegimeTax / 12 * incomeMultiplier) : estimatedNewRegime;
+      const savings = Math.max(oldTax - newTax, 0);
 
       if (isCSV) {
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader('Content-Disposition', `attachment; filename=FinPilot_Tax_Report.csv`);
-        let csv = 'Tax Category,Amount\n';
+        let csv = `Report Scope,${scopeLabel}\nTax Category,Amount\n`;
         csv += `Estimated Annual Gross Income,₹${annualIncome}\n`;
         csv += `Old Regime Estimated Tax Liability,₹${oldTax}\n`;
         csv += `New Regime Estimated Tax Liability,₹${newTax}\n`;
@@ -853,13 +878,13 @@ exports.downloadSettingsReport = async (req, res) => {
 
         doc.rect(0, 0, 612, 100).fill('#1e1b4b');
         doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold').text('FinPilot AI', 50, 30);
-        doc.fontSize(12).font('Helvetica').text('Tax Optimization & Regime Evaluation', 50, 60);
+        doc.fontSize(12).font('Helvetica').text(`Tax Optimization & Regime Evaluation - ${scopeLabel}`, 50, 60);
 
         doc.fillColor('#111827').fontSize(14).font('Helvetica-Bold').text(`Client Tax Optimization Audit`, 50, 130);
         doc.fontSize(10).font('Helvetica')
            .text(`Prepared For: ${user.name}`, 50, 155)
-           .text(`Gross Annual Base: ₹${annualIncome.toLocaleString()}`, 50, 170)
-           .text(`Optimization Date: ${new Date().toLocaleDateString()}`, 50, 185);
+           .text(`Gross Income Base (${scope || 'Yearly'}): ₹${annualIncome.toLocaleString()}`, 50, 170)
+           .text(`Scope Period: ${scopeLabel}`, 50, 185);
 
         doc.moveTo(50, 210).lineTo(560, 210).strokeColor('#e5e7eb').lineWidth(1).stroke();
 
@@ -882,18 +907,43 @@ exports.downloadSettingsReport = async (req, res) => {
         healthStatus: 'Moderate'
       };
 
-      const finDetails = await getFinancialDetailsHelper(userId, user);
+      const query = { userId };
+      if (dateLimit) {
+        query.date = { $gte: dateLimit };
+      }
+      const transactions = await Transaction.find(query);
+      
+      let totalIncome = 0;
+      let totalExpenses = 0;
+      let debt = 0;
+      transactions.forEach((tx) => {
+        if (tx.type === 'Credit') {
+          totalIncome += tx.amount;
+        } else {
+          totalExpenses += tx.amount;
+          const catLower = tx.category.toLowerCase();
+          if (catLower.includes('emi') || catLower.includes('debt') || catLower.includes('loan') || catLower.includes('credit card')) {
+            debt += tx.amount;
+          }
+        }
+      });
+
+      const income = totalIncome > 0 ? totalIncome : (user.monthlyIncome * (scope === 'Monthly' ? 1 : (scope === 'Quarterly' ? 3 : 12)));
+      const expenses = totalExpenses > 0 ? totalExpenses : (user.monthlyExpenses * (scope === 'Monthly' ? 1 : (scope === 'Quarterly' ? 3 : 12)));
+      const savings = totalIncome > 0 ? Math.max(totalIncome - totalExpenses, 0) : Math.max(income - expenses, 0);
+      
+      const finDetails = { income, expenses, savings, debt };
 
       if (isCSV) {
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader('Content-Disposition', `attachment; filename=FinPilot_Health_Report.csv`);
-        let csv = 'Parameter,Value\n';
+        let csv = `Report Scope,${scopeLabel}\nParameter,Value\n`;
         csv += `Financial Health Index Rating,${rec.healthScore} / 100\n`;
         csv += `System Diagnostic Classification,${rec.healthStatus}\n`;
-        csv += `Monthly Income Base,₹${finDetails.income}\n`;
+        csv += `Calculated Income Base,₹${finDetails.income}\n`;
         csv += `Calculated Expense Load,₹${finDetails.expenses}\n`;
         csv += `Estimated Net Savings,₹${finDetails.savings}\n`;
-        csv += `Monthly Debt Liability,₹${finDetails.debt}\n`;
+        csv += `Calculated Debt Liability,₹${finDetails.debt}\n`;
         return res.send(csv);
       } else {
         const doc = new PDFDocument();
@@ -903,13 +953,13 @@ exports.downloadSettingsReport = async (req, res) => {
 
         doc.rect(0, 0, 612, 100).fill('#1e1b4b');
         doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold').text('FinPilot AI', 50, 30);
-        doc.fontSize(12).font('Helvetica').text('Comprehensive Financial Diagnostics Audit', 50, 60);
+        doc.fontSize(12).font('Helvetica').text(`Comprehensive Financial Diagnostics Audit - ${scopeLabel}`, 50, 60);
 
         doc.fillColor('#111827').fontSize(14).font('Helvetica-Bold').text(`Client Diagnostics Dossier`, 50, 130);
         doc.fontSize(10).font('Helvetica')
            .text(`Prepared For: ${user.name}`, 50, 155)
            .text(`Financial Age: ${user.age || 'N/A'} years`, 50, 170)
-           .text(`Compiled On: ${new Date().toLocaleDateString()}`, 50, 185);
+           .text(`Scope Period: ${scopeLabel}`, 50, 185);
 
         doc.moveTo(50, 210).lineTo(560, 210).strokeColor('#e5e7eb').lineWidth(1).stroke();
 

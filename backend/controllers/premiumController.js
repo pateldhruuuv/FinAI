@@ -53,11 +53,15 @@ ${message}`;
 };
 
 // Helper to calculate user financials from transaction history
-const getUserFinancialContext = async (userId) => {
+const getUserFinancialContext = async (userId, dateLimit = null) => {
   const user = await User.findById(userId);
   if (!user) throw new Error('User not found');
 
-  const transactions = await Transaction.find({ userId });
+  const query = { userId };
+  if (dateLimit) {
+    query.date = { $gte: dateLimit };
+  }
+  const transactions = await Transaction.find(query);
   let totalIncome = 0;
   let totalExpenses = 0;
   let debt = 0;
@@ -76,8 +80,15 @@ const getUserFinancialContext = async (userId) => {
     }
   });
 
-  const income = totalIncome > 0 ? totalIncome : user.monthlyIncome;
-  const savings = totalIncome > 0 ? Math.max(totalIncome - totalExpenses, 0) : Math.max(user.monthlyIncome - totalExpenses, 0);
+  let incomeMultiplier = 12;
+  if (dateLimit) {
+    const days = Math.round((Date.now() - dateLimit.getTime()) / (1000 * 60 * 60 * 24));
+    if (days <= 35) incomeMultiplier = 1;
+    else if (days <= 95) incomeMultiplier = 3;
+  }
+
+  const income = totalIncome > 0 ? totalIncome : (user.monthlyIncome * incomeMultiplier);
+  const savings = totalIncome > 0 ? Math.max(totalIncome - totalExpenses, 0) : Math.max((user.monthlyIncome * incomeMultiplier) - totalExpenses, 0);
 
   return {
     age: user.age,
@@ -139,9 +150,13 @@ exports.getTaxOptimization = async (req, res) => {
     });
 
     const taxableOld = taxCalculator.calculateTaxableIncome(grossIncome, oldDeductionsBreakdown);
-    const oldRegimeTax = taxCalculator.calculateOldRegimeTax(taxableOld, 'FY 2024-25', 30);
-    const cessOld = taxCalculator.calculateCess(oldRegimeTax.taxAfterRebate, 'FY 2024-25');
-    const oldTaxVal = taxCalculator.calculateNetTax(oldRegimeTax.taxAfterRebate, cessOld);
+    const oldSlabResult = taxCalculator.calculateBaseSlabTax(taxableOld, 'old', 'FY 2024-25', 30);
+    const oldRebate = taxCalculator.calculateRebate(taxableOld, oldSlabResult.totalTax, 'old', 'FY 2024-25');
+    const oldTaxAfterRebate = Math.max(0, oldSlabResult.totalTax - oldRebate);
+    const oldSurchargeResult = taxCalculator.calculateSurcharge(oldTaxAfterRebate, taxableOld, 'old', 'FY 2024-25');
+    const oldTaxAfterSurcharge = oldTaxAfterRebate + oldSurchargeResult.surcharge;
+    const cessOld = taxCalculator.calculateCess(oldTaxAfterSurcharge, 'FY 2024-25');
+    const oldTaxVal = taxCalculator.calculateNetTax(oldTaxAfterSurcharge, cessOld);
 
     const newDeductionsBreakdown = taxCalculator.calculateDeductions({
       annualSalary: annualIncome,
@@ -154,9 +169,13 @@ exports.getTaxOptimization = async (req, res) => {
       age: 30
     });
     const taxableNew = taxCalculator.calculateTaxableIncome(grossIncome, newDeductionsBreakdown);
-    const newRegimeTax = taxCalculator.calculateNewRegimeTax(taxableNew, 'FY 2024-25');
-    const cessNew = taxCalculator.calculateCess(newRegimeTax.taxAfterRebate, 'FY 2024-25');
-    const newTaxVal = taxCalculator.calculateNetTax(newRegimeTax.taxAfterRebate, cessNew);
+    const newSlabResult = taxCalculator.calculateBaseSlabTax(taxableNew, 'new', 'FY 2024-25', 30);
+    const newRebate = taxCalculator.calculateRebate(taxableNew, newSlabResult.totalTax, 'new', 'FY 2024-25');
+    const newTaxAfterRebate = Math.max(0, newSlabResult.totalTax - newRebate);
+    const newSurchargeResult = taxCalculator.calculateSurcharge(newTaxAfterRebate, taxableNew, 'new', 'FY 2024-25');
+    const newTaxAfterSurcharge = newTaxAfterRebate + newSurchargeResult.surcharge;
+    const cessNew = taxCalculator.calculateCess(newTaxAfterSurcharge, 'FY 2024-25');
+    const newTaxVal = taxCalculator.calculateNetTax(newTaxAfterSurcharge, cessNew);
 
     // Prepare recommendations
     const suggestions = [];
@@ -191,7 +210,7 @@ exports.getTaxOptimization = async (req, res) => {
       currentTax: oldTaxVal,
       potentialSavings,
       recommendedInvestments,
-      taxBreakdownChart: "", // Client-side Plotly takes care of rendering
+      taxBreakdownChart: "plotly_placeholder", // Client-side Plotly takes care of rendering
     });
     await taxAnalysis.save();
 
@@ -214,7 +233,7 @@ exports.getTaxOptimization = async (req, res) => {
         potentialSavings,
         suggestions,
         recommendedInvestments,
-        taxBreakdownChart: "",
+        taxBreakdownChart: "plotly_placeholder",
         id: taxAnalysis._id,
       },
     });
@@ -675,7 +694,24 @@ exports.generateFinancialReport = async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'Report type (Monthly, Quarterly, Yearly) and format (PDF, CSV) are required' });
     }
 
-    const context = await getUserFinancialContext(req.user);
+    // Compute Date Threshold from Scope (reportType)
+    let dateLimit = null;
+    let scopeLabel = 'Yearly Wealth Advisory Plan';
+    if (reportType === 'Monthly') {
+      dateLimit = new Date();
+      dateLimit.setDate(dateLimit.getDate() - 30);
+      scopeLabel = 'Monthly Performance Statement (Last 30 Days)';
+    } else if (reportType === 'Quarterly') {
+      dateLimit = new Date();
+      dateLimit.setDate(dateLimit.getDate() - 90);
+      scopeLabel = 'Quarterly Consolidated Audit (Last 90 Days)';
+    } else {
+      dateLimit = new Date();
+      dateLimit.setDate(dateLimit.getDate() - 365);
+      scopeLabel = 'Yearly Wealth Advisory Plan (Last 365 Days)';
+    }
+
+    const context = await getUserFinancialContext(req.user, dateLimit);
     const portfolio = await Portfolio.findOne({ userId: req.user });
     const goals = await Goal.find({ userId: req.user });
     const recommendations = await PremiumRecommendations.findOne({ userId: req.user });

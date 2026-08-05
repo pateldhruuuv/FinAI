@@ -63,5 +63,10 @@ router.post('/update-category', auth, statementController.updateCategory);
 // @access  Private
 router.get('/dashboard', auth, transactionController.getDashboard);
 
+// @route   DELETE /transactions/:id
+// @desc    Delete a transaction
+// @access  Private
+router.delete('/transactions/:id', auth, transactionController.deleteTransaction);
+
 module.exports = router;
 

@@ -17,6 +17,7 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiResult, setAiResult] = useState(null);
+  const [showAllTransactions, setShowAllTransactions] = useState(false);
 
   // Goal States
   const [goals, setGoals] = useState([]);
@@ -89,6 +90,19 @@ const Dashboard = () => {
       setError(err.response?.data?.message || 'Failed to fetch dashboard data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteTransaction = async (id) => {
+    if (!window.confirm('Are you sure you want to permanently delete this transaction?')) return;
+    try {
+      const res = await axios.delete(`/transactions/${id}`);
+      if (res.data.status === 'success') {
+        fetchDashboardData();
+      }
+    } catch (err) {
+      console.error('Delete failed:', err);
+      alert(err.response?.data?.message || 'Failed to delete transaction.');
     }
   };
 
@@ -672,9 +686,15 @@ const Dashboard = () => {
           <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm">
             <div className="flex items-center justify-between border-b border-outline-variant/40 pb-4 mb-6">
               <h3 className="font-headline-sm text-headline-sm font-bold font-serif text-on-surface">Recent Ledger Transactions</h3>
-              <button onClick={() => setActiveTab('notifications')} className="text-xs text-primary-container font-semibold hover:underline flex items-center gap-1">
-                <span className="material-symbols-outlined text-sm">history</span> View Alert History
-              </button>
+              <div className="flex items-center gap-4">
+                <button onClick={() => setShowAllTransactions(!showAllTransactions)} className="text-xs text-primary-container font-semibold hover:underline flex items-center gap-1">
+                  <span className="material-symbols-outlined text-sm">{showAllTransactions ? 'unfold_less' : 'unfold_more'}</span> 
+                  {showAllTransactions ? 'Show Recent Only' : 'Show All Transactions'}
+                </button>
+                <button onClick={() => setActiveTab('notifications')} className="text-xs text-primary-container font-semibold hover:underline flex items-center gap-1">
+                  <span className="material-symbols-outlined text-sm">history</span> View Alert History
+                </button>
+              </div>
             </div>
 
             {recentTransactions.length > 0 ? (
@@ -687,10 +707,11 @@ const Dashboard = () => {
                       <th className="py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Category</th>
                       <th className="py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Type</th>
                       <th className="py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant text-right">Amount</th>
+                      <th className="py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {recentTransactions.slice(0, 8).map((tx) => (
+                    {(showAllTransactions ? recentTransactions : recentTransactions.slice(0, 8)).map((tx) => (
                       <tr key={tx._id} className="border-b border-outline-variant/20 hover:bg-surface-container/30 transition-colors">
                         <td className="py-3.5 px-4 text-sm text-on-surface-variant font-serif">{new Date(tx.date).toLocaleDateString()}</td>
                         <td className="py-3.5 px-4 text-sm text-on-surface font-semibold font-serif">{tx.description}</td>
@@ -710,6 +731,15 @@ const Dashboard = () => {
                         <td className={`py-3.5 px-4 text-sm font-bold text-right font-serif ${tx.type === 'Credit' ? 'text-emerald-400' : 'text-rose-400'
                           }`}>
                           {tx.type === 'Debit' ? '-' : '+'}₹{tx.amount.toLocaleString()}
+                        </td>
+                        <td className="py-3.5 px-4 text-sm text-center">
+                          <button
+                            onClick={() => handleDeleteTransaction(tx._id)}
+                            className="text-rose-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors inline-flex items-center justify-center"
+                            title="Delete Transaction"
+                          >
+                            <span className="material-symbols-outlined text-base">delete</span>
+                          </button>
                         </td>
                       </tr>
                     ))}

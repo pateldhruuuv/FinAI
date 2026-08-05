@@ -10,7 +10,7 @@ const Chatbot = () => {
     {
       id: 'welcome',
       role: 'assistant',
-      content: 'Hello! I am your Finmate AI assistant. How can I help you today? You can ask me about investments, saving tips, or insurance coverage, or click one of the quick queries below!',
+      content: 'Hello! I am your FinPilot AI assistant. How can I help you today? You can ask me about investments, saving tips, or insurance coverage, or click one of the quick queries below!',
       timestamp: new Date()
     }
   ]);
@@ -20,6 +20,13 @@ const Chatbot = () => {
   const [conversationsLoading, setConversationsLoading] = useState(false);
   const [currentChatId, setCurrentChatId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Streaming states
+  const [streamingId, setStreamingId] = useState(null);
+  const [streamingText, setStreamingText] = useState('');
+  
+  // Feedback states
+  const [feedback, setFeedback] = useState({}); // { [msgId]: 'up' | 'down' }
   
   // Responsive sidebar states
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -97,7 +104,7 @@ const Chatbot = () => {
   // Scroll to bottom on new messages
   useEffect(() => {
     scrollToBottom();
-  }, [messages, loading]);
+  }, [messages, loading, streamingText]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -130,7 +137,6 @@ const Chatbot = () => {
       }
     } catch (err) {
       console.error('Failed to load chat:', err);
-      // Clean up invalid ID
       localStorage.removeItem('finpilot_active_chat_id');
       startNewChat();
     } finally {
@@ -148,7 +154,7 @@ const Chatbot = () => {
       {
         id: 'welcome',
         role: 'assistant',
-        content: 'Hello! I am your Finmate AI assistant. How can I help you today? You can ask me about investments, saving tips, or insurance coverage, or click one of the quick queries below!',
+        content: 'Hello! I am your FinPilot AI assistant. How can I help you today? You can ask me about investments, saving tips, or insurance coverage, or click one of the quick queries below!',
         timestamp: new Date()
       }
     ]);
@@ -158,9 +164,40 @@ const Chatbot = () => {
     }
   };
 
+  // Word-by-word text streaming simulation
+  const simulateStreaming = (aiMsg) => {
+    setLoading(false);
+    setStreamingId(aiMsg.id);
+    setStreamingText('');
+    
+    // Add empty message to message stack
+    const tempMsg = { ...aiMsg, content: '' };
+    setMessages(prev => [...prev, tempMsg]);
+    
+    const fullText = aiMsg.content || '';
+    const words = fullText.split(' ');
+    let currentWordIndex = 0;
+    let currentText = '';
+    
+    const interval = setInterval(() => {
+      if (currentWordIndex < words.length) {
+        currentText += (currentWordIndex === 0 ? '' : ' ') + words[currentWordIndex];
+        setStreamingText(currentText);
+        setMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, content: currentText } : m));
+        currentWordIndex++;
+      } else {
+        clearInterval(interval);
+        setStreamingId(null);
+        setStreamingText('');
+        // Enforce exact match at end
+        setMessages(prev => prev.map(m => m.id === aiMsg.id ? aiMsg : m));
+      }
+    }, 30);
+  };
+
   // Handle message sending
   const handleSendMessage = async (textToSend) => {
-    if (!textToSend.trim() || loading) return;
+    if (!textToSend.trim() || loading || streamingId) return;
 
     const tempUserMsg = {
       id: `user-${Date.now()}`,
@@ -179,21 +216,7 @@ const Chatbot = () => {
         const res = await axios.post(`/api/chat/${currentChatId}/message`, { message: textToSend });
         if (res.data?.status === 'success') {
           const aiMsg = res.data.reply;
-          setMessages(prev => [...prev, aiMsg]);
-          
-          setConversations(prev => {
-            const index = prev.findIndex(c => c.id === currentChatId);
-            if (index !== -1) {
-              const updated = [...prev];
-              updated[index] = {
-                ...updated[index],
-                lastMessagePreview: aiMsg.content,
-                updatedAt: new Date().toISOString()
-              };
-              return updated.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-            }
-            return prev;
-          });
+          simulateStreaming(aiMsg);
           fetchConversations(1, false, searchQuery);
         }
       } else {
@@ -206,20 +229,10 @@ const Chatbot = () => {
           localStorage.setItem('finpilot_active_chat_id', conversation.id);
           
           if (userMessage && aiMessage) {
-            setMessages([userMessage, aiMessage]);
+            setMessages([userMessage]);
+            simulateStreaming(aiMessage);
           }
-
-          setConversations(prev => [
-            {
-              id: conversation.id,
-              title: conversation.title,
-              createdAt: conversation.createdAt,
-              updatedAt: conversation.updatedAt,
-              lastMessagePreview: aiMessage ? aiMessage.content : '',
-              lastMessageTime: aiMessage ? aiMessage.timestamp : conversation.updatedAt
-            },
-            ...prev
-          ]);
+          fetchConversations(1, false, searchQuery);
         }
       }
     } catch (err) {
@@ -231,7 +244,6 @@ const Chatbot = () => {
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMsg]);
-    } finally {
       setLoading(false);
     }
   };
@@ -239,6 +251,42 @@ const Chatbot = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     handleSendMessage(inputText);
+  };
+
+  const handleCopyText = (text) => {
+    navigator.clipboard.writeText(text);
+    showToast('Copied to clipboard!');
+  };
+
+  const handleFeedback = (msgId, type) => {
+    setFeedback(prev => ({ ...prev, [msgId]: type }));
+    showToast(type === 'up' ? 'Feedback saved: Helpful' : 'Feedback saved: Not Helpful');
+  };
+
+  const handleRegenerate = () => {
+    const userMsgs = messages.filter(m => m.role === 'user');
+    if (userMsgs.length > 0) {
+      const lastUserMsg = userMsgs[userMsgs.length - 1];
+      handleSendMessage(lastUserMsg.content);
+    }
+  };
+
+  const showToast = (msg) => {
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 px-4 py-2.5 bg-surface-container border border-outline-variant/65 text-on-surface rounded-full text-xs font-semibold shadow-xl transition-all duration-300 z-[9999] opacity-0 translate-y-2';
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    
+    // Animate in
+    setTimeout(() => {
+      toast.classList.remove('opacity-0', 'translate-y-2');
+    }, 10);
+    
+    // Animate out
+    setTimeout(() => {
+      toast.classList.add('opacity-0', 'translate-y-2');
+      setTimeout(() => toast.remove(), 300);
+    }, 2000);
   };
 
   const handleRename = async (chatId, newTitle) => {
@@ -339,16 +387,18 @@ const Chatbot = () => {
 
   const renderMessageContent = (content) => {
     if (!content) return null;
-    const parts = content.split(/(```[\s\S]*?```)/g);
 
-    return parts.map((part, index) => {
-      if (part.startsWith('```') && part.endsWith('```')) {
-        const match = part.match(/```(\w*)\n([\s\S]*?)```/);
+    // Split by block code fences first
+    const codeBlocks = content.split(/(```[\s\S]*?```)/g);
+
+    return codeBlocks.map((block, blockIndex) => {
+      if (block.startsWith('```') && block.endsWith('```')) {
+        const match = block.match(/```(\w*)\n([\s\S]*?)```/);
         const language = match ? match[1] : '';
-        const code = match ? match[2] : part.slice(3, -3);
+        const code = match ? match[2] : block.slice(3, -3);
 
         return (
-          <div key={index} className="my-4 rounded-xl overflow-hidden border border-outline-variant/40 bg-surface-container font-sans text-xs">
+          <div key={blockIndex} className="my-4 rounded-xl overflow-hidden border border-outline-variant/40 bg-surface-container font-sans text-xs">
             {language && <div className="bg-surface-container-high px-4 py-2 text-on-surface-variant font-bold border-b border-outline-variant/30 uppercase">{language}</div>}
             <pre className="p-4 overflow-x-auto text-[11px] leading-relaxed text-on-surface">
               <code>{code.trim()}</code>
@@ -357,26 +407,117 @@ const Chatbot = () => {
         );
       }
 
-      const inlineParts = part.split(/(`[^`]+`)/g);
-      const inlineRendered = inlineParts.map((subPart, subIndex) => {
-        if (subPart.startsWith('`') && subPart.endsWith('`')) {
-          return (
-            <code key={subIndex} className="px-1.5 py-0.5 rounded bg-surface-container border border-outline-variant/40 text-xs text-primary font-sans">
-              {subPart.slice(1, -1)}
-            </code>
-          );
+      // Parse lines for markdown elements: headers, bullet points, table rows
+      const lines = block.split('\n');
+      let tableRows = [];
+      let inTable = false;
+
+      const renderedLines = [];
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+
+        // 1. Markdown Tables
+        if (line.startsWith('|')) {
+          inTable = true;
+          const cells = line.split('|').map(c => c.trim()).filter((c, idx, arr) => idx > 0 && idx < arr.length - 1);
+          if (cells.some(c => c.includes('---'))) {
+            continue;
+          }
+          tableRows.push(cells);
+          
+          const nextLine = lines[i+1]?.trim() || '';
+          if (!nextLine.startsWith('|')) {
+            inTable = false;
+            const rows = [...tableRows];
+            tableRows = [];
+            renderedLines.push(
+              <div key={`table-${i}`} className="my-4 overflow-x-auto rounded-xl border border-outline-variant/40">
+                <table className="w-full text-left border-collapse text-xs font-sans">
+                  <thead>
+                    <tr className="bg-surface-container-high border-b border-outline-variant/40">
+                      {rows[0].map((cell, idx) => (
+                        <th key={idx} className="py-2.5 px-4 font-bold text-on-surface-variant">{cell}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.slice(1).map((row, rowIdx) => (
+                      <tr key={rowIdx} className="border-b border-outline-variant/20 hover:bg-surface-container/30">
+                        {row.map((cell, cellIdx) => (
+                          <td key={cellIdx} className="py-2.5 px-4 text-on-surface">{cell}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          }
+          continue;
         }
 
-        const boldParts = subPart.split(/(\*\*[^*]+\*\*)/g);
-        return boldParts.map((boldPart, boldIndex) => {
-          if (boldPart.startsWith('**') && boldPart.endsWith('**')) {
-            return <strong key={boldIndex} className="font-bold text-on-surface">{boldPart.slice(2, -2)}</strong>;
-          }
-          return boldPart;
-        });
-      });
+        // 2. Markdown Headers
+        if (line.startsWith('# ')) {
+          renderedLines.push(
+            <h1 key={i} className="text-base font-bold text-primary font-serif mt-4 mb-2 border-b border-outline-variant/20 pb-1">
+              {parseInlineMarkdown(line.slice(2))}
+            </h1>
+          );
+          continue;
+        }
+        if (line.startsWith('## ')) {
+          renderedLines.push(
+            <h2 key={i} className="text-sm font-bold text-on-surface font-serif mt-3 mb-1.5 flex items-center gap-1">
+              <span className="material-symbols-outlined text-xs text-primary">arrow_right</span>
+              {parseInlineMarkdown(line.slice(3))}
+            </h2>
+          );
+          continue;
+        }
 
-      return <span key={index} className="white-space-pre-wrap">{inlineRendered}</span>;
+        // 3. Bullet Lists
+        if (line.startsWith('- ') || line.startsWith('* ')) {
+          renderedLines.push(
+            <li key={i} className="ml-4 list-disc text-xs text-on-surface-variant font-serif leading-relaxed my-1">
+              {parseInlineMarkdown(line.slice(2))}
+            </li>
+          );
+          continue;
+        }
+
+        // 4. Standard Paragraph
+        if (line !== '') {
+          renderedLines.push(
+            <p key={i} className="my-2 text-xs font-serif leading-relaxed text-on-surface">
+              {parseInlineMarkdown(line)}
+            </p>
+          );
+        }
+      }
+
+      return <div key={blockIndex}>{renderedLines}</div>;
+    });
+  };
+
+  const parseInlineMarkdown = (text) => {
+    const inlineParts = text.split(/(`[^`]+`)/g);
+    return inlineParts.map((subPart, subIndex) => {
+      if (subPart.startsWith('`') && subPart.endsWith('`')) {
+        return (
+          <code key={subIndex} className="px-1.5 py-0.5 rounded bg-surface-container border border-outline-variant/40 text-[10px] text-primary font-sans">
+            {subPart.slice(1, -1)}
+          </code>
+        );
+      }
+
+      const boldParts = subPart.split(/(\*\*[^*]+\*\*)/g);
+      return boldParts.map((boldPart, boldIndex) => {
+        if (boldPart.startsWith('**') && boldPart.endsWith('**')) {
+          return <strong key={boldIndex} className="font-bold text-on-surface">{boldPart.slice(2, -2)}</strong>;
+        }
+        return boldPart;
+      });
     });
   };
 
@@ -389,8 +530,15 @@ const Chatbot = () => {
   const groupedChats = groupConversations(conversations);
   const showSidebar = !isMobile || sidebarOpen;
 
+  // Compute active follow-up suggestions from the last message metadata
+  const lastMessage = messages[messages.length - 1];
+  const lastMessageIsAi = lastMessage && (lastMessage.role === 'assistant' || lastMessage.sender === 'ai');
+  const activeSuggestions = lastMessageIsAi && lastMessage.metadata?.suggestions 
+    ? lastMessage.metadata.suggestions 
+    : (messages.length <= 1 ? quickReplies : []);
+
   return (
-    <div className="md:pl-20 mt-16 px-4 md:px-6 pt-8 md:pt-10 pb-4 md:pb-6 min-h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] bg-background text-on-background flex gap-6 overflow-hidden relative font-sans">
+    <div className="md:pl-20 mt-16 px-4 md:px-6 py-4 bg-background text-on-background flex gap-6 overflow-hidden relative font-sans h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] min-h-0">
       
       {/* Mobile Sidebar backdrop */}
       {isMobile && sidebarOpen && (
@@ -402,7 +550,7 @@ const Chatbot = () => {
 
       {/* Sidebar Component */}
       {showSidebar && (
-        <div className={`flex flex-col bg-surface border border-outline-variant rounded-2xl p-4 flex-shrink-0 z-50 transition-all duration-300 ${
+        <div className={`flex flex-col glass-card rounded-2xl p-4 flex-shrink-0 z-50 transition-all duration-300 min-w-0 min-h-0 ${
           isMobile 
             ? 'fixed left-0 top-0 bottom-0 w-72 shadow-2xl h-full rounded-none border-y-0 border-l-0' 
             : 'w-72 h-full'
@@ -445,7 +593,7 @@ const Chatbot = () => {
           </div>
 
           {/* Conversations list */}
-          <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-none">
+          <div className="flex-1 overflow-y-auto space-y-4 pr-1">
             {conversationsLoading ? (
               Array(4).fill(0).map((_, i) => (
                 <div key={i} className="flex gap-3 items-center p-2 animate-pulse">
@@ -510,8 +658,8 @@ const Chatbot = () => {
       )}
 
       {/* Chat Area Component */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <div className="flex-1 flex flex-col glass-card border border-outline-variant rounded-2xl overflow-hidden h-full">
+      <div className="flex-1 flex flex-col h-full overflow-hidden min-h-0">
+        <div className="flex-1 flex flex-col glass-card border border-outline-variant rounded-2xl overflow-hidden h-full min-h-0">
           
           {/* Chat Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface/30">
@@ -528,10 +676,15 @@ const Chatbot = () => {
                 <span className="material-symbols-outlined text-xl">psychology</span>
               </div>
               <div>
-                <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface font-serif max-w-[240px] md:max-w-[400px] truncate leading-tight">
+                <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface font-serif max-w-[240px] md:max-w-[400px] truncate leading-tight flex items-center gap-2">
                   {currentChatId 
                     ? (conversations.find(c => c.id === currentChatId)?.title || 'FinPilot Advisor') 
                     : 'New Consultation'}
+                  {user?.isPremium && (
+                    <span className="text-[9px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/35 font-bold uppercase tracking-wider font-sans">
+                      Premium
+                    </span>
+                  )}
                 </h3>
                 <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -542,7 +695,7 @@ const Chatbot = () => {
           </div>
 
           {/* Message Area */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-surface-container-lowest/10 scrollbar-none flex flex-col">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-surface-container-lowest/10 flex flex-col min-h-0">
             {historyLoading ? (
               Array(3).fill(0).map((_, i) => (
                 <div key={i} className={`flex gap-3 max-w-[80%] ${i % 2 === 0 ? 'self-start' : 'self-end flex-row-reverse'} animate-pulse`}>
@@ -581,17 +734,55 @@ const Chatbot = () => {
                       </div>
                     )}
                     
-                    <div className={`p-4 rounded-2xl flex flex-col gap-2 relative ${
-                      isAi 
-                        ? 'bg-surface-container/60 border border-outline-variant/50 rounded-tl-none text-on-surface' 
-                        : 'bg-primary text-on-primary rounded-tr-none shadow-md shadow-primary/10'
-                    }`}>
-                      <div className="text-sm leading-relaxed font-serif font-medium break-words">
-                        {renderMessageContent(msg.content || msg.message)}
+                    <div className="flex flex-col gap-1.5 max-w-full">
+                      <div className={`p-4 rounded-2xl flex flex-col gap-2 relative ${
+                        isAi 
+                          ? 'bg-surface-container/60 border border-outline-variant/50 rounded-tl-none text-on-surface' 
+                          : 'bg-primary text-on-primary rounded-tr-none shadow-md shadow-primary/10'
+                      }`}>
+                        <div className="text-sm leading-relaxed font-serif font-medium break-words">
+                          {renderMessageContent(msg.content || msg.message)}
+                        </div>
+                        <span className={`text-[9px] text-right font-sans block mt-1 ${isAi ? 'text-on-surface-variant/60' : 'text-on-primary/60'}`}>
+                          {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
                       </div>
-                      <span className={`text-[9px] text-right font-sans block mt-1 ${isAi ? 'text-on-surface-variant/60' : 'text-on-primary/60'}`}>
-                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
+
+                      {/* Toolbars for assistant messages */}
+                      {isAi && msg.id !== 'welcome' && (
+                        <div className="flex items-center gap-2 mt-0.5 pl-1 text-on-surface-variant/40">
+                          <button 
+                            onClick={() => handleCopyText(msg.content)} 
+                            className="hover:text-primary transition-colors flex items-center p-1 rounded hover:bg-surface-container-high"
+                            title="Copy Response"
+                          >
+                            <span className="material-symbols-outlined text-xs">content_copy</span>
+                          </button>
+                          <button 
+                            onClick={() => handleFeedback(msg.id, 'up')} 
+                            className={`transition-colors flex items-center p-1 rounded hover:bg-surface-container-high ${feedback[msg.id] === 'up' ? 'text-emerald-400' : 'hover:text-emerald-400'}`}
+                            title="Helpful"
+                          >
+                            <span className="material-symbols-outlined text-xs">thumb_up</span>
+                          </button>
+                          <button 
+                            onClick={() => handleFeedback(msg.id, 'down')} 
+                            className={`transition-colors flex items-center p-1 rounded hover:bg-surface-container-high ${feedback[msg.id] === 'down' ? 'text-rose-400' : 'hover:text-rose-400'}`}
+                            title="Not Helpful"
+                          >
+                            <span className="material-symbols-outlined text-xs">thumb_down</span>
+                          </button>
+                          {!loading && !streamingId && (
+                            <button 
+                              onClick={handleRegenerate} 
+                              className="hover:text-primary transition-colors flex items-center p-1 rounded hover:bg-surface-container-high"
+                              title="Regenerate"
+                            >
+                              <span className="material-symbols-outlined text-xs">refresh</span>
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -613,15 +804,15 @@ const Chatbot = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Replies */}
-          {messages.length <= 1 && (
+          {/* Dynamic Follow-up Suggestions / Quick Replies */}
+          {activeSuggestions.length > 0 && (
             <div className="flex gap-2 p-4 border-t border-outline-variant/40 flex-wrap flex-shrink-0 bg-surface/20">
-              {quickReplies.map((reply) => (
+              {activeSuggestions.map((reply) => (
                 <button
                   key={reply}
                   onClick={() => handleSendMessage(reply)}
-                  disabled={loading}
-                  className="px-4 py-2 border border-outline-variant rounded-full text-xs font-semibold text-on-surface-variant hover:border-primary hover:text-on-surface transition-all flex items-center gap-1.5 bg-surface-container/40 cursor-pointer"
+                  disabled={loading || !!streamingId}
+                  className="px-4 py-2 border border-outline-variant rounded-full text-xs font-semibold text-on-surface-variant hover:border-primary hover:text-on-surface transition-all flex items-center gap-1.5 bg-surface-container/40 cursor-pointer disabled:opacity-40"
                 >
                   <span className="material-symbols-outlined text-[10px] text-primary">auto_awesome</span>
                   {reply}
@@ -637,12 +828,12 @@ const Chatbot = () => {
               placeholder="Ask a financial question..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              disabled={loading}
+              disabled={loading || !!streamingId}
               className="flex-1 bg-surface-container/60 border border-outline-variant rounded-full px-5 py-3 text-sm text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
             />
             <button 
               type="submit" 
-              disabled={loading || !inputText.trim()}
+              disabled={loading || !!streamingId || !inputText.trim()}
               className="p-3 rounded-full bg-primary-container text-on-primary-container hover:bg-primary shadow-sm hover:scale-105 active:scale-95 disabled:opacity-40 disabled:scale-100 disabled:pointer-events-none transition-all flex items-center justify-center cursor-pointer"
             >
               <span className="material-symbols-outlined font-bold text-lg">send</span>

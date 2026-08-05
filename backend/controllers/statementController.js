@@ -44,15 +44,24 @@ exports.uploadStatement = async (req, res) => {
 
     const { transactions, subscriptions, recurring_expenses, detected_bank, detected_format, mapped_columns, metadata, reward_points, validations } = parseResult;
 
-    if (!transactions || transactions.length === 0) {
-      return res.status(400).json({ status: 'error', message: 'No valid transactions found in statement' });
+    // Filter transactions: must contain date and description/particulars compulsorily
+    const filteredTransactions = (transactions || []).filter(tx => {
+      const hasDate = tx.date && String(tx.date).trim() !== '' && !isNaN(Date.parse(tx.date));
+      const hasDesc = (tx.description && String(tx.description).trim() !== '') ||
+                      (tx.particulars && String(tx.particulars).trim() !== '') ||
+                      (tx.narrative && String(tx.narrative).trim() !== '');
+      return hasDate && hasDesc;
+    });
+
+    if (filteredTransactions.length === 0) {
+      return res.status(400).json({ status: 'error', message: 'No valid transactions (with date and description/particulars) found in statement' });
     }
 
-    console.log(`Successfully parsed ${transactions.length} transactions. Saving to MongoDB...`);
+    console.log(`Successfully parsed ${filteredTransactions.length} valid transactions. Saving to MongoDB...`);
 
     // Save normalized transactions
     const savedTransactions = [];
-    for (const tx of transactions) {
+    for (const tx of filteredTransactions) {
       // 1. Save to NormalizedTransaction
       const normalizedTx = new NormalizedTransaction({
         userId: req.user,
@@ -132,13 +141,13 @@ exports.uploadStatement = async (req, res) => {
     res.status(201).json({
       status: 'success',
       message: `Parsed statement successfully: detected ${detected_bank} ${detected_format}`,
-      count: transactions.length,
+      count: filteredTransactions.length,
       data: {
         detected_bank,
         detected_format,
         mapped_columns,
         transactions: savedTransactions.slice(0, 10), // Return preview of first 10
-        total_transactions: transactions.length,
+        total_transactions: filteredTransactions.length,
         subscriptions_count: subscriptions ? subscriptions.length : 0,
         recurring_count: recurring_expenses ? recurring_expenses.length : 0,
         metadata: metadata || null,

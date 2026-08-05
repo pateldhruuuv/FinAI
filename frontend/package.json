@@ -10,6 +10,8 @@
   "dependencies": {
     "@react-oauth/google": "^0.13.5",
     "axios": "^1.5.1",
+    "browserslist": "^4.28.7",
+    "caniuse-lite": "^1.0.30001806",
     "lucide-react": "^0.284.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

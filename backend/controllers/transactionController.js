@@ -2,6 +2,8 @@ const fs = require('fs');
 const csv = require('csv-parser');
 const Transaction = require('../models/Transaction');
 const User = require('../models/User');
+const NormalizedTransaction = require('../models/NormalizedTransaction');
+const UnknownTransaction = require('../models/UnknownTransaction');
 
 // Upload Bank Statement CSV
 exports.uploadStatement = async (req, res) => {
@@ -182,5 +184,62 @@ exports.getDashboard = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ status: 'error', message: 'Server error while fetching dashboard data' });
+  }
+};
+
+// DELETE /transactions/:id
+exports.deleteTransaction = async (req, res) => {
+  try {
+    const txId = req.params.id;
+    
+    // Find transaction in Transaction collection
+    const tx = await Transaction.findOne({ _id: txId, userId: req.user });
+    if (!tx) {
+      // If not in Transaction, check if it's a NormalizedTransaction ID directly
+      const normTx = await NormalizedTransaction.findOne({ _id: txId, userId: req.user });
+      if (!normTx) {
+        return res.status(404).json({ status: 'error', message: 'Transaction not found' });
+      }
+      
+      // Delete from NormalizedTransaction
+      await NormalizedTransaction.deleteOne({ _id: normTx._id });
+      
+      // Find and delete matching Transaction (matching by date, amount, description)
+      await Transaction.deleteOne({
+        userId: req.user,
+        date: normTx.date,
+        amount: normTx.amount,
+        description: normTx.description
+      });
+      
+      // Also delete from UnknownTransaction if present
+      await UnknownTransaction.deleteOne({ transactionId: normTx._id });
+      
+      return res.status(200).json({ status: 'success', message: 'Transaction deleted successfully' });
+    }
+
+    // It was found in Transaction collection. Delete it
+    await Transaction.deleteOne({ _id: tx._id });
+
+    // Find and delete matching NormalizedTransaction
+    const normMatch = await NormalizedTransaction.findOne({
+      userId: req.user,
+      date: tx.date,
+      amount: tx.amount,
+      description: tx.description
+    });
+
+    if (normMatch) {
+      await NormalizedTransaction.deleteOne({ _id: normMatch._id });
+      await UnknownTransaction.deleteOne({ transactionId: normMatch._id });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Transaction deleted successfully'
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: 'error', message: 'Server error deleting transaction' });
   }
 };

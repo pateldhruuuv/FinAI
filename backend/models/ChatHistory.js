@@ -45,6 +45,7 @@ const ChatHistorySchema = new mongoose.Schema({
     modelUsed: { type: String },
     responseTime: { type: Number },
     tokens: { type: Number },
+    suggestions: [{ type: String }]
   }
 });
 

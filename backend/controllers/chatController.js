@@ -3,6 +3,13 @@ const ChatHistory = require('../models/ChatHistory');
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 
+const { detectIntent } = require('../chatbot/intent_detector');
+const { checkPermission } = require('../chatbot/permission_engine');
+const { getFeatureByIntent } = require('../chatbot/knowledge_base');
+const { buildContext } = require('../chatbot/context_builder');
+const { buildSystemPrompt } = require('../chatbot/prompt_builder');
+const { formatResponse } = require('../chatbot/response_formatter');
+
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8000';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/interactions';
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
@@ -16,188 +23,148 @@ const extractGeminiReply = (data) => {
   return textPart?.text || 'Sorry, I could not generate a response right now.';
 };
 
-const buildChatPrompt = ({ message, context, history, advisorContext }) => {
-  const recentMessages = history
-    .map((chat) => `${chat.sender === 'user' || chat.role === 'user' ? 'User' : 'FinPilot'}: ${chat.content || chat.message}`)
-    .join('\n');
-
-  return `You are FinPilot, a helpful financial assistant inside a personal finance app.
-
-CRITICAL INSTRUCTIONS:
-- You must ONLY answer questions regarding the user's financial details, portfolios, goals, tax optimization, loan eligibility, debt rescue, and purchase affordability in this app.
-- If the user asks general questions outside personal finance or this project (e.g. "who is the president", "explain photosynthesis", "write python code", "how to build a house"), you MUST decline politely: "I am your FinPilot assistant. I can only help you with questions related to your personal finances, investments, goals, and advisor utilities in this application."
-- Under no circumstances answer off-topic questions.
-- If a calculation result is provided under "Advisory Calculations", use those exact numbers and rephrase them nicely in a conversational, helpful personal advisor tone.
-
-User financial context:
-Age: ${context.age || 'Not available'}
-Income: ${context.income || 0}
-Expenses: ${context.expenses || 0}
-Savings: ${context.savings || 0}
-Debt: ${context.debt || 0}
-
-${advisorContext ? `Advisory Calculations:\n${advisorContext}\n` : ''}
-
-Recent conversation:
-${recentMessages || 'No previous messages.'}
-
-User message:
-${message}`;
-};
-
-const getUserFinancialContext = async (userId) => {
-  const user = await User.findById(userId);
-  if (!user) throw new Error('User not found');
-
-  const transactions = await Transaction.find({ userId });
-  let totalIncome = 0;
-  let totalExpenses = 0;
-  let debt = 0;
-
-  transactions.forEach((tx) => {
-    if (tx.type === 'Credit') {
-      totalIncome += tx.amount;
-    } else {
-      totalExpenses += tx.amount;
-      const catLower = tx.category.toLowerCase();
-      if (catLower.includes('emi') || catLower.includes('debt') || catLower.includes('loan') || catLower.includes('credit card')) {
-        debt += tx.amount;
-      }
-    }
-  });
-
-  const income = totalIncome > 0 ? totalIncome : user.monthlyIncome;
-  const savings = totalIncome > 0 ? Math.max(totalIncome - totalExpenses, 0) : Math.max(user.monthlyIncome - totalExpenses, 0);
-
-  return {
-    age: user.age,
-    income,
-    expenses: totalExpenses,
-    savings,
-    debt,
-  };
-};
-
 // Subroutine to generate response via Gemini or Local Advisor fallback
 const generateAIResponse = async ({ userId, message, history }) => {
   const startTime = Date.now();
+  const user = await User.findById(userId);
+  if (!user) throw new Error('User not found');
 
-  const context = await getUserFinancialContext(userId);
-  
-  // Perform dynamic calculation checks depending on intent
-  const qLower = message.toLowerCase();
-  let advisorContext = "";
+  // 1. Detect Intent
+  const { intent, confidenceScore } = detectIntent(message);
 
-  try {
-    if (qLower.includes('invest') || qLower.includes('portfolio') || qLower.includes('mutual fund') || qLower.includes('stock') || qLower.includes('equity') || qLower.includes('fixed deposit') || qLower.includes('fd') || qLower.includes('gold')) {
-      const response = await fetch(`${AI_SERVICE_URL}/recommend-investment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          age: context.age || 30,
-          income: context.income || 50000,
-          savings: context.savings || 10000,
-          risk_profile: 'Moderate',
-        }),
-      });
-      if (response.ok) {
-        const resVal = await response.json();
-        advisorContext = `[Advisory Calculation - Investment]: Recommended allocations: Cash/FD: ${resVal.recommended_allocations?.["Cash/FD"] || "30%"}, Bonds/Debt: ${resVal.recommended_allocations?.["Bonds/Debt"] || "30%"}, Equity: ${resVal.recommended_allocations?.["Equity"] || "40%"}. Short-term advice: ${resVal.short_term}. Long-term advice: ${resVal.long_term}.`;
-      }
-    } else if (qLower.includes('insure') || qLower.includes('insurance') || qLower.includes('health cover') || qLower.includes('term plan')) {
-      const response = await fetch(`${AI_SERVICE_URL}/recommend-insurance`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          age: context.age || 30,
-          income: context.income || 50000,
-          dependents: 1,
-          marital_status: 'Single',
-        }),
-      });
-      if (response.ok) {
-        const resVal = await response.json();
-        advisorContext = `[Advisory Calculation - Insurance]: Suggested Term Insurance: ${resVal.term_insurance_recommended}, Health Insurance level: ${resVal.health_insurance_level}, Suggested Coverage: ₹${resVal.suggested_coverage_amount}. Recommendations: ${resVal.recommendations_summary?.join(', ')}`;
-      }
-    } else if (qLower.includes('loan') || qLower.includes('borrow') || qLower.includes('credit score') || qLower.includes('emi') || qLower.includes('debt')) {
-      const response = await fetch(`${AI_SERVICE_URL}/loan-advisor`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          income: context.income || 50000,
-          age: context.age || 30,
-          credit_score: 750,
-          current_emi: context.debt || 0,
-          existing_loans: context.debt || 0,
-        }),
-      });
-      if (response.ok) {
-        const resVal = await response.json();
-        advisorContext = `[Advisory Calculation - Loan Eligibility]: Maximum EMI user can pay: ₹${resVal.maximumEmi}, Safe EMI: ₹${resVal.safeEmi}, Loan Risk Assessment: ${resVal.loanRisk}, Max Eligible Loan amount: ₹${resVal.eligibleAmount}. Breakdown: Home Loan: ₹${resVal.breakdown?.homeLoan}, Car Loan: ₹${resVal.breakdown?.carLoan}.`;
-      }
-    } else if (qLower.includes('tax') || qLower.includes('deduction') || qLower.includes('80c') || qLower.includes('80d') || qLower.includes('hra') || qLower.includes('rent')) {
-      const response = await fetch(`${AI_SERVICE_URL}/tax-optimizer`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          annual_income: (context.income || 50000) * 12,
-          salary_basic: (context.income || 50000) * 12 * 0.4,
-          salary_hra: (context.income || 50000) * 12 * 0.15,
-          salary_special: 0,
-          salary_other: 0,
-          deductions_80c: 150000,
-          deductions_80d: 25000,
-          home_loan: 0,
-          education_loan: 0,
-          rent_paid: 120000,
-        }),
-      });
-      if (response.ok) {
-        const resVal = await response.json();
-        advisorContext = `[Advisory Calculation - Tax Optimization]: Taxable Income: ₹${resVal.taxableIncome}, Current calculated Tax: ₹${resVal.currentTax}, Potential savings through optimization: ₹${resVal.potentialSavings}. Recommended actions: ${resVal.recommendedInvestments?.join(', ')}.`;
-      }
-    } else if (qLower.includes('buy') || qLower.includes('purchase') || qLower.includes('afford')) {
-      const priceMatch = message.match(/\b\d{4,8}\b/);
-      const cost = priceMatch ? parseFloat(priceMatch[0]) : 50000;
-      const item = message.match(/(?:buy|purchase|for)\s+([a-zA-Z0-9\s]+)/i)?.[1] || "planned purchase";
-      
-      const response = await fetch(`${AI_SERVICE_URL}/purchase-advisor`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          item,
-          cost,
-          income: context.income || 50000,
-          savings: context.savings || 10000,
-          goals_target: 200000,
-          debt: context.debt || 0,
-          emergency_fund: context.savings || 10000,
-          investments: 0,
-        }),
-      });
-      if (response.ok) {
-        const resVal = await response.json();
-        advisorContext = `[Advisory Calculation - Purchase Affordability]: Purchase Score: ${resVal.purchaseScore}/100, Advice Status: ${resVal.status} (Buy, Wait, or Avoid). Suggestions: Refurbished: ${resVal.suggestions?.refurbishedOption}, EMI option: ${resVal.suggestions?.emiOption}, Alternative: ${resVal.suggestions?.betterAlternative}.`;
-      }
-    }
-  } catch (err) {
-    console.warn("Under-the-hood intent calculations failed in chat controller:", err.message);
+  // 2. Fallback if Out of Scope
+  if (intent === 'General Platform Help' && confidenceScore === 0.2) {
+    return {
+      reply: "I can assist only with financial planning and the features available within FinPilot AI.",
+      suggestions: ['Show my financial health score', 'Analyze my spending', 'Improve my financial health'],
+      modelUsed: 'Fallback',
+      responseTime: Date.now() - startTime
+    };
   }
 
-  const prompt = buildChatPrompt({
-    message: message.trim(),
-    context,
-    history,
-    advisorContext,
-  });
+  // 3. Check Permissions
+  const feature = getFeatureByIntent(intent);
+  const perm = checkPermission(user, feature);
 
+  // 4. Build User Financial Context
+  const context = await buildContext(userId);
+
+  let advisorContext = "";
+  // Only call advisory calculations if permission is allowed
+  if (perm.allowed) {
+    try {
+      if (intent === 'Investment' || intent === 'Stock Recommendation') {
+        const response = await fetch(`${AI_SERVICE_URL}/recommend-investment`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            age: context.age || 30,
+            income: context.income || 50000,
+            savings: context.savings || 10000,
+            risk_profile: context.riskProfile || 'Moderate',
+          }),
+        });
+        if (response.ok) {
+          const resVal = await response.json();
+          advisorContext = `[Advisory Calculation - Investment]: Recommended allocations: Cash/FD: ${resVal.recommended_allocations?.["Cash/FD"] || "30%"}, Bonds/Debt: ${resVal.recommended_allocations?.["Bonds/Debt"] || "30%"}, Equity: ${resVal.recommended_allocations?.["Equity"] || "40%"}. Short-term advice: ${resVal.short_term}. Long-term advice: ${resVal.long_term}.`;
+        }
+      } else if (intent === 'Insurance') {
+        const response = await fetch(`${AI_SERVICE_URL}/recommend-insurance`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            age: context.age || 30,
+            income: context.income || 50000,
+            dependents: context.dependents || 1,
+            marital_status: 'Single',
+          }),
+        });
+        if (response.ok) {
+          const resVal = await response.json();
+          advisorContext = `[Advisory Calculation - Insurance]: Suggested Term Insurance: ${resVal.term_insurance_recommended}, Health Insurance level: ${resVal.health_insurance_level}, Suggested Coverage: ₹${resVal.suggested_coverage_amount}. Recommendations: ${resVal.recommendations_summary?.join(', ')}`;
+        }
+      } else if (intent === 'Loans') {
+        const response = await fetch(`${AI_SERVICE_URL}/loan-advisor`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            income: context.income || 50000,
+            age: context.age || 30,
+            credit_score: 750,
+            current_emi: context.debt || 0,
+            existing_loans: context.debt || 0,
+          }),
+        });
+        if (response.ok) {
+          const resVal = await response.json();
+          advisorContext = `[Advisory Calculation - Loan Eligibility]: Maximum EMI user can pay: ₹${resVal.maximumEmi}, Safe EMI: ₹${resVal.safeEmi}, Loan Risk Assessment: ${resVal.loanRisk}, Max Eligible Loan amount: ₹${resVal.eligibleAmount}. Breakdown: Home Loan: ₹${resVal.breakdown?.homeLoan}, Car Loan: ₹${resVal.breakdown?.carLoan}.`;
+        }
+      } else if (intent === 'Tax') {
+        const response = await fetch(`${AI_SERVICE_URL}/tax-optimizer`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            annual_income: (context.income || 50000) * 12,
+            salary_basic: (context.income || 50000) * 12 * 0.4,
+            salary_hra: (context.income || 50000) * 12 * 0.15,
+            salary_special: 0,
+            salary_other: 0,
+            deductions_80c: 150000,
+            deductions_80d: 25000,
+            home_loan: 0,
+            education_loan: 0,
+            rent_paid: 120000,
+          }),
+        });
+        if (response.ok) {
+          const resVal = await response.json();
+          advisorContext = `[Advisory Calculation - Tax Optimization]: Taxable Income: ₹${resVal.taxableIncome}, Current calculated Tax: ₹${resVal.currentTax}, Potential savings through optimization: ₹${resVal.potentialSavings}. Recommended actions: ${resVal.recommendedInvestments?.join(', ')}.`;
+        }
+      }
+    } catch (err) {
+      console.warn("Under-the-hood calculations failed in chat controller:", err.message);
+    }
+  }
+
+  // 5. Generate System Prompt
+  const systemPrompt = buildSystemPrompt(context);
+
+  // If permission is denied, tell Gemini to focus only on encouraging upgrade & describing the feature benefits
+  let prompt = "";
+  if (!perm.allowed) {
+    prompt = `${systemPrompt}
+    
+CRITICAL UPDATE:
+The user has requested details on the premium feature "${feature.name}". 
+However, their current subscription is Free Tier. 
+Do NOT show any active advisor calculations or calculate any results. 
+Instead, write a premium marketing and advisory response:
+- Enthusiastically outline the core benefits of the ${feature.name}.
+- Describe 2-3 practical personal finance use cases for it.
+- Warmly invite them to upgrade to Premium in their settings page to unlock this advisor.
+
+User message: ${message}`;
+  } else {
+    prompt = `${systemPrompt}
+
+${advisorContext ? `Advisory Calculations:\n${advisorContext}\n` : ''}
+
+Recent conversation history:
+${history.map(h => `${h.role === 'user' ? 'User' : 'FinPilot'}: ${h.content}`).join('\n') || 'No previous history.'}
+
+User message: ${message}`;
+  }
+
+  // 6. Request Gemini API
   let reply = "";
   if (!process.env.GEMINI_API_KEY) {
     console.warn("No GEMINI_API_KEY configured, falling back to local advisor.");
-    if (advisorContext) {
+    if (!perm.allowed) {
+      reply = `Our ${feature.name} is a Premium benefit. Upgrading to Premium gives you access to full analytics, custom recommendations, and detailed advisor audits. Please upgrade to Premium in your Account Settings to unlock this feature!`;
+    } else if (advisorContext) {
       reply = advisorContext.replace(/\[Advisory Calculation - [^\]]+\]:\s*/g, '');
     } else {
-      reply = `Based on your profile, your monthly income is ₹${(context.income || 0).toLocaleString()} and your savings are ₹${(context.savings || 0).toLocaleString()}. Please ask specifically about investments, insurance, tax, or loan calculators to get detailed recommendations.`;
+      reply = `Based on your profile, your income is ₹${(context.income || 0).toLocaleString()} and your savings are ₹${(context.savings || 0).toLocaleString()}. Please ask specifically about investments, insurance, tax, or loan calculators to get detailed recommendations.`;
     }
   } else {
     const controller = new AbortController();
@@ -227,21 +194,24 @@ const generateAIResponse = async ({ userId, message, history }) => {
       }
     } catch (geminiErr) {
       clearTimeout(timeoutId);
-      console.warn("Gemini chatbot connection failed; falling back to local advisor. Error:", geminiErr.message);
-      
-      if (advisorContext) {
+      console.warn("Gemini chatbot connection failed; falling back to local advisor.", geminiErr.message);
+      if (!perm.allowed) {
+        reply = `Our ${feature.name} is a Premium benefit. Upgrading to Premium gives you access to full analytics, custom recommendations, and detailed advisor audits. Please upgrade to Premium in your Account Settings to unlock this feature!`;
+      } else if (advisorContext) {
         reply = advisorContext.replace(/\[Advisory Calculation - [^\]]+\]:\s*/g, '');
       } else {
-        reply = `Based on your profile, your monthly income is ₹${(context.income || 0).toLocaleString()} and your savings are ₹${(context.savings || 0).toLocaleString()}. Please ask specifically about investments, insurance, tax, or loan calculators to get detailed recommendations.`;
+        reply = `Based on your profile, your income is ₹${(context.income || 0).toLocaleString()} and your savings are ₹${(context.savings || 0).toLocaleString()}. Please ask specifically about investments, insurance, tax, or loan calculators to get detailed recommendations.`;
       }
     }
   }
 
-  const responseTime = Date.now() - startTime;
+  // 7. Format Response
+  const formatted = formatResponse(reply, intent);
 
   return {
-    reply,
-    responseTime,
+    reply: formatted.content,
+    suggestions: formatted.suggestions,
+    responseTime: Date.now() - startTime,
     modelUsed: GEMINI_MODEL
   };
 };
@@ -372,7 +342,7 @@ exports.createChat = async (req, res) => {
     let aiMsg = null;
 
     if (message?.trim()) {
-      const { reply, responseTime, modelUsed } = await generateAIResponse({
+      const { reply, suggestions, responseTime, modelUsed } = await generateAIResponse({
         userId: req.user,
         message: message.trim(),
         history: []
@@ -399,7 +369,8 @@ exports.createChat = async (req, res) => {
         timestamp: new Date(),
         metadata: {
           modelUsed,
-          responseTime
+          responseTime,
+          suggestions
         }
       });
       await aiMsg.save();
@@ -458,7 +429,7 @@ exports.postMessage = async (req, res) => {
       .limit(10)
       .lean();
 
-    const { reply, responseTime, modelUsed } = await generateAIResponse({
+    const { reply, suggestions, responseTime, modelUsed } = await generateAIResponse({
       userId: req.user,
       message: message.trim(),
       history: history.reverse()
@@ -485,7 +456,8 @@ exports.postMessage = async (req, res) => {
       timestamp: new Date(),
       metadata: {
         modelUsed,
-        responseTime
+        responseTime,
+        suggestions
       }
     });
     await aiMsg.save();

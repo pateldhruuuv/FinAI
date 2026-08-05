@@ -1,0 +1,121 @@
+{
+  "features": [
+    {
+      "id": "financial_health",
+      "name": "Financial Health Score",
+      "premium": false,
+      "description": "Calculates your overall financial health score (0-100) and status based on savings ratio, debt-to-income ratio, and emergency fund coverage.",
+      "related_modules": ["Dashboard"],
+      "supported_actions": ["check score", "assess health status"],
+      "examples": ["What is my health score?", "How is my financial health?"]
+    },
+    {
+      "id": "expense_analysis",
+      "name": "Expense Analyzer",
+      "premium": false,
+      "description": "Breaks down monthly expenses by category, detects highest expenditure areas, and visualizes categories on the dashboard.",
+      "related_modules": ["Dashboard", "Statement Hub"],
+      "supported_actions": ["analyze categories", "get highest expenses"],
+      "examples": ["Where did I spend the most?", "Show my expense categories."]
+    },
+    {
+      "id": "emergency_fund",
+      "name": "Emergency Fund Planner",
+      "premium": false,
+      "description": "Calculates safe emergency savings target (covering 3 to 6 months of expenses) and compares it with your current savings buffer.",
+      "related_modules": ["Dashboard", "AI Assistant"],
+      "supported_actions": ["calculate emergency target", "check savings buffer"],
+      "examples": ["Do I have enough emergency fund?", "How much should I save for emergencies?"]
+    },
+    {
+      "id": "goal_planning",
+      "name": "Goal Planner",
+      "premium": false,
+      "description": "Allows creating and tracking financial goals (e.g. buying a car, vacation, retirement) with progress indicators and monthly target savings.",
+      "related_modules": ["Dashboard"],
+      "supported_actions": ["create goal", "track goals", "check monthly savings targets"],
+      "examples": ["List my goals", "How much do I need to save for my vacation goal?"]
+    },
+    {
+      "id": "linked_accounts",
+      "name": "Linked Accounts Feed",
+      "premium": false,
+      "description": "Connects mock banking feeds, investment ledgers, and insurance assets to sync balances directly in the Settings workspace.",
+      "related_modules": ["Settings"],
+      "supported_actions": ["add bank feed", "link account", "unlink account"],
+      "examples": ["How do I link my bank account?", "Show my linked banking ledgers."]
+    },
+    {
+      "id": "statement_parser",
+      "name": "Universal Statement Parser",
+      "premium": false,
+      "description": "Uploads and parses CSV, Excel, or PDF bank statements to normalize transactions and automatically categorize ledgers.",
+      "related_modules": ["Statement Hub"],
+      "supported_actions": ["upload statement", "parse CSV", "parse PDF", "reconcile balance"],
+      "examples": ["How to upload my bank statement?", "Analyze my CSV ledger."]
+    },
+    {
+      "id": "investment_advisor",
+      "name": "Premium Investment Advisor",
+      "premium": true,
+      "description": "Generates tailored investment allocations (Cash, Bonds, Equities) based on age, income, and risk tolerance, providing short and long term strategies.",
+      "related_modules": ["Investments"],
+      "supported_actions": ["get allocation advice", "recommend SIP allocations", "assess short term investments"],
+      "examples": ["Give me investment recommendations.", "What are my optimal investment allocations?"]
+    },
+    {
+      "id": "insurance_advisor",
+      "name": "Premium Insurance Advisor",
+      "premium": true,
+      "description": "Analyzes family size, dependents, and income to recommend coverage amounts and levels for Term, Health, and Accidental Insurance policies.",
+      "related_modules": ["Insurance"],
+      "supported_actions": ["calculate term coverage", "suggest health cover level", "insurance audit"],
+      "examples": ["How much insurance do I need?", "Do I need health insurance?"]
+    },
+    {
+      "id": "tax_optimizer",
+      "name": "Premium Tax Optimizer",
+      "premium": true,
+      "description": "Evaluates HRA, HRA rent limits, 80C and 80D deductions, and home loans to optimize taxable income and suggest tax-saving strategies.",
+      "related_modules": ["Tax Optimizer"],
+      "supported_actions": ["calculate taxable income", "optimize HRA", "recommend 80C deductions"],
+      "examples": ["Optimize my taxes", "How can I save tax under Section 80C?"]
+    },
+    {
+      "id": "loan_advisor",
+      "name": "Premium Loan Advisor",
+      "premium": true,
+      "description": "Analyzes credit score, existing EMI debt, and income to calculate safety thresholds, safe EMIs, and maximum eligible loan amounts.",
+      "related_modules": ["Loans"],
+      "supported_actions": ["calculate safe EMI", "check loan eligibility", "assess borrowing risk"],
+      "examples": ["Am I eligible for a home loan?", "What is my maximum safe EMI?"]
+    },
+    {
+      "id": "purchase_advisor",
+      "name": "Premium Purchase Affordability Advisor",
+      "premium": true,
+      "description": "Analyzes costs and items (e.g. buying an iPhone) against monthly parameters, goals, and savings to give a purchase score and Buy/Wait/Avoid advice.",
+      "related_modules": ["AI Assistant"],
+      "supported_actions": ["evaluate purchase affordability", "calculate purchase score", "check EMI alternatives"],
+      "examples": ["Can I afford a ₹1,00,000 laptop?", "Should I buy a new phone now?"]
+    },
+    {
+      "id": "financial_twin",
+      "name": "Premium Financial Twin",
+      "premium": true,
+      "description": "Creates an AI-driven digital twin of your financial behavior to simulate future decisions, run cash flow scenarios, and test budget changes.",
+      "related_modules": ["Premium Hub"],
+      "supported_actions": ["run scenario simulation", "interact with financial twin"],
+      "examples": ["Talk to my financial twin", "Simulate my future savings ratio."]
+    },
+    {
+      "id": "reports",
+      "name": "Data & Reports",
+      "premium": true,
+      "description": "Compiles comprehensive financial summaries and downloads them as professionally formatted PDF or CSV documents.",
+      "related_modules": ["Settings", "Data & Reports"],
+      "supported_actions": ["generate PDF report", "download expense log CSV"],
+      "examples": ["Can I download my expense report?", "Export my financial telemetry."]
+    }
+  ]
+}

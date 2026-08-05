@@ -562,28 +562,6 @@ const Settings = () => {
           </button>
 
           <button 
-            onClick={() => setActiveTab('accounts')}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer font-semibold text-xs whitespace-nowrap lg:w-full ${
-              activeTab === 'accounts' 
-                ? 'bg-surface-container-high text-on-surface border-l-4 border-primary shadow-sm' 
-                : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
-            }`}
-          >
-            <span className="material-symbols-outlined text-lg">credit_card</span> Linked Accounts
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('preferences')}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer font-semibold text-xs whitespace-nowrap lg:w-full ${
-              activeTab === 'preferences' 
-                ? 'bg-surface-container-high text-on-surface border-l-4 border-primary shadow-sm' 
-                : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
-            }`}
-          >
-            <span className="material-symbols-outlined text-lg">language</span> Preferences
-          </button>
-
-          <button 
             onClick={() => setActiveTab('reports')}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer font-semibold text-xs whitespace-nowrap lg:w-full ${
               activeTab === 'reports' 
@@ -976,32 +954,6 @@ const Settings = () => {
               <h3 className="font-headline-sm text-headline-sm mb-4 text-on-surface">Alert Rules & Delivery Channels</h3>
               
               <div className="space-y-4 divide-y divide-outline-variant/20">
-                <div className="flex items-center justify-between py-3">
-                  <div>
-                    <label className="text-sm font-bold text-on-surface block">Email Alerts</label>
-                    <span className="text-xs text-on-surface-variant font-sans block mt-1">Receive daily audit summaries and health reports in your inbox.</span>
-                  </div>
-                  <input 
-                    type="checkbox" 
-                    checked={notificationsData.email}
-                    onChange={(e) => setNotificationsData(prev => ({ ...prev, email: e.target.checked }))}
-                    className="w-4 h-4 rounded text-primary-container focus:ring-primary-container bg-surface-container"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between py-3">
-                  <div>
-                    <label className="text-sm font-bold text-on-surface block">SMS Digests</label>
-                    <span className="text-xs text-on-surface-variant font-sans block mt-1">Receive rapid text indicators on volatile balances.</span>
-                  </div>
-                  <input 
-                    type="checkbox" 
-                    checked={notificationsData.sms}
-                    onChange={(e) => setNotificationsData(prev => ({ ...prev, sms: e.target.checked }))}
-                    className="w-4 h-4 rounded text-primary-container focus:ring-primary-container bg-surface-container"
-                  />
-                </div>
-
                 <div className="flex items-center justify-between py-3">
                   <div>
                     <label className="text-sm font-bold text-on-surface block">AI Diagnostics Recommendations</label>
