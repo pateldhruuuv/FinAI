@@ -122,7 +122,7 @@ const Register = () => {
           <img 
             alt="Finmate Visual Background" 
             className="w-full h-full object-cover opacity-80" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBupA0KRcLLDn-wS6Ne3ws3ISrEY2nJn86FYtfpp_ScKvdK7NdZT6yYhEHKzoKHWUioNwXlciDCVT-2RTVxQVVD-KjjyoB-v8OCi43EfGjOsalJIWTOac-1QbTqP1hRRTCHX-AzdxWM7ikOoHj3XTssvGeE_L7OeIdiHoRlTHUq_qcQ67F-CiI-yj3UYeHeWf--MHCEqCrQnw23XY_LagF6ByyvE_pn9OV5t9U1K4pQbBkomlsaS6ErPBToW0MLnrr490ejvEMixA" 
+            src="/bg.jpg" 
           />
         </div>
         

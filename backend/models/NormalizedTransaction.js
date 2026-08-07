@@ -46,6 +46,18 @@ const NormalizedTransactionSchema = new mongoose.Schema({
   is_unknown: {
     type: Boolean,
     default: false,
+  },
+  referenceNumber: {
+    type: String,
+    default: null,
+  },
+  accountNumber: {
+    type: String,
+    default: null,
+  },
+  currency: {
+    type: String,
+    default: 'INR',
   }
 }, { timestamps: true });
 

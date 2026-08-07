@@ -230,28 +230,34 @@ const Navbar = () => {
           {/* User profile dropdown and metadata */}
           <div className="h-8 w-px bg-outline-variant mx-1 hidden sm:block"></div>
 
-          <div className="flex items-center gap-3">
+          <Link
+            to="/settings"
+            title={t('settings')}
+            className="flex items-center gap-3 group rounded-lg p-1.5 transition-colors hover:bg-surface-container-high cursor-pointer"
+          >
             <div className="text-right hidden sm:block">
-              <p className="font-label-md text-label-md font-bold text-on-surface leading-tight">{t('hello')}, {user.name}</p>
+              <p className="font-label-md text-label-md font-bold text-on-surface leading-tight">
+                {t('hello')}, {user.name}
+              </p>
               <p className={`font-label-sm text-[10px] uppercase font-bold tracking-wider ${user.isPremium ? 'text-primary' : 'text-on-surface-variant'}`}>
                 {user.isPremium ? 'Premium Plan' : 'Free Member'}
               </p>
             </div>
 
-            <div className="relative group">
+            <div className="relative">
               {user.profileImage ? (
                 <img
-                  className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/40 cursor-pointer hover:ring-primary transition-all"
+                  className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/40 group-hover:ring-primary transition-all"
                   src={user.profileImage.startsWith('http') ? user.profileImage : axios.defaults.baseURL + user.profileImage}
                   alt={user.name}
                 />
               ) : (
-                <div className="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-sm ring-2 ring-primary/40 cursor-pointer hover:ring-primary transition-all">
+                <div className="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-sm ring-2 ring-primary/40 group-hover:ring-primary transition-all">
                   {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                 </div>
               )}
             </div>
-          </div>
+          </Link>
         </div>
       </header>
 

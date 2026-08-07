@@ -1476,8 +1476,33 @@ def parse_statement(file: UploadFile = File(...)):
         if not transactions:
             raise HTTPException(status_code=400, detail="No transactions found or failed to normalize transactions")
             
-        subscriptions = detect_subscriptions(transactions)
-        recurring_expenses = detect_recurring_payments(transactions)
+        # Import duplicate detector services
+        import sys
+        services_path = os.path.join(os.path.dirname(__file__), "services")
+        if services_path not in sys.path:
+            sys.path.append(services_path)
+        from duplicate_detector import (
+            remove_duplicates,
+            save_duplicate_log,
+            generate_duplicate_summary,
+            get_duplicates_with_metadata
+        )
+        
+        df_standard = pd.DataFrame(transactions)
+        df_clean = remove_duplicates(df_standard)
+        
+        # Save duplicate log and get raw CSV string
+        _, csv_content = save_duplicate_log(df_standard, file.filename)
+        
+        # Generate summary stats
+        summary = generate_duplicate_summary(df_standard, df_clean)
+        
+        # Convert clean transactions back to list of dicts for downstream modules
+        clean_transactions = df_clean.to_dict(orient="records")
+        dup_transactions_with_meta = get_duplicates_with_metadata(df_standard, file.filename)
+        
+        subscriptions = detect_subscriptions(clean_transactions)
+        recurring_expenses = detect_recurring_payments(clean_transactions)
         
         ext = os.path.splitext(file.filename)[1].lower()
         detected_format = ext.replace(".", "").upper()
@@ -1487,7 +1512,7 @@ def parse_statement(file: UploadFile = File(...)):
         validations = df.attrs.get("validations", None)
         
         return {
-            "transactions": transactions,
+            "transactions": clean_transactions,
             "subscriptions": subscriptions,
             "recurring_expenses": recurring_expenses,
             "detected_bank": detected_bank,
@@ -1495,7 +1520,10 @@ def parse_statement(file: UploadFile = File(...)):
             "mapped_columns": mapped_columns,
             "metadata": metadata,
             "reward_points": reward_points,
-            "validations": validations
+            "validations": validations,
+            "duplicate_summary": summary,
+            "duplicate_transactions": dup_transactions_with_meta,
+            "duplicate_csv": csv_content
         }
     except HTTPException:
         raise

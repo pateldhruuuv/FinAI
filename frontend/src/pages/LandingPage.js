@@ -215,7 +215,7 @@ const LandingPage = () => {
       {/* STATS SECTION */}
       <section className="max-w-[1280px] mx-auto px-6 md:px-12 grid grid-cols-2 md:grid-cols-4 gap-8 py-12 border-y border-outline-variant/30 mb-24 relative z-10 bg-surface-container/20 rounded-3xl">
         <div className="text-center space-y-1">
-          <h3 className="font-display-hero text-3xl sm:text-4xl font-bold text-on-surface font-serif">$2.4B+</h3>
+          <h3 className="font-display-hero text-3xl sm:text-4xl font-bold text-on-surface font-serif">₹2.4B+</h3>
           <p className="text-xs text-on-surface-variant uppercase tracking-wider font-semibold">Assets managed</p>
         </div>
         <div className="text-center space-y-1">

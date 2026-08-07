@@ -42,5 +42,9 @@
   "pos udemy 128 mumbai in": {
     "merchant": "Zomato Correction",
     "category": "Food"
+  },
+  "pos expedia 658 mumbai in": {
+    "merchant": "Zomato Correction",
+    "category": "Food"
   }
 }

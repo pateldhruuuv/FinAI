@@ -627,9 +627,13 @@ const Dashboard = () => {
                         ))}
                       </Pie>
                       <Tooltip
-                        contentStyle={{ backgroundColor: '#1f2020', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '8px' }}
+                        contentStyle={{
+                          backgroundColor: '#1f2020',
+                          border: '1px solid rgba(255, 255, 255, 0.08)',
+                          borderRadius: '8px'
+                        }}
                         itemStyle={{ color: '#e3e2e2', fontFamily: 'Inter', fontSize: '13px' }}
-                        formatter={(value) => [`₹${value.toLocaleString()}`, 'Spent']}
+                        formatter={(value, name) => [`₹${value.toLocaleString()}`, `${name} Spend`]}
                       />
                       <Legend verticalAlign="bottom" height={36} iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px', fontFamily: 'Inter' }} />
                     </PieChart>
@@ -688,7 +692,7 @@ const Dashboard = () => {
               <h3 className="font-headline-sm text-headline-sm font-bold font-serif text-on-surface">Recent Ledger Transactions</h3>
               <div className="flex items-center gap-4">
                 <button onClick={() => setShowAllTransactions(!showAllTransactions)} className="text-xs text-primary-container font-semibold hover:underline flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">{showAllTransactions ? 'unfold_less' : 'unfold_more'}</span> 
+                  <span className="material-symbols-outlined text-sm">{showAllTransactions ? 'unfold_less' : 'unfold_more'}</span>
                   {showAllTransactions ? 'Show Recent Only' : 'Show All Transactions'}
                 </button>
                 <button onClick={() => setActiveTab('notifications')} className="text-xs text-primary-container font-semibold hover:underline flex items-center gap-1">

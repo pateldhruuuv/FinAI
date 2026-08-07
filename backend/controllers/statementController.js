@@ -6,6 +6,7 @@ const Subscription = require('../models/Subscription');
 const RecurringTransaction = require('../models/RecurringTransaction');
 const MerchantLearning = require('../models/MerchantLearning');
 const UnknownTransaction = require('../models/UnknownTransaction');
+const DuplicateTransaction = require('../models/DuplicateTransaction');
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8000';
 
@@ -42,7 +43,20 @@ exports.uploadStatement = async (req, res) => {
     const parseResult = await pythonRes.json();
     fs.unlinkSync(filePath); // Cleanup upload file
 
-    const { transactions, subscriptions, recurring_expenses, detected_bank, detected_format, mapped_columns, metadata, reward_points, validations } = parseResult;
+    const { 
+      transactions, 
+      subscriptions, 
+      recurring_expenses, 
+      detected_bank, 
+      detected_format, 
+      mapped_columns, 
+      metadata, 
+      reward_points, 
+      validations,
+      duplicate_summary,
+      duplicate_transactions,
+      duplicate_csv
+    } = parseResult;
 
     // Filter transactions: must contain date and description/particulars compulsorily
     const filteredTransactions = (transactions || []).filter(tx => {
@@ -57,11 +71,64 @@ exports.uploadStatement = async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'No valid transactions (with date and description/particulars) found in statement' });
     }
 
+    // Save removed duplicate transactions separately in MongoDB
+    if (duplicate_transactions && duplicate_transactions.length > 0) {
+      console.log(`Saving ${duplicate_transactions.length} removed duplicate transactions to MongoDB...`);
+      for (const dup of duplicate_transactions) {
+        const dupDoc = new DuplicateTransaction({
+          userId: req.user,
+          date: new Date(dup.date),
+          description: dup.description,
+          merchant: dup.merchant || 'Unknown',
+          category: dup.category || 'Miscellaneous',
+          amount: dup.amount,
+          transactionType: dup.transactionType || 'Debit',
+          referenceNumber: dup.referenceNumber || null,
+          accountNumber: dup.accountNumber || null,
+          currency: dup.currency || 'INR',
+          originalRowNumber: dup.originalRowNumber || null,
+          duplicateRowNumber: dup.duplicateRowNumber || null,
+          reason: dup.reason || 'Duplicate transaction matching Date, Description, and Amounts',
+          sourceFile: req.file.originalname,
+        });
+        await dupDoc.save();
+      }
+    }
+
     console.log(`Successfully parsed ${filteredTransactions.length} valid transactions. Saving to MongoDB...`);
 
     // Save normalized transactions
     const savedTransactions = [];
+    let dbDuplicatesCount = 0;
+
     for (const tx of filteredTransactions) {
+      // Check if this transaction already exists in the database for this user
+      const query = {
+        userId: req.user,
+        date: new Date(tx.date),
+        description: tx.description,
+        amount: tx.amount,
+        transactionType: tx.transactionType,
+      };
+
+      if (tx.referenceNumber) {
+        query.referenceNumber = tx.referenceNumber;
+      } else {
+        query.referenceNumber = { $in: [null, ""] };
+      }
+
+      if (tx.accountNumber) {
+        query.accountNumber = tx.accountNumber;
+      } else {
+        query.accountNumber = { $in: [null, ""] };
+      }
+
+      const existing = await NormalizedTransaction.findOne(query);
+      if (existing) {
+        dbDuplicatesCount++;
+        continue;
+      }
+
       // 1. Save to NormalizedTransaction
       const normalizedTx = new NormalizedTransaction({
         userId: req.user,
@@ -74,6 +141,9 @@ exports.uploadStatement = async (req, res) => {
         balance: tx.balance,
         confidence: tx.confidence,
         is_unknown: tx.is_unknown,
+        referenceNumber: tx.referenceNumber || null,
+        accountNumber: tx.accountNumber || null,
+        currency: tx.currency || 'INR',
       });
       const savedTx = await normalizedTx.save();
       savedTransactions.push(savedTx);
@@ -86,6 +156,9 @@ exports.uploadStatement = async (req, res) => {
         category: tx.category,
         amount: tx.amount,
         type: tx.transactionType, // matches 'Credit' or 'Debit'
+        referenceNumber: tx.referenceNumber || null,
+        accountNumber: tx.accountNumber || null,
+        currency: tx.currency || 'INR',
       });
       await compatTx.save();
 
@@ -141,7 +214,7 @@ exports.uploadStatement = async (req, res) => {
     res.status(201).json({
       status: 'success',
       message: `Parsed statement successfully: detected ${detected_bank} ${detected_format}`,
-      count: filteredTransactions.length,
+      count: savedTransactions.length,
       data: {
         detected_bank,
         detected_format,
@@ -152,7 +225,16 @@ exports.uploadStatement = async (req, res) => {
         recurring_count: recurring_expenses ? recurring_expenses.length : 0,
         metadata: metadata || null,
         reward_points: reward_points || null,
-        validations: validations || null
+        validations: validations || null,
+        duplicate_summary: {
+          total_uploaded: duplicate_summary ? duplicate_summary.total_uploaded : filteredTransactions.length,
+          duplicate_found: (duplicate_summary ? duplicate_summary.duplicate_found : 0) + dbDuplicatesCount,
+          duplicate_removed: (duplicate_summary ? duplicate_summary.duplicate_removed : 0) + dbDuplicatesCount,
+          final_transactions: savedTransactions.length
+        },
+        duplicate_transactions: duplicate_transactions || [],
+        duplicate_csv: duplicate_csv || "",
+        db_duplicates_removed: dbDuplicatesCount
       },
     });
   } catch (err) {

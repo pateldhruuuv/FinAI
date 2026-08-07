@@ -143,6 +143,19 @@ const UploadStatement = () => {
     }
   };
 
+  const downloadDuplicateCSV = () => {
+    if (!parseResult || !parseResult.duplicate_csv) return;
+    const blob = new Blob([parseResult.duplicate_csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'duplicate_transactions.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Category Correction Handling
   const openCorrectionModal = (tx) => {
     setCorrectionModal({ isOpen: true, transaction: tx });
@@ -249,6 +262,23 @@ const UploadStatement = () => {
                 </div>
               )}
 
+              {parseResult && parseResult.duplicate_summary && parseResult.duplicate_summary.duplicate_removed > 0 && (
+                <div className="p-4 rounded-xl border bg-amber-500/10 border-amber-500/20 text-amber-400 flex flex-col gap-1.5 font-serif text-xs animate-fade-in">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-sm">filter_alt_off</span>
+                    <span className="font-bold uppercase tracking-wider">Deduplication Report</span>
+                  </div>
+                  <ul className="list-disc list-inside ml-6 space-y-0.5 text-on-surface-variant font-sans text-[11px]">
+                    {parseResult.duplicate_summary.duplicate_removed - (parseResult.db_duplicates_removed || 0) > 0 && (
+                      <li>{parseResult.duplicate_summary.duplicate_removed - (parseResult.db_duplicates_removed || 0)} duplicate rows within the statement file were removed.</li>
+                    )}
+                    {parseResult.db_duplicates_removed > 0 && (
+                      <li>{parseResult.db_duplicates_removed} transactions were skipped because they already exist in your historical ledger records (double-upload prevention).</li>
+                    )}
+                  </ul>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div
                   onDragOver={handleDragOver}
@@ -325,7 +355,7 @@ const UploadStatement = () => {
               <div className="glass-card rounded-2xl p-6 border border-outline-variant/40 shadow-sm space-y-6 animate-fade-in font-serif">
                 <h3 className="text-sm font-bold text-on-surface uppercase tracking-wider">AI Analysis Output Summary</h3>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="bg-surface-container/30 border border-outline-variant/20 rounded-xl p-4 text-center">
                     <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Detected Bank</span>
                     <strong className="text-sm font-bold text-on-surface">{parseResult.detected_bank}</strong>
@@ -334,9 +364,32 @@ const UploadStatement = () => {
                     <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">File Format</span>
                     <strong className="text-sm font-bold text-on-surface">{parseResult.detected_format}</strong>
                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-surface-container/30 border border-outline-variant/20 rounded-xl p-4 text-center">
-                    <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Transactions</span>
-                    <strong className="text-sm font-bold text-on-surface">{parseResult.total_transactions}</strong>
+                    <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Total Uploaded</span>
+                    <strong className="text-sm font-bold text-on-surface">
+                      {parseResult.duplicate_summary ? parseResult.duplicate_summary.total_uploaded : parseResult.total_transactions}
+                    </strong>
+                  </div>
+                  <div className="bg-surface-container/30 border border-outline-variant/20 rounded-xl p-4 text-center">
+                    <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Duplicates Found</span>
+                    <strong className="text-sm font-bold text-amber-500">
+                      {parseResult.duplicate_summary ? parseResult.duplicate_summary.duplicate_found : 0}
+                    </strong>
+                  </div>
+                  <div className="bg-surface-container/30 border border-outline-variant/20 rounded-xl p-4 text-center">
+                    <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Duplicates Removed</span>
+                    <strong className="text-sm font-bold text-rose-500">
+                      {parseResult.duplicate_summary ? parseResult.duplicate_summary.duplicate_removed : 0}
+                    </strong>
+                  </div>
+                  <div className="bg-surface-container/30 border border-outline-variant/20 rounded-xl p-4 text-center">
+                    <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-sans block mb-1">Final Used</span>
+                    <strong className="text-sm font-bold text-emerald-400">
+                      {parseResult.duplicate_summary ? parseResult.duplicate_summary.final_transactions : parseResult.total_transactions}
+                    </strong>
                   </div>
                 </div>
 
@@ -390,6 +443,60 @@ const UploadStatement = () => {
                     <div className="bg-surface-container-high/40 border border-outline-variant/40 rounded-xl p-4 text-[10px] text-on-surface-variant font-mono whitespace-pre-wrap leading-relaxed">
                       {parseResult.reward_points.join('\n')}
                     </div>
+                  </div>
+                )}
+
+                {parseResult.duplicate_transactions && parseResult.duplicate_transactions.length > 0 && (
+                  <div className="border-t border-outline-variant/30 pt-4 space-y-4">
+                    <details className="group font-sans">
+                      <summary className="flex justify-between items-center font-serif text-xs font-bold text-on-surface uppercase tracking-wider cursor-pointer select-none py-2 hover:text-primary transition-colors">
+                        <span className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
+                          View Removed Transactions ({parseResult.duplicate_transactions.length})
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); downloadDuplicateCSV(); }}
+                          className="px-3 py-1 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/60 rounded-full font-bold text-[9px] text-on-surface flex items-center gap-1.5 cursor-pointer inline-block"
+                        >
+                          <span className="material-symbols-outlined text-[11px]">download</span>
+                          Download CSV
+                        </button>
+                      </summary>
+                      
+                      <div className="overflow-x-auto pt-3 animate-fade-in">
+                        <table className="w-full text-[10px] text-left border-collapse font-serif">
+                          <thead>
+                            <tr className="border-b border-outline-variant/40 text-on-surface-variant font-sans uppercase text-[9px] tracking-wider">
+                              <th className="py-2 px-2">Original Row</th>
+                              <th className="py-2 px-2">Duplicate Row</th>
+                              <th className="py-2 px-2">Date</th>
+                              <th className="py-2 px-2">Description</th>
+                              <th className="py-2 px-2 text-right">Amount</th>
+                              <th className="py-2 px-2 text-right">Type</th>
+                              <th className="py-2 px-2">Reason</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-outline-variant/20 text-on-surface-variant">
+                            {parseResult.duplicate_transactions.map((tx, idx) => (
+                              <tr key={idx} className="hover:bg-surface-container/20">
+                                <td className="py-2.5 px-2 font-bold text-on-surface text-center">{tx.originalRowNumber}</td>
+                                <td className="py-2.5 px-2 font-bold text-on-surface text-center">{tx.duplicateRowNumber}</td>
+                                <td className="py-2.5 px-2 whitespace-nowrap">{tx.date}</td>
+                                <td className="py-2.5 px-2 truncate max-w-[120px]" title={tx.description}>{tx.description}</td>
+                                <td className="py-2.5 px-2 text-right font-bold text-on-surface">₹{tx.amount.toLocaleString('en-IN')}</td>
+                                <td className="py-2.5 px-2 text-right">
+                                  <span className={`text-[9px] font-bold ${tx.transactionType === 'Credit' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    {tx.transactionType}
+                                  </span>
+                                </td>
+                                <td className="py-2.5 px-2 text-[9px] text-on-surface-variant/80 italic max-w-[120px] truncate" title={tx.reason}>{tx.reason}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </details>
                   </div>
                 )}
 

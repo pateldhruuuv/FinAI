@@ -30,6 +30,18 @@ const TransactionSchema = new mongoose.Schema({
     required: [true, 'Type is required'],
     enum: ['Credit', 'Debit'],
   },
+  referenceNumber: {
+    type: String,
+    default: null,
+  },
+  accountNumber: {
+    type: String,
+    default: null,
+  },
+  currency: {
+    type: String,
+    default: 'INR',
+  }
 });
 
 module.exports = mongoose.model('Transaction', TransactionSchema);

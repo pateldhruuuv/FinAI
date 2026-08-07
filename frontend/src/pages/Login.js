@@ -118,7 +118,7 @@ const Login = () => {
           <img 
             alt="Finmate Visual Background" 
             className="w-full h-full object-cover opacity-80" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBupA0KRcLLDn-wS6Ne3ws3ISrEY2nJn86FYtfpp_ScKvdK7NdZT6yYhEHKzoKHWUioNwXlciDCVT-2RTVxQVVD-KjjyoB-v8OCi43EfGjOsalJIWTOac-1QbTqP1hRRTCHX-AzdxWM7ikOoHj3XTssvGeE_L7OeIdiHoRlTHUq_qcQ67F-CiI-yj3UYeHeWf--MHCEqCrQnw23XY_LagF6ByyvE_pn9OV5t9U1K4pQbBkomlsaS6ErPBToW0MLnrr490ejvEMixA" 
+            src="/bg.jpg" 
           />
         </div>
         
@@ -220,7 +220,7 @@ const Login = () => {
               <img 
                 alt="Google Logo" 
                 className="w-5 h-5 opacity-80" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAj0v8Qmrj9mRxzKuVdT4NTsf_u8ARy3ZcZbDSndER3WQbVkAIT2y-APWy3-hbT7gveeDhYLukwa4Xk1NfMcAJ6vDerMhpUFroxOhqLGJ0-yYtXQyUmfVUZMR5qIhh1xzWeEaVCkpL4WNuHyJvVyL7CDq2tLg5Yxi_zFNkTT38NDaBjd2GbmjHaSeyzef3097K9JXSobM6QJJdgVtI2eTndpEjD6roWyr4yxUO2sEMgj3Fb5CjJ5V-_C-GUa3Z4fC3kD9KgCtrDhw" 
+                src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
               />
               {googleSubmitting ? 'Connecting...' : 'Continue with Google'}
             </button>

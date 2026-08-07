@@ -33,6 +33,9 @@ def normalize_transactions(df: pd.DataFrame):
     amount_col = mapped_cols.get("amount")
     type_col = mapped_cols.get("type")
     balance_col = mapped_cols.get("balance")
+    reference_col = mapped_cols.get("reference")
+    account_col = mapped_cols.get("account")
+    currency_col = mapped_cols.get("currency")
     
     normalized_list = []
     
@@ -148,6 +151,19 @@ def normalize_transactions(df: pd.DataFrame):
                 running_balance -= amount
             balance = round(running_balance, 2)
             
+        # Parse reference, account, currency values from mapped columns if they exist
+        reference_val = ""
+        if reference_col and pd.notna(row[reference_col]):
+            reference_val = str(row[reference_col]).strip()
+            
+        account_val = ""
+        if account_col and pd.notna(row[account_col]):
+            account_val = str(row[account_col]).strip()
+            
+        currency_val = "INR"
+        if currency_col and pd.notna(row[currency_col]):
+            currency_val = str(row[currency_col]).strip().upper()
+
         normalized_list.append({
             "date": date_str,
             "description": raw_desc,
@@ -157,7 +173,10 @@ def normalize_transactions(df: pd.DataFrame):
             "transactionType": tx_type,
             "balance": round(balance, 2),
             "confidence": round(confidence, 2),
-            "is_unknown": is_unknown
+            "is_unknown": is_unknown,
+            "referenceNumber": reference_val if reference_val else None,
+            "accountNumber": account_val if account_val else None,
+            "currency": currency_val if currency_val else "INR"
         })
         
     # Sort final transactions by date

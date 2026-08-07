@@ -17,7 +17,10 @@ def map_columns(df: pd.DataFrame):
         "credit": ["credit", "deposit", "cr", "deposit (cr)", "amount (cr)", "cr amount", "cr_amt", "receipt"],
         "amount": ["amount", "txn amount", "transaction amount", "value", "net amount", "amt"],
         "type": ["type", "dr/cr", "cr_dr", "transaction type", "dr_or_cr"],
-        "balance": ["balance", "bal", "running balance", "available balance", "bal (inr)"]
+        "balance": ["balance", "bal", "running balance", "available balance", "bal (inr)"],
+        "reference": ["reference no", "reference number", "ref no", "ref number", "transaction id", "txn id", "chq./ref.no.", "chq/ref no", "reference", "ref", "cheque no", "cheque number", "chq.no."],
+        "account": ["account number", "account no", "acc no", "acc number", "account"],
+        "currency": ["currency", "curr", "ccy"]
     }
     
     # Try to map columns using exact/partial matching
