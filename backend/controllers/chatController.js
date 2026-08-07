@@ -121,6 +121,52 @@ const generateAIResponse = async ({ userId, message, history }) => {
           advisorContext = `[Advisory Calculation - Tax Optimization]: Taxable Income: ₹${resVal.taxableIncome}, Current calculated Tax: ₹${resVal.currentTax}, Potential savings through optimization: ₹${resVal.potentialSavings}. Recommended actions: ${resVal.recommendedInvestments?.join(', ')}.`;
         }
       }
+      
+      // Fallback to general financial coach advisor if specific advisor returned nothing
+      if (!advisorContext) {
+        const Goal = require('../models/Goal');
+        const Portfolio = require('../models/Portfolio');
+        const goals = await Goal.find({ userId });
+        const portfolio = await Portfolio.findOne({ userId });
+
+        const inputGoals = goals.map(g => ({
+          goalName: g.goalName,
+          targetAmount: g.targetAmount,
+          currentSavings: g.currentSavings,
+        }));
+
+        const portfolioData = portfolio ? {
+          stocks: portfolio.stocks,
+          mutual_funds: portfolio.mutualFunds,
+          gold: portfolio.gold,
+          fd: portfolio.fd,
+          crypto: portfolio.crypto,
+          property: portfolio.property,
+        } : {};
+
+        const response = await fetch(`${AI_SERVICE_URL}/financial-coach`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question: message,
+            age: context.age || 30,
+            income: context.income || 50000,
+            expenses: context.expenses || 0,
+            savings: context.savings || 0,
+            debt: context.debt || 0,
+            goals: inputGoals,
+            investments: portfolioData,
+            insurance: {
+              current_coverage: 1000000,
+            },
+          }),
+        });
+
+        if (response.ok) {
+          const resVal = await response.json();
+          advisorContext = `[Advisory Calculation - Financial Coach Advice]: ${resVal.reply}`;
+        }
+      }
     } catch (err) {
       console.warn("Under-the-hood calculations failed in chat controller:", err.message);
     }

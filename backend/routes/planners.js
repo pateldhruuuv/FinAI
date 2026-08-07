@@ -5,7 +5,11 @@ const plannerController = require('../controllers/plannerController');
 
 // Goal planner routes
 router.post('/goals/create', auth, plannerController.createGoal);
+router.post('/goals', auth, plannerController.createGoal);
 router.get('/goals', auth, plannerController.getGoals);
+
+// Emergency fund routes
+router.get('/emergency-fund', auth, plannerController.calculateEmergencyFund);
 
 // Trip planner routes
 router.post('/trip-planner', auth, plannerController.planTrip);

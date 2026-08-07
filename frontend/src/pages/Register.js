@@ -119,13 +119,13 @@ const Register = () => {
         {/* Visual Overlay Image */}
         <div className="absolute inset-0 w-full h-full opacity-40 md:opacity-60 bg-gradient-to-tr from-surface via-transparent to-primary/10 z-10 pointer-events-none"></div>
         <div className="h-full w-full absolute inset-0 select-none pointer-events-none z-0">
-          <img 
-            alt="Finmate Visual Background" 
-            className="w-full h-full object-cover opacity-80" 
-            src="/bg.jpg" 
+          <img
+            alt="Finmate Visual Background"
+            className="w-full h-full object-cover opacity-80"
+            src="/bg.jpg"
           />
         </div>
-        
+
         {/* Brand Label Overlay */}
         <div className="absolute top-8 left-8 z-20 flex items-center gap-2">
           <span className="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-on-primary-container font-semibold">
@@ -146,7 +146,7 @@ const Register = () => {
       {/* Right Side: Registration Card */}
       <section className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12 relative z-20 bg-surface">
         <div className="w-full max-w-md glass-card rounded-2xl p-8 md:p-10 shadow-2xl relative overflow-hidden animate-fade-in">
-          
+
           {/* Form Header */}
           <div className="mb-6">
             <h2 className="font-headline-lg text-headline-lg text-on-surface mb-2 font-serif">Create Account</h2>
@@ -165,13 +165,13 @@ const Register = () => {
               <label className="text-xs font-semibold text-on-surface-variant block ml-1" htmlFor="name">
                 Full Name
               </label>
-              <input 
-                id="name" 
+              <input
+                id="name"
                 type="text"
-                placeholder="John Doe" 
+                placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all text-sm" 
+                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all text-sm"
                 required
               />
             </div>
@@ -180,13 +180,13 @@ const Register = () => {
               <label className="text-xs font-semibold text-on-surface-variant block ml-1" htmlFor="email">
                 Email Address
               </label>
-              <input 
-                id="email" 
+              <input
+                id="email"
                 type="email"
-                placeholder="john@example.com" 
+                placeholder="john@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all text-sm" 
+                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all text-sm"
                 required
               />
             </div>
@@ -195,18 +195,18 @@ const Register = () => {
               <label className="text-xs font-semibold text-on-surface-variant block ml-1" htmlFor="password">
                 Password
               </label>
-              <input 
-                id="password" 
+              <input
+                id="password"
                 type="password"
-                placeholder="Min. 6 characters" 
+                placeholder="Min. 6 characters"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all text-sm" 
+                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all text-sm"
                 required
               />
             </div>
 
-            <button 
+            <button
               type="submit"
               disabled={submitting || googleSubmitting}
               className="w-full bg-primary-container hover:bg-primary text-on-primary-container font-semibold py-3 rounded-full transition-all duration-300 transform active:scale-[0.98] shadow-lg shadow-primary-container/20 flex items-center justify-center gap-2 cursor-pointer mt-4"
@@ -225,16 +225,16 @@ const Register = () => {
 
           {/* Social Sign-In */}
           <div className="grid grid-cols-1 gap-3">
-            <button 
+            <button
               type="button"
               onClick={() => triggerGoogleLogin()}
               disabled={googleSubmitting || submitting}
               className="w-full border border-outline-variant hover:bg-surface-container/60 py-2.5 px-4 rounded-xl flex items-center justify-center gap-3 font-semibold text-on-surface transition-all duration-200 cursor-pointer text-sm"
             >
-              <img 
-                alt="Google Logo" 
-                className="w-4.5 h-4.5 opacity-80" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAj0v8Qmrj9mRxzKuVdT4NTsf_u8ARy3ZcZbDSndER3WQbVkAIT2y-APWy3-hbT7gveeDhYLukwa4Xk1NfMcAJ6vDerMhpUFroxOhqLGJ0-yYtXQyUmfVUZMR5qIhh1xzWeEaVCkpL4WNuHyJvVyL7CDq2tLg5Yxi_zFNkTT38NDaBjd2GbmjHaSeyzef3097K9JXSobM6QJJdgVtI2eTndpEjD6roWyr4yxUO2sEMgj3Fb5CjJ5V-_C-GUa3Z4fC3kD9KgCtrDhw" 
+              <img
+                alt="Google Logo"
+                className="w-4.5 h-4.5 opacity-80"
+                src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
               />
               {googleSubmitting ? 'Connecting...' : 'Continue with Google'}
             </button>

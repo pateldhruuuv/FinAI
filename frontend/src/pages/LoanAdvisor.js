@@ -36,9 +36,16 @@ const LoanAdvisor = () => {
       };
 
       const res = await axios.post('/loan-advisor', payload);
-      setResult(res.data.data);
+      const apiData = res.data.data;
+      setResult({
+        creditRiskLevel: apiData.loanRisk,
+        maxSafeEmi: apiData.maximumEmi,
+        additionalEmiBuffer: Math.max(apiData.maximumEmi - payload.currentEmi, 0),
+        eligibleLimits: apiData.breakdown || {},
+      });
       setLoading(false);
     } catch (err) {
+
       console.error(err);
       setError(err.response?.data?.message || 'Failed to analyze loan eligibility');
       setLoading(false);

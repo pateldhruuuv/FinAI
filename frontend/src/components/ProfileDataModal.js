@@ -44,53 +44,67 @@ const ProfileDataModal = () => {
   };
 
   return (
-    <div style={styles.overlay}>
-      <div className="glass-card animate-fade-in" style={styles.modal}>
-        <h2 style={styles.title}>Complete Your Profile</h2>
-        <p style={styles.subtitle}>
-          To unlock the advisor calculations and financial insights, please verify your age and monthly income.
-        </p>
+    <div className="fixed inset-0 w-screen h-screen bg-black/85 backdrop-blur-md z-[9999] flex items-center justify-center p-6">
+      <div className="glass-card rounded-2xl p-8 md:p-10 shadow-2xl relative overflow-hidden animate-fade-in w-full max-w-md border border-outline-variant/30">
+        
+        {/* Header */}
+        <div className="mb-6 text-center">
+          <h2 className="font-serif text-2xl font-bold tracking-tight text-on-surface mb-2">
+            Complete Your Profile
+          </h2>
+          <p className="font-sans text-sm text-on-surface-variant leading-relaxed">
+            To unlock the advisor calculations and financial insights, please verify your age and monthly income.
+          </p>
+        </div>
 
-        {error && <div className="alert alert-error" style={{ marginBottom: '16px' }}>{error}</div>}
+        {/* Error Alert */}
+        {error && (
+          <div className="alert bg-error-container/20 border-l-4 border-error text-error p-4 rounded-xl text-sm mb-6">
+            {error}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="modal-age">Current Age</label>
-            <div style={styles.inputWrapper}>
-              <Calendar size={18} style={styles.inputIcon} />
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-on-surface-variant block ml-1" htmlFor="modal-age">
+              Current Age
+            </label>
+            <div className="relative flex items-center">
+              <Calendar size={18} className="absolute left-4 text-on-surface-variant/60 pointer-events-none" />
               <input
                 id="modal-age"
                 type="number"
-                className="form-input"
                 placeholder="25"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
-                style={styles.inputWithIcon}
+                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl pl-11 pr-4 py-2.5 text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all text-sm animate-none"
+                required
               />
             </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="modal-income">Monthly Income (₹)</label>
-            <div style={styles.inputWrapper}>
-              <Wallet size={18} style={styles.inputIcon} />
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-on-surface-variant block ml-1" htmlFor="modal-income">
+              Monthly Income (₹)
+            </label>
+            <div className="relative flex items-center">
+              <Wallet size={18} className="absolute left-4 text-on-surface-variant/60 pointer-events-none" />
               <input
                 id="modal-income"
                 type="number"
-                className="form-input"
                 placeholder="50000"
                 value={income}
                 onChange={(e) => setIncome(e.target.value)}
-                style={styles.inputWithIcon}
+                className="w-full bg-surface-container/60 border border-outline-variant rounded-xl pl-11 pr-4 py-2.5 text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all text-sm animate-none"
+                required
               />
             </div>
           </div>
 
           <button
             type="submit"
-            className="btn btn-primary"
-            style={styles.submitBtn}
             disabled={submitting}
+            className="w-full bg-primary-container hover:bg-primary text-on-primary-container font-semibold py-3 rounded-full transition-all duration-300 transform active:scale-[0.98] shadow-lg shadow-primary-container/20 flex items-center justify-center gap-2 cursor-pointer mt-6"
           >
             <Check size={18} />
             {submitting ? 'Saving Profile...' : 'Unlock Features'}
@@ -99,71 +113,6 @@ const ProfileDataModal = () => {
       </div>
     </div>
   );
-};
-
-const styles = {
-  overlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100vw',
-    height: '100vh',
-    backgroundColor: 'rgba(3, 7, 18, 0.85)',
-    backdropFilter: 'blur(10px)',
-    zIndex: 9999,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: '24px',
-  },
-  modal: {
-    width: '100%',
-    maxWidth: '440px',
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-  },
-  title: {
-    fontSize: '22px',
-    marginBottom: '8px',
-    color: '#ffffff',
-    fontFamily: 'Outfit, sans-serif',
-    fontWeight: 700,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: '13px',
-    color: '#94a3b8',
-    marginBottom: '20px',
-    lineHeight: '1.5',
-    textAlign: 'center',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  inputWrapper: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  inputIcon: {
-    position: 'absolute',
-    left: '14px',
-    color: '#64748b',
-    pointerEvents: 'none',
-  },
-  inputWithIcon: {
-    paddingLeft: '44px',
-    width: '100%',
-  },
-  submitBtn: {
-    marginTop: '12px',
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '8px',
-  },
 };
 
 export default ProfileDataModal;
