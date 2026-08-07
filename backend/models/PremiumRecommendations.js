@@ -22,10 +22,6 @@ const PremiumRecommendationsSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
-  purchaseAdvice: {
-    type: String,
-    default: '',
-  },
   debtAdvice: {
     type: String,
     default: '',

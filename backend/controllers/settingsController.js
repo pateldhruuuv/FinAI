@@ -22,7 +22,6 @@ const Conversation = require('../models/Conversation');
 const Loans = require('../models/Loans');
 const Portfolio = require('../models/Portfolio');
 const PremiumRecommendations = require('../models/PremiumRecommendations');
-const PurchaseHistory = require('../models/PurchaseHistory');
 const RecommendationHistory = require('../models/RecommendationHistory');
 const Reports = require('../models/Reports');
 const TaxAnalysis = require('../models/TaxAnalysis');
@@ -520,7 +519,6 @@ exports.deleteAccount = async (req, res) => {
     await Notification.deleteMany({ userId });
     await Portfolio.deleteMany({ userId });
     await PremiumRecommendations.deleteMany({ userId });
-    await PurchaseHistory.deleteMany({ userId });
     await Recommendation.deleteMany({ userId });
     await RecommendationHistory.deleteMany({ userId });
     await RecurringTransaction.deleteMany({ userId });

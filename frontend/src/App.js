@@ -24,7 +24,6 @@ import PremiumDashboard from './pages/PremiumDashboard';
 import TaxOptimizer from './pages/TaxOptimizer';
 import LoanAdvisor from './pages/LoanAdvisor';
 import InsuranceGap from './pages/InsuranceGap';
-import PurchaseAdvisor from './pages/PurchaseAdvisor';
 import WhatIfSimulator from './pages/WhatIfSimulator';
 import PortfolioRisk from './pages/PortfolioRisk';
 import StockAdvisor from './pages/StockAdvisor';
@@ -127,14 +126,6 @@ function App() {
               element={
                 <PremiumProtectedRoute>
                   <InsuranceGap />
-                </PremiumProtectedRoute>
-              }
-            />
-            <Route
-              path="/purchase-advisor"
-              element={
-                <PremiumProtectedRoute>
-                  <PurchaseAdvisor />
                 </PremiumProtectedRoute>
               }
             />

@@ -51,7 +51,6 @@ const PremiumDashboard = () => {
     goalsProgress,
     taxSavings,
     loanEligibility,
-    purchaseScore,
     digitalTwin,
     plots
   } = data;
@@ -87,7 +86,6 @@ const PremiumDashboard = () => {
               { to: '/tax-optimizer', icon: 'percent', label: 'Tax Optimizer', color: 'text-indigo-400' },
               { to: '/loan-advisor', icon: 'scale', label: 'Loan Advisor', color: 'text-blue-400' },
               { to: '/insurance-gap', icon: 'shield', label: 'Insurance Gap', color: 'text-emerald-400' },
-              { to: '/purchase-advisor', icon: 'payments', label: 'Purchase Advisor', color: 'text-amber-400' },
               { to: '/what-if', icon: 'query_stats', label: 'What-If Simulator', color: 'text-pink-400' },
               { to: '/portfolio-risk', icon: 'pie_chart', label: 'Portfolio Risk', color: 'text-orange-400' },
               { to: '/stock-advisor', icon: 'trending_up', label: 'Stock Advisor', color: 'text-emerald-400' },

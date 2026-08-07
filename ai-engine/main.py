@@ -601,15 +601,6 @@ class InsuranceGapRequest(BaseModel):
     dependents: int
     income: float
 
-class PurchaseAdvisorRequest(BaseModel):
-    item: str
-    cost: float
-    income: float
-    savings: float
-    goals_target: float
-    debt: float
-    emergency_fund: float
-    investments: float
 
 class WhatIfGoal(BaseModel):
     goalName: str
@@ -876,79 +867,6 @@ def get_insurance_gap(data: InsuranceGapRequest):
     }
 
 
-@app.post("/purchase-advisor")
-def get_purchase_advice(data: PurchaseAdvisorRequest):
-    # Purchase Score calculation: starts at 100, subtracts risk factors
-    score = 100
-    
-    # 1. Cost relative to monthly income
-    if data.income > 0:
-        cost_income_ratio = data.cost / data.income
-        if cost_income_ratio > 3.0:
-            score -= 30
-        elif cost_income_ratio > 1.0:
-            score -= 15
-        elif cost_income_ratio > 0.5:
-            score -= 5
-            
-    # 2. Cost relative to savings minus emergency fund
-    usable_savings = data.savings - data.emergency_fund
-    if usable_savings <= 0:
-        score -= 40
-    elif data.cost > usable_savings:
-        excess = data.cost - usable_savings
-        # scale deduction
-        score -= min(int((excess / data.cost) * 35), 35)
-
-    # 3. Debt to income ratio
-    if data.income > 0:
-        debt_ratio = data.debt / data.income
-        if debt_ratio > 0.40:
-            score -= 25
-        elif debt_ratio > 0.20:
-            score -= 10
-
-    score = max(score, 0)
-
-    # Recommendation
-    if score >= 75:
-        status = "Buy"
-    elif score >= 45:
-        status = "Wait"
-    else:
-        status = "Avoid"
-
-    # Suggest alternative options
-    refurbished = f"Refurbished model estimated at ₹{data.cost * 0.65:,.0f} (saves 35%)"
-    second_hand = f"Good-condition pre-owned estimated at ₹{data.cost * 0.50:,.0f} (saves 50%)"
-    
-    # EMI calculation: 6-month EMI at 12% p.a.
-    r = 0.12 / 12
-    emi_val = data.cost * r * (1+r)**6 / ((1+r)**6 - 1) if data.cost > 0 else 0
-    emi = f"₹{emi_val:,.0f}/month for 6 months at 12% p.a. interest"
-    
-    # Better alternative suggestion
-    item_lower = data.item.lower()
-    if "iphone" in item_lower:
-        alt = "Look for last year's base model or a premium Android flag-ship, saving up to ₹25,000."
-    elif "bike" in item_lower:
-        alt = "Consider a high-mileage commuter bike or public transit pass to keep transportation expenses low."
-    elif "laptop" in item_lower:
-        alt = "Opt for a mid-range model with upgradeable RAM rather than a top-tier premium workstation."
-    else:
-        alt = "Rent it first if it is for one-time use, or wait for seasonal clearance/discount events."
-
-    return {
-        "status": "success",
-        "purchase_score": score,
-        "status_recommendation": status,
-        "suggestions": {
-            "refurbishedOption": refurbished,
-            "emiOption": emi,
-            "secondHandOption": second_hand,
-            "betterAlternative": alt
-        }
-    }
 
 
 @app.post("/what-if")

@@ -5,7 +5,6 @@ const bcrypt = require('bcryptjs');
 
 // Load models
 const User = require('./models/User');
-const PurchaseHistory = require('./models/PurchaseHistory');
 const Portfolio = require('./models/Portfolio');
 const Loans = require('./models/Loans');
 const TaxAnalysis = require('./models/TaxAnalysis');
@@ -16,8 +15,6 @@ dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/finpilot';
 
-const ITEMS = ['iPhone 15 Pro', 'Sport Commuter Bike', 'Developer Workstation Laptop', 'PlayStation 5 Console', 'Apple Watch Series 9', 'Sony Noise Canceling Headphones', 'Ergonomic Desk Chair', '4K Smart TV', 'iPad Air', 'Mirrorless Camera'];
-const STATUSES = ['Buy', 'Wait', 'Avoid'];
 const DIVERSIFICATIONS = ['Low', 'Medium', 'High'];
 const RISKS = ['Low', 'Medium', 'High'];
 
@@ -39,7 +36,6 @@ const seedData = async () => {
 
     console.log(`Deleting existing records for ${oldUserIds.length} old seed users...`);
     await User.deleteMany({ email: { $in: seedEmails } });
-    await PurchaseHistory.deleteMany({ userId: { $in: oldUserIds } });
     await Portfolio.deleteMany({ userId: { $in: oldUserIds } });
     await Loans.deleteMany({ userId: { $in: oldUserIds } });
     await TaxAnalysis.deleteMany({ userId: { $in: oldUserIds } });
@@ -64,29 +60,6 @@ const seedData = async () => {
     const insertedUsers = await User.insertMany(usersToInsert);
     const userIds = insertedUsers.map(u => u._id);
     console.log(`Successfully seeded 500 Premium Users`);
-
-    // 1000 Purchase records
-    console.log('Seeding 1000 Purchase Records...');
-    const purchases = [];
-    for (let i = 0; i < 1000; i++) {
-      const uId = userIds[i % 500];
-      const cost = Math.floor(Math.random() * 150000) + 10000;
-      purchases.push({
-        userId: uId,
-        item: `${ITEMS[i % ITEMS.length]} #${i + 1}`,
-        cost,
-        purchaseScore: Math.floor(Math.random() * 70) + 25, // 25 to 95
-        status: STATUSES[i % STATUSES.length],
-        suggestions: {
-          refurbishedOption: `Refurbished model estimated at ₹${Math.round(cost * 0.65).toLocaleString()}`,
-          secondHandOption: `Second-hand pre-owned estimated at ₹${Math.round(cost * 0.5).toLocaleString()}`,
-          emiOption: `₹${Math.round((cost * 1.06) / 6).toLocaleString()}/month for 6 months`,
-          betterAlternative: 'Consider renting or purchasing last year’s base model.',
-        },
-      });
-    }
-    await PurchaseHistory.insertMany(purchases);
-    console.log('Successfully seeded 1000 Purchase Records');
 
     // 500 Portfolio records
     console.log('Seeding 500 Portfolio Records...');

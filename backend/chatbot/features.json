@@ -91,15 +91,6 @@
       "examples": ["Am I eligible for a home loan?", "What is my maximum safe EMI?"]
     },
     {
-      "id": "purchase_advisor",
-      "name": "Premium Purchase Affordability Advisor",
-      "premium": true,
-      "description": "Analyzes costs and items (e.g. buying an iPhone) against monthly parameters, goals, and savings to give a purchase score and Buy/Wait/Avoid advice.",
-      "related_modules": ["AI Assistant"],
-      "supported_actions": ["evaluate purchase affordability", "calculate purchase score", "check EMI alternatives"],
-      "examples": ["Can I afford a ₹1,00,000 laptop?", "Should I buy a new phone now?"]
-    },
-    {
       "id": "financial_twin",
       "name": "Premium Financial Twin",
       "premium": true,

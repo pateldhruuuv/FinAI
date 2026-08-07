@@ -23,7 +23,7 @@ const buildChatPrompt = ({ message, context, history, advisorContext }) => {
   return `You are FinPilot, a helpful financial assistant inside a personal finance app.
 
 CRITICAL INSTRUCTIONS:
-- You must ONLY answer questions regarding the user's financial details, portfolios, goals, tax optimization, loan eligibility, debt rescue, and purchase affordability in this app.
+- You must ONLY answer questions regarding the user's financial details, portfolios, goals, tax optimization, loan eligibility, and debt rescue in this app.
 - If the user asks general questions outside personal finance or this project (e.g. "who is the president", "explain photosynthesis", "write python code", "how to build a house"), you MUST decline politely: "I am your FinPilot assistant. I can only help you with questions related to your personal finances, investments, goals, and advisor utilities in this application."
 - Under no circumstances answer off-topic questions.
 - If a calculation result is provided under "Advisory Calculations", use those exact numbers and rephrase them nicely in a conversational, helpful personal advisor tone.
@@ -355,30 +355,7 @@ exports.chat = async (req, res) => {
           const resVal = await response.json();
           advisorContext = `[Advisory Calculation - Tax Optimization]: Taxable Income: ₹${resVal.taxableIncome}, Current calculated Tax: ₹${resVal.currentTax}, Potential savings through optimization: ₹${resVal.potentialSavings}. Recommended actions: ${resVal.recommendedInvestments?.join(', ')}.`;
         }
-      } else if (qLower.includes('buy') || qLower.includes('purchase') || qLower.includes('afford')) {
-        const priceMatch = message.match(/\b\d{4,8}\b/);
-        const cost = priceMatch ? parseFloat(priceMatch[0]) : 50000;
-        const item = message.match(/(?:buy|purchase|for)\s+([a-zA-Z0-9\s]+)/i)?.[1] || "planned purchase";
-        
-        const response = await fetch(`${AI_SERVICE_URL}/purchase-advisor`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            item,
-            cost,
-            income: context.income || 50000,
-            savings: context.savings || 10000,
-            goals_target: 200000,
-            debt: context.debt || 0,
-            emergency_fund: context.savings || 10000,
-            investments: 0,
-          }),
-        });
-        if (response.ok) {
-          const resVal = await response.json();
-          advisorContext = `[Advisory Calculation - Purchase Affordability]: Purchase Score: ${resVal.purchaseScore}/100, Advice Status: ${resVal.status} (Buy, Wait, or Avoid). Suggestions: Refurbished: ${resVal.suggestions?.refurbishedOption}, EMI option: ${resVal.suggestions?.emiOption}, Alternative: ${resVal.suggestions?.betterAlternative}.`;
-        }
-      }
+
     } catch (err) {
       console.warn("Under-the-hood intent calculations failed:", err.message);
     }

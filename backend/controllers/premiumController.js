@@ -3,7 +3,6 @@ const Transaction = require('../models/Transaction');
 const Goal = require('../models/Goal');
 const TaxAnalysis = require('../models/TaxAnalysis');
 const Loans = require('../models/Loans');
-const PurchaseHistory = require('../models/PurchaseHistory');
 const Portfolio = require('../models/Portfolio');
 const FinancialTwin = require('../models/FinancialTwin');
 const Reports = require('../models/Reports');
@@ -31,7 +30,7 @@ const buildChatPrompt = ({ message, context, history, advisorContext }) => {
   return `You are Finmate, a helpful financial assistant inside a personal finance app.
 
 CRITICAL INSTRUCTIONS:
-- You must ONLY answer questions regarding the user's financial details, portfolios, goals, tax optimization, loan eligibility, debt rescue, and purchase affordability in this app.
+- You must ONLY answer questions regarding the user's financial details, portfolios, goals, tax optimization, loan eligibility, and debt rescue in this app.
 - If the user asks general questions outside personal finance or this project (e.g. "who is the president", "explain photosynthesis", "write python code", "how to build a house"), you MUST decline politely: "I am your Finmate assistant. I can only help you with questions related to your personal finances, investments, goals, and advisor utilities in this application."
 - Under no circumstances answer off-topic questions.
 - If a calculation result is provided under "Advisory Calculations", use those exact numbers and rephrase them nicely in a conversational, helpful personal advisor tone.
@@ -369,87 +368,6 @@ exports.getInsuranceGapAnalysis = async (req, res) => {
   }
 };
 
-// FEATURE 4: Purchase Advisor
-exports.getPurchaseAdvice = async (req, res) => {
-  try {
-    const { item, cost } = req.body;
-    if (!item || cost === undefined) {
-      return res.status(400).json({ status: 'error', message: 'Item name and cost are required' });
-    }
-
-    const context = await getUserFinancialContext(req.user);
-    const goals = await Goal.find({ userId: req.user });
-    const goalsTarget = goals.reduce((acc, g) => acc + g.targetAmount, 0);
-    const portfolio = await Portfolio.findOne({ userId: req.user });
-    
-    // Accumulate total investments
-    const totalInvestments = portfolio
-      ? (portfolio.stocks + portfolio.mutualFunds + portfolio.gold + portfolio.fd + portfolio.crypto + portfolio.property)
-      : 0;
-
-    // Call Python FastAPI
-    const response = await fetch(`${AI_SERVICE_URL}/purchase-advisor`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        item,
-        cost: parseFloat(cost),
-        income: context.income,
-        savings: context.savings + totalInvestments, // Liquid + investments
-        goals_target: goalsTarget,
-        debt: context.debt,
-        emergency_fund: context.expenses * 3, // assume emergency fund target is 3 months expenses
-        investments: totalInvestments,
-      }),
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      return res.status(response.status).json({ status: 'error', message: `AI Service Error: ${errText}` });
-    }
-
-    const result = await response.json();
-
-    // Save to Database
-    const purchase = new PurchaseHistory({
-      userId: req.user,
-      item,
-      cost: parseFloat(cost),
-      purchaseScore: result.purchase_score,
-      status: result.status_recommendation,
-      suggestions: {
-        refurbishedOption: result.suggestions.refurbishedOption,
-        emiOption: result.suggestions.emiOption,
-        secondHandOption: result.suggestions.secondHandOption,
-        betterAlternative: result.suggestions.betterAlternative,
-      },
-    });
-    await purchase.save();
-
-    // Update Centralized recommendations
-    await PremiumRecommendations.findOneAndUpdate(
-      { userId: req.user },
-      {
-        purchaseAdvice: `Buying ${item} (₹${cost.toLocaleString()}): Decision is ${result.status_recommendation} (Score: ${result.purchase_score}/100). Alternative: ${result.suggestions.betterAlternative}`,
-        updatedAt: Date.now(),
-      },
-      { upsert: true, new: true }
-    );
-
-    res.json({
-      status: 'success',
-      data: {
-        purchaseScore: result.purchase_score,
-        status: result.status_recommendation,
-        suggestions: result.suggestions,
-        id: purchase._id,
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ status: 'error', message: err.message || 'Server error during purchase advisory' });
-  }
-};
 
 // FEATURE 5: What-If Simulator
 exports.runWhatIfSimulation = async (req, res) => {
@@ -849,7 +767,6 @@ exports.getPremiumDashboardData = async (req, res) => {
     const goals = await Goal.find({ userId: req.user });
     const tax = await TaxAnalysis.findOne({ userId: req.user }).sort({ createdAt: -1 });
     const loan = await Loans.findOne({ userId: req.user }).sort({ createdAt: -1 });
-    const purchase = await PurchaseHistory.findOne({ userId: req.user }).sort({ createdAt: -1 });
 
     const totalInvestments = portfolio
       ? (portfolio.stocks + portfolio.mutualFunds + portfolio.gold + portfolio.fd + portfolio.crypto + portfolio.property)
@@ -1014,7 +931,7 @@ exports.getPremiumDashboardData = async (req, res) => {
         goalsProgress: goals.map(g => ({ name: g.goalName, target: g.targetAmount, current: g.currentSavings, progress: g.progress })),
         taxSavings: tax ? { oldTax: tax.currentTax, potentialSavings: tax.potentialSavings } : null,
         loanEligibility: loan ? { eligibleAmount: loan.eligibleAmount, safeEmi: loan.safeEmi, maxEmi: loan.maximumEmi } : null,
-        purchaseScore: purchase ? { item: purchase.item, score: purchase.purchaseScore, status: purchase.status } : null,
+        purchaseScore: null,
         digitalTwin: {
           financialAge: twinRecord.financialAge,
           riskLevel: twinRecord.riskLevel,

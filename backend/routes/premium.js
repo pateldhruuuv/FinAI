@@ -7,7 +7,6 @@ const premiumController = require('../controllers/premiumController');
 // All routes here require authentication and premium authorization
 router.post('/tax-optimizer', auth, premiumAuth, premiumController.getTaxOptimization);
 router.post('/loan-advisor', auth, premiumAuth, premiumController.getLoanAdvice);
-router.post('/purchase-advisor', auth, premiumAuth, premiumController.getPurchaseAdvice);
 router.post('/insurance-gap', auth, premiumAuth, premiumController.getInsuranceGapAnalysis);
 router.post('/portfolio-risk', auth, premiumAuth, premiumController.getPortfolioRiskAnalysis);
 router.post('/financial-report', auth, premiumAuth, premiumController.generateFinancialReport);
