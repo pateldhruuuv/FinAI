@@ -302,7 +302,7 @@ const Settings = () => {
     e.preventDefault();
     try {
       setSubmitLoading(true);
-      const res = await axios.put('/notifications/settings', { notifications: notificationsData });
+      const res = await axios.put('/notifications', notificationsData);
       if (res.data.status === 'success') {
         setUser(res.data.user);
         showToast('Alert preferences updated successfully!');

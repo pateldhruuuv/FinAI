@@ -343,7 +343,12 @@ exports.updateNotifications = async (req, res) => {
     if (subscriptionRenewal !== undefined) user.notifications.subscriptionRenewal = subscriptionRenewal;
     if (goalAchievement !== undefined) user.notifications.goalAchievement = goalAchievement;
     if (marketNews !== undefined) user.notifications.marketNews = marketNews;
-    if (aiRecommendation !== undefined) user.notifications.aiRecommendation = aiRecommendation;
+    if (aiRecommendation !== undefined) {
+      user.notifications.aiRecommendation = aiRecommendation;
+      if (aiRecommendation === false) {
+        await Notification.deleteMany({ userId: req.user });
+      }
+    }
 
     await user.save();
 

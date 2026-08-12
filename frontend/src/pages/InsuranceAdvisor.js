@@ -126,7 +126,7 @@ const InsuranceAdvisor = () => {
               className="w-full bg-primary-container hover:bg-primary text-on-primary-container font-semibold py-3 rounded-full transition-all flex items-center justify-center gap-2 cursor-pointer text-sm shadow-md"
               disabled={loading}
             >
-              <span className="material-symbols-outlined text-md">shield_check</span>
+              <span className="material-symbols-outlined text-md">shield</span>
               {loading ? 'Analyzing Risks...' : 'Evaluate Insurance Options'}
             </button>
           </form>
@@ -221,7 +221,7 @@ const InsuranceAdvisor = () => {
             </div>
           ) : (
             <div className="glass-card rounded-2xl p-12 border border-outline-variant/40 shadow-sm text-center flex flex-col items-center justify-center min-h-[300px] border-dashed">
-              <span className="material-symbols-outlined text-5xl text-on-surface-variant/40 mb-4">shield_alert</span>
+              <span className="material-symbols-outlined text-5xl text-on-surface-variant/40 mb-4">shield</span>
               <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface font-serif">Awaiting Parameter Diagnostics</h3>
               <p className="text-sm text-on-surface-variant max-w-sm mt-2 font-serif leading-relaxed">
                 Provide dependents parameters to check your protection pool values and check CSR providers ratios.

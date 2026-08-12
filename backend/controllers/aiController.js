@@ -355,7 +355,7 @@ exports.chat = async (req, res) => {
           const resVal = await response.json();
           advisorContext = `[Advisory Calculation - Tax Optimization]: Taxable Income: ₹${resVal.taxableIncome}, Current calculated Tax: ₹${resVal.currentTax}, Potential savings through optimization: ₹${resVal.potentialSavings}. Recommended actions: ${resVal.recommendedInvestments?.join(', ')}.`;
         }
-
+      }
     } catch (err) {
       console.warn("Under-the-hood intent calculations failed:", err.message);
     }

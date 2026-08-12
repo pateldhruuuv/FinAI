@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
@@ -7,8 +7,19 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line
 } from 'recharts';
 
+const formatDateToMMDDYYYY = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+  const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(date.getUTCDate()).padStart(2, '0');
+  const yyyy = date.getUTCFullYear();
+  return `${mm}-${dd}-${yyyy}`;
+};
+
 const Dashboard = () => {
   const { user, t } = useContext(AuthContext);
+  const datePickerRef = useRef(null);
   const [activeTab, setActiveTab] = useState('overview');
 
   // Dashboard Overview States
@@ -236,10 +247,32 @@ const Dashboard = () => {
     }
   };
 
+  const handleGoalDateChange = (e) => {
+    let val = e.target.value;
+    val = val.replace(/\D/g, '');
+    val = val.slice(0, 8);
+    let formatted = '';
+    if (val.length > 0) {
+      formatted += val.slice(0, 2);
+    }
+    if (val.length > 2) {
+      formatted += '-' + val.slice(2, 4);
+    }
+    if (val.length > 4) {
+      formatted += '-' + val.slice(4, 8);
+    }
+    setGoalDate(formatted);
+  };
+
   const handleCreateGoal = async (e) => {
     e.preventDefault();
     if (!goalName || !goalTarget || !goalSavings || !goalDate) {
       alert('Please fill in all goal fields');
+      return;
+    }
+    const dateRegex = /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])-\d{4}$/;
+    if (!dateRegex.test(goalDate)) {
+      alert('Please enter deadline date in MM-DD-YYYY format (e.g. 08-15-2026)');
       return;
     }
     try {
@@ -717,7 +750,7 @@ const Dashboard = () => {
                   <tbody>
                     {(showAllTransactions ? recentTransactions : recentTransactions.slice(0, 8)).map((tx) => (
                       <tr key={tx._id} className="border-b border-outline-variant/20 hover:bg-surface-container/30 transition-colors">
-                        <td className="py-3.5 px-4 text-sm text-on-surface-variant font-serif">{new Date(tx.date).toLocaleDateString()}</td>
+                        <td className="py-3.5 px-4 text-sm text-on-surface-variant font-serif">{formatDateToMMDDYYYY(tx.date)}</td>
                         <td className="py-3.5 px-4 text-sm text-on-surface font-semibold font-serif">{tx.description}</td>
                         <td className="py-3.5 px-4 text-sm">
                           <span className="px-2.5 py-1 text-xs bg-surface-container-high border border-outline-variant/40 rounded-lg text-on-surface-variant font-sans">
@@ -816,13 +849,44 @@ const Dashboard = () => {
 
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-on-surface-variant block ml-1">Deadline Date</label>
-                <input
-                  type="date"
-                  className="w-full bg-surface-container/60 border border-outline-variant rounded-xl px-4 py-2.5 text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all text-sm"
-                  value={goalDate}
-                  onChange={(e) => setGoalDate(e.target.value)}
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="MM-DD-YYYY"
+                    className="w-full bg-surface-container/60 border border-outline-variant rounded-xl pl-4 pr-10 py-2.5 text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all text-sm"
+                    value={goalDate}
+                    onChange={handleGoalDateChange}
+                    maxLength={10}
+                    required
+                  />
+                  <input
+                    type="date"
+                    ref={datePickerRef}
+                    className="absolute inset-0 w-full h-full opacity-0 pointer-events-none"
+                    onChange={(e) => {
+                      const selectedDate = e.target.value; // YYYY-MM-DD
+                      if (selectedDate) {
+                        const [y, m, d] = selectedDate.split('-');
+                        setGoalDate(`${m}-${d}-${y}`);
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (datePickerRef.current) {
+                        try {
+                          datePickerRef.current.showPicker();
+                        } catch (err) {
+                          console.error("Failed to show picker:", err);
+                        }
+                      }
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface cursor-pointer flex items-center"
+                  >
+                    <span className="material-symbols-outlined text-lg">calendar_month</span>
+                  </button>
+                </div>
               </div>
 
               <button
@@ -849,7 +913,7 @@ const Dashboard = () => {
                       <div className="flex justify-between items-start gap-4 mb-3">
                         <div>
                           <h4 className="font-headline-sm text-headline-sm font-bold text-on-surface font-serif">{goal.goalName}</h4>
-                          <span className="text-xs text-on-surface-variant font-serif">Target Date: {new Date(goal.targetDate).toLocaleDateString()}</span>
+                          <span className="text-xs text-on-surface-variant font-serif">Target Date: {formatDateToMMDDYYYY(goal.targetDate)}</span>
                         </div>
                         <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider ${goal.probability < 50
                           ? 'bg-rose-500/10 text-rose-400'

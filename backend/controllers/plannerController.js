@@ -547,6 +547,10 @@ const generateSmartNotifications = async (userId) => {
     const user = await User.findById(userId);
     if (!user) return;
 
+    if (user.notifications?.aiRecommendation === false) {
+      return;
+    }
+
     const financials = await getUserFinancials(userId);
     const { monthlyIncome, monthlyExpenses, monthlySavings, emiAmount, transactions } = financials;
 

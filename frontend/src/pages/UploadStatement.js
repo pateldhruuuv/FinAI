@@ -2,6 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+const formatDateToMMDDYYYY = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+  const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(date.getUTCDate()).padStart(2, '0');
+  const yyyy = date.getUTCFullYear();
+  return `${mm}-${dd}-${yyyy}`;
+};
+
 const UploadStatement = () => {
   // Navigation & Tabs
   const navigate = useNavigate();
@@ -565,7 +575,7 @@ const UploadStatement = () => {
                     <tbody className="divide-y divide-outline-variant/20">
                       {unknownTransactions.map((tx) => (
                         <tr key={tx._id} className="hover:bg-surface-container/20">
-                          <td className="py-3 px-3">{new Date(tx.date).toLocaleDateString()}</td>
+                          <td className="py-3 px-3">{formatDateToMMDDYYYY(tx.date)}</td>
                           <td className="py-3 px-3 truncate max-w-[180px]" title={tx.description}>{tx.description}</td>
                           <td className="py-3 px-3 font-semibold text-on-surface">{tx.merchant || 'None'}</td>
                           <td className="py-3 px-3">
@@ -676,7 +686,7 @@ const UploadStatement = () => {
                         <td className="py-3 px-3 font-sans text-on-surface-variant">{sub.frequency}</td>
                         <td className="py-3 px-3 text-right font-serif">₹{sub.monthlyCost.toLocaleString('en-IN')}</td>
                         <td className="py-3 px-3 text-right font-serif">₹{sub.annualCost.toLocaleString('en-IN')}</td>
-                        <td className="py-3 px-3 text-right font-sans text-on-surface-variant">{new Date(sub.renewalDate).toLocaleDateString()}</td>
+                        <td className="py-3 px-3 text-right font-sans text-on-surface-variant">{formatDateToMMDDYYYY(sub.renewalDate)}</td>
                         <td className="py-3 px-3 text-right font-bold text-on-surface font-serif">₹{sub.totalSubscriptionSpending.toLocaleString('en-IN')}</td>
                       </tr>
                     ))}
@@ -753,9 +763,9 @@ const UploadStatement = () => {
                             <td className="py-3 px-3 font-sans text-on-surface-variant">{rec.type}</td>
                             <td className="py-3 px-3 text-right font-bold text-on-surface font-serif">₹{rec.amount.toLocaleString('en-IN')}</td>
                             <td className="py-3 px-3 text-right font-sans text-on-surface-variant">Monthly</td>
-                            <td className="py-3 px-3 text-right font-sans text-on-surface-variant">{rec.lastPaid.toLocaleDateString()}</td>
+                            <td className="py-3 px-3 text-right font-sans text-on-surface-variant">{formatDateToMMDDYYYY(rec.lastPaid)}</td>
                             <td className="py-3 px-3 text-right">
-                              <span className="px-2 py-0.5 border border-primary/20 bg-primary/10 rounded-full text-[9px] font-sans font-semibold text-primary-container">{nextDue.toLocaleDateString()}</span>
+                              <span className="px-2 py-0.5 border border-primary/20 bg-primary/10 rounded-full text-[9px] font-sans font-semibold text-primary-container">{formatDateToMMDDYYYY(nextDue)}</span>
                             </td>
                           </tr>
                         );

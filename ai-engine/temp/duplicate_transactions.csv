@@ -1,0 +1,5 @@
+Original Row Number,Duplicate Row Number,Reason,Timestamp,Source File
+17,18,"Duplicate of row 17 (matches Date, Description, Amounts, Ref No)",2026-08-08 11:19:53,ebrcpt_file_5e37ba9973e09.pdf
+35,36,"Duplicate of row 35 (matches Date, Description, Amounts, Ref No)",2026-08-08 11:19:53,ebrcpt_file_5e37ba9973e09.pdf
+35,37,"Duplicate of row 35 (matches Date, Description, Amounts, Ref No)",2026-08-08 11:19:53,ebrcpt_file_5e37ba9973e09.pdf
+50,51,"Duplicate of row 50 (matches Date, Description, Amounts, Ref No)",2026-08-08 11:19:53,ebrcpt_file_5e37ba9973e09.pdf
