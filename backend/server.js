@@ -16,6 +16,17 @@ const app = express();
 // Enable CORS
 app.use(cors());
 
+// Custom Request Logger for Debugging
+app.use((req, res, next) => {
+  console.log(`[REQUEST] ${req.method} ${req.url}`);
+  if (req.headers.authorization) {
+    console.log(`[REQUEST] Auth Header: ${req.headers.authorization.substring(0, 20)}...`);
+  } else {
+    console.log(`[REQUEST] No Auth Header`);
+  }
+  next();
+});
+
 // Body Parser Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

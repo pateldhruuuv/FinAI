@@ -4,7 +4,7 @@ import axios from 'axios';
 export const AuthContext = createContext();
 
 // Set default URL for Axios
-axios.defaults.baseURL = 'http://localhost:5000';
+axios.defaults.baseURL = 'http://127.0.0.1:5000';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
